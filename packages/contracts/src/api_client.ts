@@ -95,13 +95,17 @@ export class ApiClient {
 
     private async request<T>(
         endpoint: string,
-        options: RequestInit = {}
+        options: RequestInit & { parseAs?: "json" | "blob" } = {}
     ): Promise<T> {
+        // `parseAs` is ours, not fetch's, so it is taken out before the rest of
+        // `options` is spread into the request. It survives the 401 retry below
+        // because that path passes the original `options` through unchanged.
+        const { parseAs = "json", ...init } = options
         const token = this.getToken()
 
         const headers: Record<string, string> = {
             "Content-Type": "application/json",
-            ...((options.headers as Record<string, string>) || {}),
+            ...((init.headers as Record<string, string>) || {}),
         }
 
         if (token) {
@@ -109,7 +113,7 @@ export class ApiClient {
         }
 
         const response = await fetch(`${this.baseUrl}${endpoint}`, {
-            ...options,
+            ...init,
             credentials: "include",
             headers,
         })
@@ -185,7 +189,38 @@ export class ApiClient {
             throw errorData
         }
 
+        // A blob response has no JSON to parse and `response.json()` would throw
+        // on it. Everything above this line -- the token, the 401 refresh, the
+        // error shapes -- is shared, which is the reason this is a parameter
+        // rather than a second method.
+        if (parseAs === "blob") {
+            return response.blob() as Promise<T>
+        }
+
         return response.json()
+    }
+
+    // File Endpoints
+    public files = {
+        /**
+         * The stored bytes of one file, as a Blob.
+         *
+         * `GET /files/{file_id}/content` answers with a FileResponse carrying
+         * the file's own mime type, not JSON -- so this is the one call that
+         * asks for `parseAs: "blob"`. Ownership is checked server-side and a
+         * file the caller does not own comes back as 404, never 403: a 403
+         * would answer "does this id exist", which is not a question a stranger
+         * should get an answer to.
+         *
+         * The caller owns the Blob. Turning it into an object URL means
+         * revoking that URL when the view goes away, or the bytes stay in
+         * memory for the life of the tab -- `useFileContent` does that.
+         */
+        content: (fileId: string): Promise<Blob> =>
+            this.request<Blob>(
+                `/files/${encodeURIComponent(fileId)}/content`,
+                { parseAs: "blob" }
+            ),
     }
 
     // Auth Endpoints
