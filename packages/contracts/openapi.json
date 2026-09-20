@@ -2373,8 +2373,9 @@
           "password": {
             "type": "string",
             "minLength": 8,
+            "pattern": ".*[A-Z].*",
             "title": "Password",
-            "description": "Password must be at least 8 characters"
+            "description": "At least 8 characters and at least 1 uppercase letter. Both rules are in the contract, so the client can check them before submitting."
           }
         },
         "type": "object",

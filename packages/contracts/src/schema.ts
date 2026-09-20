@@ -857,7 +857,7 @@ export interface components {
             email: string;
             /**
              * Password
-             * @description Password must be at least 8 characters
+             * @description At least 8 characters and at least 1 uppercase letter. Both rules are in the contract, so the client can check them before submitting.
              */
             password: string;
         };

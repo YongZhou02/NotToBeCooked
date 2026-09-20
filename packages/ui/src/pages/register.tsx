@@ -17,6 +17,7 @@ import {
 } from "@workspace/ui/components/card"
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -208,8 +209,17 @@ export function RegisterPage() {
                         </button>
                       </InputGroupAddon>
                     </InputGroup>
-                    {fieldState.invalid && (
+                    {fieldState.invalid ? (
                       <FieldError errors={[fieldState.error]} />
+                    ) : (
+                      // The rules live in the contract -- RegisterRequest
+                      // .password carries minLength 8 and pattern .*[A-Z].*,
+                      // and the generated zod schema checks both. This line
+                      // only states them before the user types, which is the
+                      // half a schema cannot do. r80.
+                      <FieldDescription>
+                        At least 8 characters, including one capital letter.
+                      </FieldDescription>
                     )}
                   </Field>
                 )}
