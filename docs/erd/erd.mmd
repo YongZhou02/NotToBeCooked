@@ -158,7 +158,7 @@ erDiagram
         string title "Week 3 - Recursion"
         string description
         int week "teaching week, nullable"
-        string status "not_started, in_progress, completed — US-16 counts these"
+        enum status "not_started, in_progress, completed — US-16 counts these. enum not string, matching COURSE/FILE/INGESTION_RUN; r42 gave it the type"
         date due_date
         jsonb file_ids "US-17, attached materials. Deliberately not a join table"
         timestamptz created_at

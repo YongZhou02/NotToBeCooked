@@ -1,6 +1,6 @@
 # Code vs ERD
 
-**Generated 13 September 2026 from `cf59346` by `apps/api/scripts/erd_diff.py`. Do not edit by hand.**
+**Generated 20 September 2026 from `ac77096` by `apps/api/scripts/erd_diff.py`. Do not edit by hand.**
 
 `docs/erd/erd.mmd` is the schema of record; the code side is introspected from
 live `SQLModel.metadata` and compiled against `postgresql.dialect()`, not read
@@ -19,16 +19,14 @@ docstring for why both of those are deliberate.
 | | Count |
 |---|---|
 | Entities in the diagram | 9 |
-| Tables in the code | 8 |
-| In the diagram, absent from the code | 1 |
+| Tables in the code | 9 |
+| In the diagram, absent from the code | 0 |
 | In the code, absent from the diagram | 0 |
 | Column-level differences | 0 |
 
 ## Tables
 
-| Table | Where it is |
-|---|---|
-| `milestone` | diagram only |
+Every entity in the diagram exists as a table, and nothing else does.
 
 ## Columns
 

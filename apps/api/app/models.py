@@ -13,7 +13,7 @@ sets `metadata = SQLModel.metadata` (see schemas/chunk.py), so one metadata
 object still covers every table.
 """
 
-from app.schemas import chat, chunk, course, file, folder, ingestion_run, user
+from app.schemas import chat, chunk, course, file, folder, ingestion_run, milestone, user
 
 # Re-exported so linters can see the imports are deliberate. Nothing reads these
 # names; importing the modules for their side effect is the entire point.
@@ -24,5 +24,6 @@ __all__ = [
     "file",
     "folder",
     "ingestion_run",
+    "milestone",
     "user",
 ]
