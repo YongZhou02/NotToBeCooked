@@ -200,12 +200,14 @@ reopen each.
 
 Being specific here rather than implying everything works:
 
-* **Works end-to-end:** register and log in, create courses and folders, upload a file,
-  ingest it, ask a question, get an answer with citations checked against the retrieved
-  chunks, refused when they do not support it.
+* **Works end-to-end:** register and log in, ask a question and get an answer with
+  citations checked against the retrieved chunks and refused when they do not support
+  it, with conversations kept across sessions. Creating courses and folders, uploading
+  and ingesting files work against the API but have no UI yet.
 * **Not wired yet:** the file-browser and upload UI are built and mounted but render
-  fixture data — the API client covers auth and `/rag/query`, and the file, folder and
-  course endpoints have no client methods yet.
+  fixture data. The API client covers auth, `/rag/query`, the chat sessions and
+  a file's content — nineteen endpoints, all of the file, folder and course
+  management, still have no client method.
 * **Not started:** the roadmap/milestone feature, and public exposure of the deployment
   (TLS, firewall) — both scheduled for later phases.
 
