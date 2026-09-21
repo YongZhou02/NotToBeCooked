@@ -15,6 +15,7 @@ from app.routers import (
     files_router,
     folders_router,
     ingestion_runs_router,
+    milestones_router,
     rag_router,
 )
 
@@ -65,6 +66,14 @@ app.include_router(
     tags=["Folder"],
 )
 app.include_router(course_files_router, prefix="/courses", tags=["Files"])
+# Same "/courses" prefix as folders and course files: a milestone has no life
+# outside its course, so the course id belongs in the path rather than in the
+# body. r51.
+app.include_router(
+    milestones_router,
+    prefix="/courses",
+    tags=["Milestones"],
+)
 
 # CORS configuration for Web (any local port), Tauri (Desktop & Android), and Production
 origins = [
