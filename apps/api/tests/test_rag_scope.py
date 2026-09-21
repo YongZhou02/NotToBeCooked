@@ -16,11 +16,12 @@ from uuid import uuid4
 
 import pytest
 import pytest_asyncio
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 import app.models  # noqa: F401  -- registers every table before create_all
+from app.db.database import make_engine
 from app.routers import rag as rag_module
 from app.routers.rag import _retrieve, _scope_file_ids
 from app.schemas.course import Course, CourseStatus
@@ -75,7 +76,7 @@ async def _make_owner(session, code: str):
 @pytest_asyncio.fixture
 async def two_owners(test_database_url):
     """Two users who have never heard of each other, each with one file."""
-    engine = create_async_engine(test_database_url)
+    engine = make_engine(test_database_url)
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.drop_all)
         await conn.run_sync(SQLModel.metadata.create_all)

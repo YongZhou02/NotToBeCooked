@@ -25,12 +25,12 @@ import pytest_asyncio
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlmodel import SQLModel, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 import app.models  # noqa: F401  -- registers every table before create_all
-from app.db.database import get_session
+from app.db.database import get_session, make_engine
 from app.dependencies.auth import get_current_user
 from app.main import app
 from app.routers.milestone import milestones_router
@@ -49,7 +49,7 @@ async def ctx(test_database_url):
     `test_database_url` rather than `settings.DATABASE_URL` -- the two lines
     below drop every table. See tests/conftest.py.
     """
-    engine = create_async_engine(test_database_url)
+    engine = make_engine(test_database_url)
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.drop_all)
         await conn.run_sync(SQLModel.metadata.create_all)

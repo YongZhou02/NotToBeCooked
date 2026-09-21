@@ -44,6 +44,7 @@ what makes it live again.** The long-form Summary with measurements stays at the
 
 | # | One line | State | Owner / trigger |
 |---|---|---|---|
+| **R35** | A JSONB column typed `list[UUID]` could not be written at all — every `/rag/query` carrying an @-mention raised | **Closed 21 Sep** — found while building r51, fixed the same day (`json_serializer` on the engine) | Reopens the day someone builds an engine with `create_async_engine` instead of `make_engine` |
 | **R34** | Replacing a file's bytes leaves the old chunks retrievable, under the new filename | **Open**, raised 15 Sep | AI-2 — deactivate the old run inside the PUT. **Due 22 Sep** |
 | **R30** | A corrected re-upload becomes a second FILE row, both retrievable | **Closed 15 Sep** — the PUT landed (`02e8647`) | Its remaining half is now R34 |
 | **R27** | Deleting a FILE row leaves its bytes on disk | **Deferred, with a trigger** | Whoever writes the delete-file endpoint. **Trigger: the day it lands** |
@@ -970,6 +971,79 @@ r79, because it is the other half of that row.
 Note the shape it shares with R33: `PUT .../content` has tests, they pass, and
 none of them could have caught this — a test of the PUT asserts what the PUT
 writes, and the damage is in what a *different* endpoint reads.
+
+---
+
+### R35 — a JSONB column typed `list[UUID]` could not be written at all
+
+`MESSAGE.mentioned_file_ids` is declared `list[UUID] | None` over a JSONB column.
+A JSONB column is written by calling `json.dumps` on the Python value, and
+`json.dumps` has never accepted a `UUID`. So the column committed while it was
+`None` or `[]`, and raised the moment it held a single id.
+
+**Measured 21 September 2026** on the test database, against
+`PGDialect_asyncpg` — the dialect this project runs:
+
+```
+mentioned_file_ids = None      OK
+mentioned_file_ids = []        OK
+mentioned_file_ids = [UUID]    StatementError: (builtins.TypeError)
+                               Object of type UUID is not JSON serializable
+```
+
+**What a user sees.** They type `@[Lecture 1.pdf]` in the chat box and the
+request fails. `useChatSession.tsx:143` builds `file_ids` from the resolved
+mentions, falls back to the workspace scope, and sends it; `rag.py:260` puts
+that list straight into the user turn, and the `await session.commit()` a few
+lines later raises. **Not a wrong answer — a 500.** Selecting files in the
+workspace does the same thing, because `ragScope` fills the same field.
+
+**Two lines in the same constructor got it right.** `rag.py:337`:
+
+```python
+citations=[c.model_dump(mode="json") for c in citations],      # converted
+mentioned_file_ids=request.file_ids,                           # not converted
+scope_snapshot=snapshot.model_dump(mode="json"),               # converted
+```
+
+The pattern existed. It was applied to two of three fields.
+
+**Why nothing caught it.** pyright cannot: `list[UUID]` is exactly what the
+column claims to hold, and the error happens inside the driver. The tests
+cannot: the ones covering `/rag/query` replace the session with a mock, and a
+mock serialises nothing. **This is the third finding of that shape — R33, R34,
+and now this.** Each time the test asserted what the handler intended and the
+damage was one layer down.
+
+**Fix.** `json_serializer` on the engine, so that it covers every JSON and JSONB
+column rather than the two that happen to be known today:
+
+```python
+def _json_default(value: Any) -> str:
+    if isinstance(value, UUID):
+        return str(value)
+    raise TypeError(f"Object of type {type(value).__name__} is not JSON serializable")
+```
+
+Deliberately not `default=str`: that would make every unserialisable object
+succeed, so a model instance left in a payload by mistake would be stored as
+`"<Course object at 0x7f...>"` and nobody would find out. Anything that is not
+a `UUID` still raises exactly as before.
+
+Reading the column back gives strings, and every response is built through a
+Read model declaring `list[UUID]` — `MessageRead`, `MilestoneRead` — so pydantic
+converts them back and the string form never leaves the database layer.
+
+**The second half of the fix is the part that keeps it fixed.** Four test
+fixtures built their own engines with a bare `create_async_engine(url)`, which
+would not have carried the serializer — a test on such an engine passes on code
+that fails in production, which is how this stayed hidden. Engines are now built
+through one constructor, `app.db.database.make_engine`, and no call to
+`create_async_engine` remains outside it.
+
+Covered by `tests/test_jsonb_uuid.py`. Commenting out the one keyword argument
+turns that test red with the exact `StatementError` above, which is how the test
+was checked to have teeth.
 
 ---
 

@@ -14,12 +14,12 @@ from uuid import UUID, uuid4
 
 import pytest
 import pytest_asyncio
-from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 import app.models  # noqa: F401  -- registers every table before create_all
 from app.core.config import settings
+from app.db.database import make_engine
 from app.db.vector_ops import (
     SearchConfig,
     _full_text_search,
@@ -50,7 +50,7 @@ QUERY_VECTOR = direction(0)
 
 @pytest_asyncio.fixture
 async def session(test_database_url) -> AsyncGenerator[AsyncSession, None]:
-    engine = create_async_engine(test_database_url)
+    engine = make_engine(test_database_url)
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.drop_all)
         await conn.run_sync(SQLModel.metadata.create_all)

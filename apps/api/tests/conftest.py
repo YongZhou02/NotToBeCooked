@@ -23,9 +23,9 @@ import asyncpg
 import pytest_asyncio
 from sqlalchemy import text
 from sqlalchemy.engine import make_url
-from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.core.config import settings
+from app.db.database import make_engine
 
 TEST_DB_SUFFIX = "_test"
 
@@ -86,7 +86,7 @@ async def test_database_url() -> AsyncGenerator[str, None]:
     # CHUNK.embedding is vector(1024); create_all cannot build that column until
     # the extension exists. The development database got this from init_db(); a
     # freshly created test database has nothing.
-    engine = create_async_engine(url)
+    engine = make_engine(url)
     async with engine.begin() as conn:
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
     await engine.dispose()
