@@ -859,6 +859,11 @@ def test_replace_file_content_returns_200_and_updates_metadata(monkeypatch):
     replace_call = fake_replace_upload.await_args
     assert replace_call is not None
     assert replace_call.args[1] == original_file.storage_key
+    assert fake_session.exec.await_count == 2
+    deactivate_statement = fake_session.exec.await_args_list[1].args[0]
+    assert deactivate_statement.table.name == "ingestion_run"
+    deactivate_values = list(deactivate_statement._values.values())
+    assert len(deactivate_values) == 1 and deactivate_values[0].value is False
 
     fake_session.add.assert_called_once_with(original_file)
     fake_session.commit.assert_awaited_once()
