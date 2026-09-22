@@ -44,7 +44,8 @@ what makes it live again.** The long-form Summary with measurements stays at the
 
 | # | One line | State | Owner / trigger |
 |---|---|---|---|
-| **R37** | A file that yields zero chunks still reaches `READY`, with no error, and contributes nothing to any answer | **Open, raised 22 Sep** — found while measuring R36 | Nobody yet. `files.py:288` sets `READY` with no check on the chunk count |
+| **R38** | `POST /files/{file_id}/ingest` has no test at all, and r81 is about to wire it | **Open, raised 22 Sep** — found while checking what `origin/bao-sheng` still holds | The two tests that covered it live only on a branch nobody has merged. **Trigger: r81, 23–30 Sep** |
+| **R37** | The zero-chunk path tells the user their PDF has no selectable text, which for a lecture deck is the wrong culprit | **Open, raised 22 Sep** — the original claim that zero chunks reach `READY` was wrong and is corrected below | Whoever fixes R36 — the message and the cause move together |
 | **R36** | Real lecture slides produce almost no chunks — not because the text is missing, but because `extract_text` discards the label the text carries | **Open, raised 22 Sep** — cause measured 22 Sep on the CPC251 deck; the fix is unowned | Whoever takes `ingestion.py:16-43`. **Trigger: the day anyone uploads a real lecture deck** |
 | **R35** | A JSONB column typed `list[UUID]` could not be written at all — every `/rag/query` carrying an @-mention raised | **Closed 21 Sep** — found while building r51, fixed the same day (`json_serializer` on the engine) | Reopens the day someone builds an engine with `create_async_engine` instead of `make_engine` |
 | **R34** | Replacing a file's bytes leaves the old chunks retrievable, under the new filename | **Closed 22 Sep** — the fix is merged (`9878edd`, into `dev` as `631a7e0`). **No test proves it: the regression test is r82, 1–3 Oct** | Reopens if r82 slips. Until it lands, this is closed on a reading of the code, not on a measurement |
@@ -1150,40 +1151,91 @@ changes what its number is worth.
 decision about what a bullet list should become: one chunk per bullet is too
 small to retrieve well, and a whole slide as one chunk loses the heading
 structure. That is a design call, not a one-line edit, and it belongs in a row
-nobody has opened yet. See also **R37**, found while measuring this.
+nobody has opened yet. See also **R37**: the message a user gets when this
+happens blames their PDF, and for this file that is the wrong culprit.
 
 ---
 
-### R37 — a file that yields zero chunks still reaches READY
+### R37 — the zero-chunk path names the wrong culprit
 
-Found 22 September while measuring R36. `apps/api/app/routers/files.py:288`, at
-the end of `_ingest_in_background`:
+**This entry was first written as "a file that yields zero chunks still reaches
+`READY`, with no error". That was wrong.** It was written from
+`files.py:288` alone, without following the exception path that reaches it. The
+guard exists and is thorough:
 
 ```python
-file_row.status = FileStatus.READY
-file_row.error_message = None
-file_row.indexed_at = datetime.now(UTC)
+# app/services/processing.py:53
+if not chunk_creates:
+    raise NoExtractableContentError("No extractable content found")
+
+# app/services/processing.py:110  -- the run row
+ingestion_run.status = IngestionRunStatus.FAILED
+ingestion_run.error_message = "No extractable content found"
+
+# app/routers/files.py:241  -- the file row
+file_row.status = FileStatus.FAILED
+file_row.error_message = (
+    "This PDF has no selectable text (usually a scan or images only)."
+)
 ```
 
-**Nothing between the extractor and this line checks how many chunks were
-written.** `extract_text` returning `[]` makes `create_chunk` return `[]`, no
-CHUNK rows are inserted, the run is still marked `is_active = True`, and the FILE
-row still goes to `READY` with `error_message = None`.
+Both rows are marked, the run carries a completion time, and
+`tests/test_processing.py:177` asserts the raise. A file that produces no chunks
+reaches `FAILED`, not `READY`, and the UI can say so.
 
-The user-visible shape: a lecture deck is uploaded, the browser shows it as ready,
-and the file contributes nothing to any answer for the rest of its life, with no
-error anywhere to explain it. Every failure of extraction, present and future,
-fails this way.
+**What is actually wrong is the message.** It does not report a symptom, it
+asserts a cause — *"usually a scan or images only"* — and for the case measured
+in R36 that cause is false. `1 - Deep Learning_v2.pdf` has 13 embedded fonts and
+20,414 characters of selectable text across 59 pages. The text is there; this
+codebase discards it because it is labelled `list_item`. A user reading that
+message would go and re-scan or re-export a file that was never the problem, and
+the one line that could have pointed at `ingestion.py` instead points away from it.
 
-**This is not the same finding as R36.** R36 is why the chunk count is zero for
-this class of document; R37 is why nobody would find out. Fixing R36 does not fix
-R37 — the next unsupported format lands in exactly the same place.
+**Proposed:** say what was observed and not why. "No indexable text was extracted
+from this file" is true in both cases. If a cause is worth guessing at, it belongs
+in the log beside the chunk count, not in the message the reader gets.
 
-**Proposed:** if a run produces zero chunks, the FILE row ends at `FAILED` with a
-message that says the file yielded no indexable text, or at a new status meaning
-"stored but not indexed". Which of the two is a product decision. `chunk_count`
-already exists on INGESTION_RUN (`files.py:186` writes `chunk_count=None` at
-creation), so the number to check is already being carried.
+**This moves with R36**, not separately: the same change that stops discarding
+bullets decides how often this message is seen at all.
+
+---
+
+### R38 — the ingest endpoint has no test
+
+Found 22 September while checking what would be lost by deleting
+`origin/bao-sheng`. Two commits exist only on that branch (`f6bb273`, `fa63696`,
+both AI-2, 31 August), and the file they carry, `apps/api/tests/test_files.py`,
+has never existed in `dev`'s history.
+
+Its replacement on `dev` is `test_ingestion_runs.py` (`1d9bc54`, AI-2,
+1 September). The two files are the same size and test different endpoints:
+
+```
+test_files.py            (branch only)     test_ingestion_runs.py   (dev)
+  ingest_file 202 + body shape               get_ingestion_run own run
+  ingest_file 404                            get_ingestion_run 404
+  get_ingestion_run 401                      get_ingestion_run 401
+```
+
+**`POST /files/{file_id}/ingest` has no test anywhere on `dev`.** No test file
+issues a request to that path; the only match for "ingest" in
+`test_file_routing.py` is the `ingestion_run` table name inside R34's assertion.
+`test_processing.py` covers `process_file` and `run_ingestion`, the service layer
+below, not the route.
+
+The lost coverage was specific: a 202, the response body's `file_id`,
+`ingestion_run_id`, `status = "queued"`, `chunk_count = None` and `error = None`,
+that the session executed, added, committed and refreshed, and a 404 for a file
+that is not there.
+
+**Why it matters now.** `POST /files/{file_id}/ingest` is one of the six calls on
+the Usable RAG path, and r81 wires it between 23 and 30 September. It is the
+one endpoint on that path with no test behind it.
+
+**The branch is not to be deleted until this is resolved** — that file is the
+only copy of those two tests. Recovering them is `git show
+fa63696:apps/api/tests/test_files.py`, not a merge; they were written against the
+August shape of the router and will need reworking.
 
 ---
 
