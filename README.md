@@ -219,4 +219,6 @@ agenda states the options, the recommendation, and what happens if no decision i
 
 ## 📄 Licence
 
-Not yet chosen. Until one is added, no permission to reuse this code is granted.
+MIT — see [`LICENSE`](LICENSE). Copyright is held jointly by the three members
+named there; chosen at the meeting of 22 September 2026, with all three agreeing.
+Relicensing a future version would need the same three again.
