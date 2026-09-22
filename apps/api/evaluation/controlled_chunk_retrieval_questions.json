@@ -1,0 +1,163 @@
+[
+  {
+    "id": "q01",
+    "question": "Why can the search layer not recover a paragraph that ingestion silently drops?",
+    "expected_pages": [1],
+    "acceptable_evidence": [
+      "If ingestion silently drops a paragraph, the search layer cannot recover it"
+    ]
+  }
+    ,
+  {
+    "id": "q02",
+    "question": "Why is a text-based source preferable for a controlled chunking experiment?",
+    "expected_pages": [2],
+    "acceptable_evidence": [
+      "The goal is to compare chunk sizes, not to measure OCR accuracy at the same time"
+    ]
+  },
+  {
+    "id": "q03",
+    "question": "Which lightweight normalization operations are considered safe for literal evidence matching?",
+    "expected_pages": [3],
+    "acceptable_evidence": [
+      "Collapsing whitespace and using case-insensitive comparison are usually safe"
+    ]
+  },
+  {
+    "id": "q04",
+    "question": "Why are boundary-sensitive questions more informative in a chunking benchmark?",
+    "expected_pages": [4],
+    "acceptable_evidence": [
+      "they create realistic competition between precision and context preservation"
+    ]
+  },
+  {
+    "id": "q05",
+    "question": "Why should evaluators use the production tokenizer instead of estimating chunk boundaries from word count?",
+    "expected_pages": [5],
+    "acceptable_evidence": [
+      "Evaluators should therefore measure the chunks produced by the actual tokenizer used in production"
+    ]
+  },
+    {
+    "id": "q06",
+    "question": "How can chunk overlap reduce the diversity of the top five retrieval results?",
+    "expected_pages": [6],
+    "acceptable_evidence": [
+      "If the top five results contain three overlapping versions of the same passage, retrieval diversity decreases"
+    ]
+  },
+  {
+    "id": "q07",
+    "question": "Why should ground-truth evidence use a distinctive phrase instead of a generic shared word?",
+    "expected_pages": [7],
+    "acceptable_evidence": [
+      "Distinctive evidence reduces false hits when nearby sections discuss the same broad topic"
+    ]
+  },
+  {
+    "id": "q08",
+    "question": "What happens when document vectors and query vectors are produced by incompatible embedding models?",
+    "expected_pages": [8],
+    "acceptable_evidence": [
+      "their coordinate spaces do not align and similarity scores become meaningless"
+    ]
+  },
+  {
+    "id": "q09",
+    "question": "Why is a high vector similarity score not sufficient proof that a retrieved chunk is relevant?",
+    "expected_pages": [9],
+    "acceptable_evidence": [
+      "A top-ranked chunk can still be wrong if many passages discuss related vocabulary"
+    ]
+  },
+  {
+    "id": "q10",
+    "question": "Why should precomputed query vectors be stored by question identifier instead of list position?",
+    "expected_pages": [10],
+    "acceptable_evidence": [
+      "each vector is retrieved by a stable question identifier rather than by list position"
+    ]
+  },
+    {
+    "id": "q11",
+    "question": "For which kinds of search terms is lexical retrieval particularly effective?",
+    "expected_pages": [11],
+    "acceptable_evidence": [
+      "It is particularly strong for exact names, identifiers, error messages, code symbols, and rare technical terminology"
+    ]
+  },
+  {
+    "id": "q12",
+    "question": "What must remain comparable between the 350-token and 500-token vector indexes?",
+    "expected_pages": [12],
+    "acceptable_evidence": [
+      "should represent the same document and use the same embedding model"
+    ]
+  },
+  {
+    "id": "q13",
+    "question": "Why can reciprocal rank fusion avoid problems caused by lexical and vector scores using different scales?",
+    "expected_pages": [13],
+    "acceptable_evidence": [
+      "use candidate positions instead of raw scores"
+    ]
+  },
+  {
+    "id": "q14",
+    "question": "Why should an empty retrieval result first be investigated as a metadata-filtering problem?",
+    "expected_pages": [14],
+    "acceptable_evidence": [
+      "A perfect embedding cannot retrieve a chunk that the database query has filtered out"
+    ]
+  },
+  {
+    "id": "q15",
+    "question": "Why can reranking not recover a correct chunk that is missing from the initial candidate pool?",
+    "expected_pages": [15],
+    "acceptable_evidence": [
+      "If the correct chunk is absent from the initial candidate pool, the reranker has nothing to promote"
+    ]
+  },
+    {
+    "id": "q16",
+    "question": "What simple measurement can reveal that duplicate results are consuming retrieval capacity?",
+    "expected_pages": [16],
+    "acceptable_evidence": [
+      "A simple report can count unique page ranges in the final top five"
+    ]
+  },
+  {
+    "id": "q17",
+    "question": "What two conditions must a returned chunk satisfy to be considered relevant in this benchmark?",
+    "expected_pages": [17],
+    "acceptable_evidence": [
+      "its page range covers an expected page and its text contains at least one approved evidence phrase"
+    ]
+  },
+  {
+    "id": "q18",
+    "question": "How is the outcome of Hit@K determined for each individual query?",
+    "expected_pages": [18],
+    "acceptable_evidence": [
+      "For each query, the outcome is binary: hit or miss"
+    ]
+  },
+  {
+    "id": "q19",
+    "question": "What should be investigated when the correct chunk is returned but the evaluator still marks it as a miss?",
+    "expected_pages": [19],
+    "acceptable_evidence": [
+      "investigate the ground-truth matcher rather than the search algorithm"
+    ]
+  },
+  {
+    "id": "q20",
+    "question": "Why must the two chunk configurations not compete in the same unfiltered search index?",
+    "expected_pages": [20],
+    "acceptable_evidence": [
+      "a run labeled '350' may retrieve 500-token chunks and invalidate the comparison"
+    ]
+  }
+]
