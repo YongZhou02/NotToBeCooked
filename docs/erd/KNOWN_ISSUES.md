@@ -44,7 +44,8 @@ what makes it live again.** The long-form Summary with measurements stays at the
 
 | # | One line | State | Owner / trigger |
 |---|---|---|---|
-| **R36** | Real lecture slides produce few or no chunks, while the evaluation corpus produces plenty | **Open, raised 22 Sep** — reported by AI-2, nothing measured yet | AI-2 — send the CPC251 PDF and the `DocItemLabel` counts. **Trigger: the counts exist** |
+| **R37** | A file that yields zero chunks still reaches `READY`, with no error, and contributes nothing to any answer | **Open, raised 22 Sep** — found while measuring R36 | Nobody yet. `files.py:288` sets `READY` with no check on the chunk count |
+| **R36** | Real lecture slides produce almost no chunks — not because the text is missing, but because `extract_text` discards the label the text carries | **Open, raised 22 Sep** — cause measured 22 Sep on the CPC251 deck; the fix is unowned | Whoever takes `ingestion.py:16-43`. **Trigger: the day anyone uploads a real lecture deck** |
 | **R35** | A JSONB column typed `list[UUID]` could not be written at all — every `/rag/query` carrying an @-mention raised | **Closed 21 Sep** — found while building r51, fixed the same day (`json_serializer` on the engine) | Reopens the day someone builds an engine with `create_async_engine` instead of `make_engine` |
 | **R34** | Replacing a file's bytes leaves the old chunks retrievable, under the new filename | **Closed 22 Sep** — the fix is merged (`9878edd`, into `dev` as `631a7e0`). **No test proves it: the regression test is r82, 1–3 Oct** | Reopens if r82 slips. Until it lands, this is closed on a reading of the code, not on a measurement |
 | **R30** | A corrected re-upload becomes a second FILE row, both retrievable | **Closed 15 Sep** — the PUT landed (`02e8647`) | Its remaining half is now R34 |
@@ -1060,50 +1061,129 @@ was checked to have teeth.
 
 ---
 
-### R36 — real lecture slides produce few or no chunks
+### R36 — real lecture slides produce almost no chunks
 
-Raised 22 September by AI-2 at the meeting. The evaluation corpus r52 was measured
-on (`apps/api/evaluation/controlled_retrieval_evaluation_corpus.pdf`) was generated
-for the purpose and extracts cleanly. Last semester's CPC251 lecture slides
-reportedly produce almost nothing. AI-2 attributes this to image-only PDFs; AI-1
-suggested a VLM.
+Raised 22 September by AI-2 at the meeting: the corpus r52 was measured on
+(`apps/api/evaluation/controlled_retrieval_evaluation_corpus.pdf`) was generated
+for the purpose and extracts cleanly, while last semester's CPC251 lecture slides
+produce almost nothing. AI-2 attributed it to image-only PDFs; AI-1 suggested a
+VLM. **The symptom is real. Both explanations are wrong for this file.**
 
-**Nothing here has been measured.** docling does not run on the Lead's machine
-(`ImportError: libgthread-2.0.so.0` out of `cv2`), so everything below is read off
-the source rather than observed.
-
-Two things the source says:
-
-1. **OCR is not obviously the cause.** docling 2.119.0 defaults to `do_ocr=True`
-   with `ocr engine = auto`. A PDF of page images should still be OCR'd unless the
-   engine failed to load on that machine.
-
-2. **`extract_text` keeps two labels out of thirty.**
-   `apps/api/app/services/ingestion.py:24` reads
-   `elif document_item.label.value == "text":`, so only `section_header` and `text`
-   survive the loop. `DocItemLabel` has 30 members; the discarded ones include
-   `list_item`, `title`, `paragraph`, `table`, `caption`, `code` and `formula`.
-   Lecture slides are almost entirely bullets, which docling labels `list_item`.
-   If that is the cause, the text extracts fine and this codebase throws it away.
-   `ingestion.py:25` also drops any item with no `prov`, silently.
-
-**What settles it**, in one run over the CPC251 PDF:
-`Counter(t.label.value for t in document.texts)`.
+Measured 22 September on `1 - Deep Learning_v2.pdf`, one of sixteen CPC251 decks:
 
 ```
-all list_item     -> ingestion.py:24, a one-line fix
-texts empty       -> then it is OCR, and a VLM is worth discussing
+Creator                 Acrobat PDFMaker 25 for PowerPoint
+Embedded fonts          13      (Calibri, Arial, CambriaMath, CourierNew, ...)
+Tagged                  yes
+Pages                   59
+pdftotext characters    20,414
+Pages with no text      0
 ```
 
-**Owner: AI-2**, to produce the counts. No row is opened and no work is scheduled
-until they exist — a VLM is an entire second pipeline, and there is no number
-supporting one yet.
+Three other decks in the same folder behave the same way: Reinforcement Learning
+83 pages / 29,609 characters, SVM 41 / 10,529, Fuzzy Sets 38 / 12,992. These are
+PowerPoint exports, not scans. **There is nothing wrong with the text layer, and
+OCR is not involved** — docling 2.119.0 defaults to `do_ocr=True` with
+`ocr engine = auto` in any case.
 
-**This also bears on r52 and r53.** Decision 1 of 22 September read the two
+**What the text actually is.** Page 8, line by line, as `pdftotext` returns it:
+
+```
+'Kami Memimpin | We Lead'                            <- page_header
+'Why use Deep Learning?'                             <- the slide title
+'* Works tremendously well with more data.'          <- list_item
+'* Automatic feature extraction in deep learning.'   <- list_item
+'* Text'                                             <- list_item
+'* Images (raw pixels)'                              <- list_item
+'* Sounds tracks'                                    <- list_item
+'* Etc.'                                             <- list_item
+'* Able to learn non-linear relationships ...'       <- list_item
+'20/05/2025   (c) MNAW, USM, 2025'                   <- page_footer
+```
+
+Not one line on that page is a paragraph. Over the whole deck, of 429 non-empty
+lines, 152 carry a bullet glyph (`\u2022` or Wingdings `\uf0a7`) and 116 are the
+header/footer boilerplate that repeats on all 59 pages. **Strip the boilerplate
+and the slide title, and 32 of the 59 pages contain nothing but bullets.** Most of
+what remains on the other 27 is wrapped continuations of those bullets, title-slide
+lines, formulas and image captions.
+
+**Why that empties the pipeline.** `apps/api/app/services/ingestion.py:16-43`:
+
+```python
+if document_item.label.value == "section_header":
+    current_heading = document_item.text      # stored, never emitted
+elif document_item.label.value == "text":
+    ...
+    extracted_items.append(item)              # the only path that emits
+```
+
+Two of `DocItemLabel`'s thirty members survive the loop, and **one of the two
+emits nothing** — a `section_header` only sets the heading for a later `text`
+item. A page made of a heading and bullets therefore produces an empty
+`extracted_items`, and `create_chunk` turns an empty list into zero chunks.
+`ingestion.py:25` separately drops any item with no `prov`.
+
+Discarded along with `list_item`: `title`, `paragraph`, `table`, `caption`,
+`code`, `formula`, `page_header`, `page_footer` and twenty more.
+
+**Not measured:** `Counter(t.label.value for t in document.texts)` over this PDF.
+docling will not run on this machine (`ImportError: libgthread-2.0.so.0`, out of
+`cv2`), so the labels named above are read off `DocItemLabel` and matched to the
+extracted text by hand, not printed by docling. That count would confirm the
+mapping; **it is no longer what decides the cause**, because the question it was
+going to answer — does the text come out at all — now has an answer.
+
+**A VLM is a separate question.** The deck carries 409 images, only two of which
+are full-bleed (the title and closing backgrounds); the rest are diagrams whose
+content exists nowhere else. Reading those is worth discussing on its own terms.
+It is not why the chunk count is zero.
+
+**Bearing on r52 and r53.** Decision 1 of 22 September read the two
 configurations' 20/20 Hit@5 as a ceiling effect and moved r53 to Recall@1 and MRR.
-If the corpus is not merely easy but unrepresentative, a sharper metric on the same
-corpus still measures the wrong thing. That does not change what r53 should do this
-week; it changes what its number will be worth.
+If the evaluation corpus is prose while the real material is bullets, the corpus is
+not merely easy, it is a different shape of document — and a sharper metric on it
+still measures the wrong thing. That does not change what r53 does this week; it
+changes what its number is worth.
+
+**Unowned.** The fix is a change to which labels `extract_text` accepts, plus a
+decision about what a bullet list should become: one chunk per bullet is too
+small to retrieve well, and a whole slide as one chunk loses the heading
+structure. That is a design call, not a one-line edit, and it belongs in a row
+nobody has opened yet. See also **R37**, found while measuring this.
+
+---
+
+### R37 — a file that yields zero chunks still reaches READY
+
+Found 22 September while measuring R36. `apps/api/app/routers/files.py:288`, at
+the end of `_ingest_in_background`:
+
+```python
+file_row.status = FileStatus.READY
+file_row.error_message = None
+file_row.indexed_at = datetime.now(UTC)
+```
+
+**Nothing between the extractor and this line checks how many chunks were
+written.** `extract_text` returning `[]` makes `create_chunk` return `[]`, no
+CHUNK rows are inserted, the run is still marked `is_active = True`, and the FILE
+row still goes to `READY` with `error_message = None`.
+
+The user-visible shape: a lecture deck is uploaded, the browser shows it as ready,
+and the file contributes nothing to any answer for the rest of its life, with no
+error anywhere to explain it. Every failure of extraction, present and future,
+fails this way.
+
+**This is not the same finding as R36.** R36 is why the chunk count is zero for
+this class of document; R37 is why nobody would find out. Fixing R36 does not fix
+R37 — the next unsupported format lands in exactly the same place.
+
+**Proposed:** if a run produces zero chunks, the FILE row ends at `FAILED` with a
+message that says the file yielded no indexable text, or at a new status meaning
+"stored but not indexed". Which of the two is a product decision. `chunk_count`
+already exists on INGESTION_RUN (`files.py:186` writes `chunk_count=None` at
+creation), so the number to check is already being carried.
 
 ---
 
