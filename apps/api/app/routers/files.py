@@ -554,6 +554,15 @@ async def replace_file(
     file_row.indexed_at = None
     file_row.uploaded_at = datetime.now(UTC)
 
+    # Replacement bytes no longer match chunks from the previously active run.
+    # Keep the historical run and its chunks, but remove it from retrieval until
+    # the replacement is ingested and a new run becomes active.
+    await session.exec(
+        update(IngestionRun)
+        .where(col(IngestionRun.file_id) == file_id, col(IngestionRun.is_active))
+        .values(is_active=False)
+    )
+
     session.add(file_row)
     await session.commit()
     await session.refresh(file_row)
