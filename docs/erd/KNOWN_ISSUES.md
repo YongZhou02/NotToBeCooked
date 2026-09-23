@@ -46,7 +46,7 @@ what makes it live again.** The long-form Summary with measurements stays at the
 |---|---|---|---|
 | **R38** | `POST /files/{file_id}/ingest` has no test at all, and r81 is about to wire it | **Open, raised 22 Sep** — found while checking what `origin/bao-sheng` still holds | The two tests that covered it live only on a branch nobody has merged. **Trigger: r81, 23–30 Sep** |
 | **R37** | The zero-chunk path tells the user their PDF has no selectable text, which for a lecture deck is the wrong culprit | **Open, raised 22 Sep** — the original claim that zero chunks reach `READY` was wrong and is corrected below | Whoever fixes R36 — the message and the cause move together |
-| **R36** | Real lecture slides produce almost no chunks — not because the text is missing, but because `extract_text` discards the label the text carries | **Open, raised 22 Sep** — cause measured 22 Sep on the CPC251 deck; the fix is unowned | Whoever takes `ingestion.py:16-43`. **Trigger: the day anyone uploads a real lecture deck** |
+| **R36** | Real lecture slides are indexed as their logos: docling OCRs every slide's banner into `text`, and `extract_text` discards the bullets that carry the content | **Open, raised 22 Sep** — measured with docling and a live model 23 Sep; this entry was wrong twice before that, see below | Whoever takes `ingestion.py:16-43`. **Trigger: the day anyone uploads a real lecture deck** — AI-2 already has, on `feat/real-api-wiring` |
 | **R35** | A JSONB column typed `list[UUID]` could not be written at all — every `/rag/query` carrying an @-mention raised | **Closed 21 Sep** — found while building r51, fixed the same day (`json_serializer` on the engine) | Reopens the day someone builds an engine with `create_async_engine` instead of `make_engine` |
 | **R34** | Replacing a file's bytes leaves the old chunks retrievable, under the new filename | **Closed 22 Sep** — the fix is merged (`9878edd`, into `dev` as `631a7e0`). **No test proves it: the regression test is r82, 1–3 Oct** | Reopens if r82 slips. Until it lands, this is closed on a reading of the code, not on a measurement |
 | **R30** | A corrected re-upload becomes a second FILE row, both retrievable | **Closed 15 Sep** — the PUT landed (`02e8647`) | Its remaining half is now R34 |
@@ -1062,97 +1062,112 @@ was checked to have teeth.
 
 ---
 
-### R36 — real lecture slides produce almost no chunks
+### R36 — real lecture slides are indexed as their logos
 
-Raised 22 September by AI-2 at the meeting: the corpus r52 was measured on
-(`apps/api/evaluation/controlled_retrieval_evaluation_corpus.pdf`) was generated
-for the purpose and extracts cleanly, while last semester's CPC251 lecture slides
-produce almost nothing. AI-2 attributed it to image-only PDFs; AI-1 suggested a
-VLM. **The symptom is real. Both explanations are wrong for this file.**
+**Measured 23 September**, with docling actually running, on
+`1 - Deep Learning_v2.pdf` (CPC251, 59 pages) through `extract_text` and
+`create_chunk` as they stand on `feat/real-api-wiring` (`6ea628f`). That branch
+changes only the `prov` handling in `extract_text`; the label filter is the one
+on `dev`.
 
-Measured 22 September on `1 - Deep Learning_v2.pdf`, one of sixteen CPC251 decks:
+**This entry has been wrong twice, and both versions are recorded here because
+they were circulated.** On 22 September it first said "reported, nothing
+measured". It was then rewritten to say the deck produces *almost no chunks*
+because 32 of its 59 pages are nothing but bullets, and `extract_text` keeps
+`text` but not `list_item`. The bullet half of that was right. **The "almost no
+chunks" half was wrong**: it was inferred from `pdftotext`, which reads only the
+PDF's text layer, and docling does more than that — it OCRs the pictures. A
+slide is never empty to docling, because every slide carries a banner of logos.
 
-```
-Creator                 Acrobat PDFMaker 25 for PowerPoint
-Embedded fonts          13      (Calibri, Arial, CambriaMath, CourierNew, ...)
-Tagged                  yes
-Pages                   59
-pdftotext characters    20,414
-Pages with no text      0
-```
-
-Three other decks in the same folder behave the same way: Reinforcement Learning
-83 pages / 29,609 characters, SVM 41 / 10,529, Fuzzy Sets 38 / 12,992. These are
-PowerPoint exports, not scans. **There is nothing wrong with the text layer, and
-OCR is not involved** — docling 2.119.0 defaults to `do_ocr=True` with
-`ocr engine = auto` in any case.
-
-**What the text actually is.** Page 8, line by line, as `pdftotext` returns it:
+**What docling actually labels** (all 1,864 items in `document.texts`):
 
 ```
-'Kami Memimpin | We Lead'                            <- page_header
-'Why use Deep Learning?'                             <- the slide title
-'* Works tremendously well with more data.'          <- list_item
-'* Automatic feature extraction in deep learning.'   <- list_item
-'* Text'                                             <- list_item
-'* Images (raw pixels)'                              <- list_item
-'* Sounds tracks'                                    <- list_item
-'* Etc.'                                             <- list_item
-'* Able to learn non-linear relationships ...'       <- list_item
-'20/05/2025   (c) MNAW, USM, 2025'                   <- page_footer
+text               1377
+page_footer         191
+list_item           157     <- the slides' bullets, i.e. the lecture
+section_header       88
+caption              31
+page_header          12
+formula               4
+checkbox_unselected   2
+code                  2
 ```
 
-Not one line on that page is a paragraph. Over the whole deck, of 429 non-empty
-lines, 152 carry a bullet glyph (`\u2022` or Wingdings `\uf0a7`) and 116 are the
-header/footer boilerplate that repeats on all 59 pages. **Strip the boilerplate
-and the slide title, and 32 of the 59 pages contain nothing but bullets.** Most of
-what remains on the other 27 is wrapped continuations of those bullets, title-slide
-lines, formulas and image captions.
+**Of the 1,377 `text` items, 1,304 are children of a picture** — text OCR'd out
+of images — and **372 are nothing but banner and logo wording**: "SCHOOL OF
+COMPUTER SCIENCES", "UNIVERSITI SAINS MALAYSIA", "USM", "APEX TM",
+"Kami Memimpin | We Lead". That banner is an image on every one of the 59
+slides, and it says the same thing as the title slide.
 
-**Why that empties the pipeline.** `apps/api/app/services/ingestion.py:16-43`:
+**What survives.** `extract_text` keeps all 1,377 `text` items, covering 59 of
+59 pages, and `create_chunk` makes **52 chunks** of them. **41 of the 52 are
+more than 30% logo wording.** The 157 `list_item` items — the actual content
+of the lecture — are all discarded. Eight sentences taken from the slides'
+bullets were searched for across all 52 chunks; **seven appear in none**. The
+eighth ("hidden state") appears only because a diagram on the same topic was
+OCR'd.
 
-```python
-if document_item.label.value == "section_header":
-    current_heading = document_item.text      # stored, never emitted
-elif document_item.label.value == "text":
-    ...
-    extracted_items.append(item)              # the only path that emits
+**What that does to an answer.** Same deck, same model
+(`gemini-3.5-flash-lite`, four calls in total), same question, with the
+branch's `extract_text` against a control extractor that also accepts
+`list_item` and skips picture OCR and page headers and footers. Retrieval was
+vector-only top-5 over locally embedded chunks, so BM25 was not in play.
+
+```
+"How can you identify a vanishing or exploding gradient problem?"
+  (the answer is the bullets on p.46)
+
+  current   answers only the exploding half, pieced together from the
+            OCR of a flowchart
+  control   both halves, matching p.46: early-layer weights go to 0 and
+            training stops; weights grow unexpectedly large and the error
+            gradient stays above 1.0
+
+"Summarise this document."   (first 8 chunks by chunk_index)
+
+  current   pages 1-5. "The document is from the School of Computer
+            Sciences at Universiti Sains Malaysia for the course CPC 251
+            ... taught by Mohd Nadhir Ab Wahab"
+  control   pages 1-15. Definitions, why deep learning now, feature
+            extraction, CNNs
 ```
 
-Two of `DocItemLabel`'s thirty members survive the loop, and **one of the two
-emits nothing** — a `section_header` only sets the heading for a later `text`
-item. A page made of a heading and bullets therefore produces an empty
-`extracted_items`, and `create_chunk` turns an empty list into zero chunks.
-`ingestion.py:25` separately drops any item with no `prov`.
+The current summary is AI-2's complaint of 23 September, reproduced: answers
+that describe the cover. It is what a model says when every source it is given
+reads like the cover.
 
-Discarded along with `list_item`: `title`, `paragraph`, `table`, `caption`,
-`code`, `formula`, `page_header`, `page_footer` and twenty more.
+**The control is not a proposed fix.** Skipping picture OCR also drops diagram
+labels, and those sometimes carry content — the one half the current extractor
+got right came from a flowchart. The decision is what a slide should become:
+bullets alone, bullets plus diagram text with the repeated banner removed, or
+something else. That is a design call, and it is unowned.
 
-**Not measured:** `Counter(t.label.value for t in document.texts)` over this PDF.
-docling will not run on this machine (`ImportError: libgthread-2.0.so.0`, out of
-`cv2`), so the labels named above are read off `DocItemLabel` and matched to the
-extracted text by hand, not printed by docling. That count would confirm the
-mapping; **it is no longer what decides the cause**, because the question it was
-going to answer — does the text come out at all — now has an answer.
+**Separate, and not this finding:** the control's summary still stops at page
+15 of 59, because the summary path on `feat/real-api-wiring` takes the first 8
+chunks by `chunk_index` (`prompt.py:102`, `_MAX_SOURCES = 8`). That is new code
+on an unmerged branch and is review feedback there, not an entry here.
 
-**A VLM is a separate question.** The deck carries 409 images, only two of which
-are full-bleed (the title and closing backgrounds); the rest are diagrams whose
-content exists nowhere else. Reading those is worth discussing on its own terms.
-It is not why the chunk count is zero.
+**Not reconciled:** AI-2 reported at the meeting that the deck produced
+"almost no chunks", and this machine produced 52. One difference that would
+explain it is whether an OCR engine loads on his machine — without OCR the
+banner text disappears, and so does nearly everything else. Not checked.
 
-**Bearing on r52 and r53.** Decision 1 of 22 September read the two
-configurations' 20/20 Hit@5 as a ceiling effect and moved r53 to Recall@1 and MRR.
-If the evaluation corpus is prose while the real material is bullets, the corpus is
-not merely easy, it is a different shape of document — and a sharper metric on it
-still measures the wrong thing. That does not change what r53 does this week; it
-changes what its number is worth.
+**How this was measured, since docling would not start here.** The venv
+carries both `opencv-python` and `opencv-python-headless`; the GUI build wins
+and needs `libgthread-2.0.so.0`, which this machine does not have. The library
+was taken from a throwaway container of the API image and supplied through
+`LD_LIBRARY_PATH` for the measuring process only — nothing on the system or in
+the venv was changed. The API container itself cannot parse PDFs either:
+`import cv2` fails there on `libxcb.so.1`.
 
-**Unowned.** The fix is a change to which labels `extract_text` accepts, plus a
-decision about what a bullet list should become: one chunk per bullet is too
-small to retrieve well, and a whole slide as one chunk loses the heading
-structure. That is a design call, not a one-line edit, and it belongs in a row
-nobody has opened yet. See also **R37**: the message a user gets when this
-happens blames their PDF, and for this file that is the wrong culprit.
+**Bearing on r52 and r53** is unchanged: the evaluation corpus is prose and the
+real material is bullets, so a sharper metric on that corpus still measures a
+different shape of document.
+
+**R37 is unaffected but narrower than it looked.** This deck never reaches the
+zero-chunk path — OCR guarantees every slide some text — so the misleading
+"no selectable text" message is for documents that genuinely yield nothing, not
+for slide decks.
 
 ---
 
