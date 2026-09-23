@@ -1,5 +1,6 @@
 import {
   AlertCircle,
+  Download,
   FileQuestion,
   LoaderCircle,
   RotateCcw,
@@ -15,7 +16,13 @@ type DocumentContentStateProps =
       message?: string
       onRetry: () => void
     }
-  | { variant: "unsupported"; fileName: string }
+  | {
+      variant: "unsupported"
+      fileName: string
+      isDownloading?: boolean
+      downloadError?: string | null
+      onDownload: () => void
+    }
 
 export function DocumentContentState(props: DocumentContentStateProps) {
   if (props.variant === "loading") {
@@ -84,6 +91,25 @@ export function DocumentContentState(props: DocumentContentStateProps) {
           unchanged.
         </p>
       </div>
+      {props.downloadError && (
+        <p role="alert" className="text-sm text-(--danger-tx,#F0A19D)">
+          {props.downloadError}
+        </p>
+      )}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={props.isDownloading}
+        onClick={props.onDownload}
+      >
+        {props.isDownloading ? (
+          <LoaderCircle className="animate-spin" />
+        ) : (
+          <Download />
+        )}
+        {props.isDownloading ? "Downloading…" : "Download original"}
+      </Button>
     </div>
   )
 }

@@ -807,6 +807,11 @@ export interface components {
             conversation_id?: string | null;
         };
         /**
+         * RagIntent
+         * @enum {string}
+         */
+        RagIntent: "question" | "document_summary";
+        /**
          * RagQueryRequest
          * @description Inbound: frontend -> generation layer. A single question from the user.
          *
@@ -840,6 +845,8 @@ export interface components {
              * @description Explicit @-mention scope. May cross courses. When set, overrides course_id.
              */
             file_ids?: string[] | null;
+            /** @default question */
+            intent: components["schemas"]["RagIntent"];
             /**
              * Top K
              * @default 5

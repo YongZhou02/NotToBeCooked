@@ -2293,6 +2293,14 @@
         "title": "RagAnswer",
         "description": "Outbound: generation -> frontend. Response model of POST /rag/query."
       },
+      "RagIntent": {
+        "type": "string",
+        "enum": [
+          "question",
+          "document_summary"
+        ],
+        "title": "RagIntent"
+      },
       "RagQueryRequest": {
         "properties": {
           "question": {
@@ -2342,6 +2350,10 @@
             ],
             "title": "File Ids",
             "description": "Explicit @-mention scope. May cross courses. When set, overrides course_id."
+          },
+          "intent": {
+            "$ref": "#/components/schemas/RagIntent",
+            "default": "question"
           },
           "top_k": {
             "type": "integer",

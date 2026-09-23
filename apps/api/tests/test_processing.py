@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 from uuid import UUID, uuid4
 
@@ -5,7 +6,29 @@ import pytest
 
 from app.schemas.chunk import ChunkCreate
 from app.schemas.ingestion_run import IngestionRun, IngestionRunStatus
+from app.services.ingestion import extract_text
 from app.services.processing import NoExtractableContentError, process_file, run_ingestion
+
+
+def test_extract_text_keeps_text_without_page_provenance():
+    document = SimpleNamespace(
+        texts=[
+            SimpleNamespace(
+                label=SimpleNamespace(value="text"),
+                text="Text extracted from a DOCX paragraph.",
+                prov=[],
+            )
+        ]
+    )
+
+    assert extract_text(document) == [
+        {
+            "heading": None,
+            "page_start": 1,
+            "page_end": 1,
+            "content": "Text extracted from a DOCX paragraph.",
+        }
+    ]
 
 
 def make_chunk_create(file_id: UUID) -> ChunkCreate:

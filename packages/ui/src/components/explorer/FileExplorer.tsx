@@ -2,10 +2,11 @@ import React, { useState, useMemo, useEffect } from "react"
 import type { MockDocumentFile } from "../../types/course"
 import { FolderItem } from "./FolderItem"
 import { FileItem } from "./FileItem"
-import { Folder, Search, X } from "lucide-react"
+import { Folder, FolderPlus, Search, X } from "lucide-react"
 import { RoadmapWidget } from "../roadmap/RoadmapWidget"
 import { UploadDock } from "../upload/UploadDock"
 import { ExplorerState } from "./ExplorerState"
+import { CreateFolderDialog } from "./CreateFolderDialog"
 
 export type ExplorerStatus = "ready" | "loading" | "error"
 interface FileExplorerProps {
@@ -21,6 +22,7 @@ interface FileExplorerProps {
   onOpenRoadmapModal: () => void
   onOpenBatchUpload: () => void
   onOpenDirectFolderUpload: (category: string) => void
+  onCreateFolder: (folderName: string) => Promise<void> | void
   onCreateSubfolder: (
     parentFolder: string,
     folderName: string
@@ -61,6 +63,7 @@ export function FileExplorer({
   onOpenRoadmapModal,
   onOpenBatchUpload,
   onOpenDirectFolderUpload,
+  onCreateFolder,
   onCreateSubfolder,
   onRenameFolder,
   onDeleteFolder,
@@ -71,6 +74,7 @@ export function FileExplorer({
   const [isResizing, setIsResizing] = useState(false)
 
   const [searchQuery, setSearchQuery] = useState("")
+  const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false)
   const [collapsedCats, setCollapsedCats] = useState<Record<string, boolean>>(
     {}
   )
@@ -259,13 +263,29 @@ export function FileExplorer({
             />
           ) : (
             <>
-              <div className="px-1 font-mono text-[11px] font-semibold tracking-wider text-(--tx-faint,#5C6976) uppercase">
+              <div className="flex items-center justify-between px-1 font-mono text-[11px] font-semibold tracking-wider text-(--tx-faint,#5C6976) uppercase">
                 <span>Folders</span>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateFolderOpen(true)}
+                  aria-label="Create root folder"
+                  title="Create folder"
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-(--tx-muted,#93A1AF) transition-colors hover:bg-(--bg-hover,#213040) hover:text-(--acc,#52A8EA) focus-visible:ring-2 focus-visible:ring-(--acc,#52A8EA) focus-visible:outline-none"
+                >
+                  <FolderPlus className="h-4 w-4" />
+                </button>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                {rootCategories.map(renderFolder)}
-              </div>
+              {rootCategories.length === 0 ? (
+                <ExplorerState
+                  variant="empty"
+                  onCreateFolder={() => setIsCreateFolderOpen(true)}
+                />
+              ) : (
+                <div className="flex flex-col gap-1.5">
+                  {rootCategories.map(renderFolder)}
+                </div>
+              )}
             </>
           )}
         </div>
@@ -281,6 +301,12 @@ export function FileExplorer({
           <UploadDock onOpenBatchUpload={onOpenBatchUpload} />
         </div>
       </aside>
+
+      <CreateFolderDialog
+        open={isCreateFolderOpen}
+        onOpenChange={setIsCreateFolderOpen}
+        onCreate={onCreateFolder}
+      />
 
       {/* Horizontal Drag Resize Handle on Right Edge */}
       <div

@@ -1,8 +1,10 @@
-import React from "react"
+import React, { useCallback, useState } from "react"
 import { AlertCircle, Clock3, LoaderCircle } from "lucide-react"
+import { api } from "@workspace/contracts"
 import type { MockDocumentFile } from "../../types/course"
 import type { Tab } from "../../store/workspace"
 import type { CitationItem } from "../chat/Chat"
+import { useFileContent } from "../../hooks/useFileContent"
 import { DocumentContentState } from "./DocumentContentState"
 
 export interface DocumentViewerProps {
@@ -27,14 +29,46 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = React.memo(
     onDismissCitation,
     onRetryContent,
   }) => {
+    const [isDownloading, setIsDownloading] = useState(false)
+    const [downloadError, setDownloadError] = useState<string | null>(null)
     const page = tab.page ?? 1
     const zoomLevel = tab.zoomLevel ?? 100
     const previewState = document.previewState ?? "ready"
+    const {
+      state: contentState,
+      url: contentUrl,
+      retry: retryContent,
+    } = useFileContent(document.id, isVisible && previewState !== "unsupported")
 
     const isCitationOnCurrentPage =
       selectedCitation &&
       selectedCitation.f === document.id &&
       (selectedCitation.p === page || !selectedCitation.p)
+
+    const downloadOriginal = useCallback(async () => {
+      setIsDownloading(true)
+      setDownloadError(null)
+
+      try {
+        const blob = await api.files.content(document.id)
+        const url = URL.createObjectURL(blob)
+        const anchor = window.document.createElement("a")
+        anchor.href = url
+        anchor.download = document.name
+        window.document.body.appendChild(anchor)
+        anchor.click()
+        anchor.remove()
+        URL.revokeObjectURL(url)
+      } catch (error) {
+        setDownloadError(
+          error instanceof Error && error.message.trim()
+            ? error.message
+            : "Couldn’t download the original file. Try again."
+        )
+      } finally {
+        setIsDownloading(false)
+      }
+    }, [document.id, document.name])
 
     return (
       <div
@@ -109,19 +143,26 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = React.memo(
 
         {/* Document Canvas Content Area */}
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-(--bg-canvas,#161F29) p-6 md:p-8 lg:p-10">
-          {previewState === "loading" ? (
-            <DocumentContentState variant="loading" fileName={document.name} />
-          ) : previewState === "error" ? (
-            <DocumentContentState
-              variant="error"
-              fileName={document.name}
-              message={document.previewError ?? undefined}
-              onRetry={() => onRetryContent?.(document.id)}
-            />
-          ) : previewState === "unsupported" ? (
+          {previewState === "unsupported" ? (
             <DocumentContentState
               variant="unsupported"
               fileName={document.name}
+              isDownloading={isDownloading}
+              downloadError={downloadError}
+              onDownload={() => void downloadOriginal()}
+            />
+          ) : contentState.status === "idle" ||
+            contentState.status === "loading" ? (
+            <DocumentContentState variant="loading" fileName={document.name} />
+          ) : contentState.status === "error" ? (
+            <DocumentContentState
+              variant="error"
+              fileName={document.name}
+              message={contentState.message}
+              onRetry={() => {
+                retryContent()
+                onRetryContent?.(document.id)
+              }}
             />
           ) : (
             <>
@@ -200,63 +241,21 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = React.memo(
                 </div>
               )}
 
-              {/* Direct Document Reading Content Area */}
-              <div
-                style={{
-                  transform: `scale(${zoomLevel / 100})`,
-                  transformOrigin: "top left",
-                }}
-                className="flex flex-1 flex-col gap-6 text-sm leading-relaxed text-(--tx,#DCE3EA) transition-transform duration-150"
-              >
-                <div className="flex items-center justify-between border-b border-(--line-soft,#1B2530) pb-4 font-mono text-xs text-(--tx-faint,#5C6976)">
-                  <span className="font-semibold text-(--tx,#DCE3EA)">
-                    {document.name}
+              {selectedCitation?.quote && isCitationOnCurrentPage && (
+                <div className="mb-4 rounded-lg border border-(--cite-line,rgba(227,166,63,0.4)) bg-(--cite-bg,rgba(227,166,63,0.12)) p-4 text-xs leading-relaxed text-(--tx-strong,#EDF2F6) shadow-sm">
+                  <span className="mb-1.5 block font-mono text-[11px] font-semibold text-(--cite,#E3A63F) uppercase">
+                    Verified Grounded Quote
                   </span>
-                  <span>
-                    Page {page} / {document.totalPages}
-                  </span>
+                  <em>"{selectedCitation.quote}"</em>
                 </div>
+              )}
 
-                {/* Page Content Display */}
-                <div className="flex flex-1 flex-col gap-4">
-                  {document.contentByPage?.[page] ? (
-                    <div className="space-y-4">
-                      <p className="text-sm leading-relaxed whitespace-pre-line text-(--tx,#DCE3EA)">
-                        {document.contentByPage[page]}
-                      </p>
-
-                      {/* Highlight quote if citation corresponds to this document & page */}
-                      {selectedCitation?.quote && isCitationOnCurrentPage && (
-                        <div className="rounded-lg border border-(--cite-line,rgba(227,166,63,0.4)) bg-(--cite-bg,rgba(227,166,63,0.12)) p-4 text-xs leading-relaxed text-(--tx-strong,#EDF2F6) shadow-sm">
-                          <span className="mb-1.5 block font-mono text-[11px] font-semibold text-(--cite,#E3A63F) uppercase">
-                            Verified Grounded Quote
-                          </span>
-                          <em>"{selectedCitation.quote}"</em>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex flex-1 flex-col gap-4">
-                      <h4 className="text-base font-semibold text-(--acc,#52A8EA)">
-                        Section {page}.1 — Core Theoretical Foundations
-                      </h4>
-                      <p className="text-sm leading-relaxed text-(--tx-dim,#8B98A7)">
-                        This document contains comprehensive materials for{" "}
-                        {document.name}. All paragraphs and equations in this
-                        section are indexed by the Retrieval-Augmented
-                        Generation (RAG) pipeline for verified citation and
-                        context retrieval.
-                      </p>
-                      <div className="mt-auto rounded-lg border border-(--line-soft,#1B2530) bg-(--bg-raise,#1C2833)/60 p-4 font-mono text-xs text-(--tx-faint,#5C6976)">
-                        [Indexed Document Chunk #{document.id}-p{page}]
-                        <br />
-                        Embedding vectors synced with vector store and ready for
-                        query matching.
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <iframe
+                key={`${contentUrl}:${page}:${zoomLevel}`}
+                src={`${contentUrl}#page=${page}&zoom=${zoomLevel}`}
+                title={document.name}
+                className="min-h-[32rem] w-full flex-1 rounded-sm border border-(--line,#25313E) bg-white"
+              />
             </>
           )}
         </div>

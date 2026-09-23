@@ -65,7 +65,7 @@ async def logout(response: Response, _=Depends(get_current_user)):
         key="refresh_token",
         httponly=True,
         samesite="lax",
-        secure=True,
+        secure=settings.AUTH_COOKIE_SECURE,
     )
     return {"status": "ok"}
 
@@ -141,7 +141,7 @@ async def refresh_session(
         value=new_refresh_token,
         httponly=True,  # JS cannot read cookie, prevents XSS attack
         samesite="lax",  # CSRF protection
-        secure=True,  # Requires HTTPS in production
+        secure=settings.AUTH_COOKIE_SECURE,
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
     )
 
@@ -188,7 +188,7 @@ async def login(
         value=refresh_token,
         httponly=True,  # JS cannot read cookie, prevents XSS attack
         samesite="lax",  # CSRF protection
-        secure=True,  # Requires HTTPS in production
+        secure=settings.AUTH_COOKIE_SECURE,
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
     )
 
@@ -247,7 +247,7 @@ async def register(
         value=refresh_token,
         httponly=True,  # JS cannot read cookie, prevents XSS attack
         samesite="lax",  # CSRF protection
-        secure=True,  # Requires HTTPS in production
+        secure=settings.AUTH_COOKIE_SECURE,
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
     )
 

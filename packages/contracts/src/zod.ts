@@ -16,7 +16,8 @@ const FileRead = z.object({ id: z.string().uuid(), folder_id: z.string().uuid(),
 const IngestionResponse = z.object({ file_id: z.string().uuid(), ingestion_run_id: z.string().uuid(), status: z.enum(["queued", "processing", "ready", "failed"]), chunk_count: z.union([z.number(), z.null()]).optional(), error: z.union([z.string(), z.null()]).optional() }).passthrough();
 const FileUpdate = z.object({ filename: z.union([z.string(), z.null()]), folder_id: z.union([z.string(), z.null()]) }).partial().passthrough();
 const Body_replace_file_files__file_id__content_put = z.object({ upload: z.string() }).passthrough();
-const RagQueryRequest = z.object({ question: z.string().min(1).max(2000), course_id: z.union([z.string(), z.null()]).optional(), conversation_id: z.union([z.string(), z.null()]).optional(), file_ids: z.union([z.array(z.string().uuid()), z.null()]).optional(), top_k: z.number().int().gte(1).lte(20).optional().default(5) });
+const RagIntent = z.enum(["question", "document_summary"]);
+const RagQueryRequest = z.object({ question: z.string().min(1).max(2000), course_id: z.union([z.string(), z.null()]).optional(), conversation_id: z.union([z.string(), z.null()]).optional(), file_ids: z.union([z.array(z.string().uuid()), z.null()]).optional(), intent: RagIntent.optional(), top_k: z.number().int().gte(1).lte(20).optional().default(5) });
 const Citation = z.object({ marker: z.number().int().gte(1), file_id: z.string().uuid(), course_id: z.string().uuid(), filename: z.string().min(1), page: z.union([z.number(), z.null()]).optional(), page_end: z.union([z.number(), z.null()]).optional(), quote: z.string().min(1) });
 const RagAnswer = z.object({ answer: z.string().min(1), citations: z.array(Citation).optional(), grounded: z.boolean(), uncovered: z.union([z.string(), z.null()]).optional(), used_chunks: z.number().int().gte(0), conversation_id: z.union([z.string(), z.null()]).optional() });
 const course_id = z.union([z.string(), z.null()]).optional();
@@ -48,6 +49,7 @@ export const schemas = {
 	IngestionResponse,
 	FileUpdate,
 	Body_replace_file_files__file_id__content_put,
+	RagIntent,
 	RagQueryRequest,
 	Citation,
 	RagAnswer,

@@ -5,6 +5,7 @@ import {
   FileText,
   FolderInput,
   MoreVertical,
+  Play,
   Trash2,
 } from "lucide-react"
 
@@ -300,6 +301,15 @@ export function FileItem({
               >
                 <AlertCircle className="h-4 w-4" />
                 View failure details
+              </DropdownMenuItem>
+            )}
+            {file.status === "uploaded" && (
+              <DropdownMenuItem
+                onClick={() => void onRetryIndexing(file.id)}
+                className="cursor-pointer text-xs text-(--acc,#52A8EA)"
+              >
+                <Play className="h-4 w-4" />
+                Start indexing
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />

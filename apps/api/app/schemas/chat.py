@@ -74,7 +74,7 @@ class Message(SQLModel, table=True):
         "out of the reply text afterwards, and a conversation reopened next week has to "
         "show the same caveat it showed when it was written -- r47.",
     )
-    mentioned_file_ids: list[UUID] | None = Field(
+    mentioned_file_ids: list[str] | None = Field(
         default=None, sa_column=Column(JSONB, nullable=True)
     )
     scope_snapshot: dict[str, Any] | None = Field(

@@ -1,4 +1,10 @@
-import { AlertTriangle, FolderOpen, RefreshCw, SearchX } from "lucide-react"
+import {
+  AlertTriangle,
+  FolderOpen,
+  FolderPlus,
+  RefreshCw,
+  SearchX,
+} from "lucide-react"
 
 import { Button } from "../button"
 
@@ -10,6 +16,7 @@ interface ExplorerEmptyStateProps {
   variant: "empty"
   folderName?: string
   onUpload?: () => void
+  onCreateFolder?: () => void
 }
 
 interface ExplorerErrorStateProps {
@@ -120,7 +127,7 @@ export function ExplorerState(props: ExplorerStateProps) {
       </div>
 
       <p className="text-xs font-semibold text-(--tx,#DCE3EA)">
-        This folder is empty
+        {props.folderName ? "This folder is empty" : "No folders yet"}
       </p>
 
       {props.folderName && (
@@ -133,10 +140,23 @@ export function ExplorerState(props: ExplorerStateProps) {
       )}
 
       <p className="mt-1 text-[11px] leading-4 text-(--tx-dim,#8B98A7)">
-        Upload your first file to get started.
+        {props.folderName
+          ? "Upload your first file to get started."
+          : "Create a folder before uploading your first file."}
       </p>
 
-      {props.onUpload && (
+      {props.onCreateFolder ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="mt-3"
+          onClick={props.onCreateFolder}
+        >
+          <FolderPlus className="h-4 w-4" />
+          Create folder
+        </Button>
+      ) : props.onUpload ? (
         <Button
           type="button"
           variant="outline"
@@ -146,7 +166,7 @@ export function ExplorerState(props: ExplorerStateProps) {
         >
           Upload here
         </Button>
-      )}
+      ) : null}
     </div>
   )
 }

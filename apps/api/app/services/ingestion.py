@@ -22,15 +22,12 @@ def extract_text(document):
             current_heading = document_item.text
 
         elif document_item.label.value == "text":
-            if not document_item.prov:
-                continue
-
-            pages = []
-            for provenance in document_item.prov:
-                pages.append(provenance.page_no)
-
-            page_start = min(pages)
-            page_end = max(pages)
+            # PDF items carry page provenance. Reflowable formats such as DOCX
+            # can contain valid text without page coordinates; dropping those
+            # items makes a readable document look empty to the indexer.
+            pages = [provenance.page_no for provenance in document_item.prov]
+            page_start = min(pages) if pages else 1
+            page_end = max(pages) if pages else 1
 
             item = {
                 "heading": current_heading,

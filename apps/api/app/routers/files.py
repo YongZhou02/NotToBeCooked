@@ -244,7 +244,7 @@ async def _ingest_in_background(
             # scanned PDF sits at `uploaded` for ever and the UI cannot say why.
             file_row.status = FileStatus.FAILED
             file_row.error_message = (
-                "This PDF has no selectable text (usually a scan or images only)."
+                "This file has no extractable text (it may contain only images)."
             )
             await session.commit()
             return
