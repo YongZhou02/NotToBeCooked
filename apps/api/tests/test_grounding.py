@@ -3,7 +3,12 @@
 from uuid import uuid4
 
 from app.schemas.rag import Citation, RetrievedChunk
-from app.services.grounding import check_grounding, extract_markers
+from app.services.grounding import (
+    check_grounding,
+    drop_unreferenced,
+    drop_unverified,
+    extract_markers,
+)
 
 COURSE_ID = uuid4()
 
@@ -77,6 +82,73 @@ def test_citation_never_referred_to_in_the_answer_fails():
     )
     assert not report.ok
     assert any("[2]" in p for p in report.problems)
+
+
+def test_an_unreferenced_citation_is_dropped_and_the_rest_then_passes():
+    """The same answer as above. Nothing the reader sees rested on [2]."""
+    answer = "Plants turn light into chemical energy [1]."
+    kept, dropped = drop_unreferenced(
+        answer,
+        [
+            cite(1, C1, "Photosynthesis converts light energy"),
+            cite(2, C2, "fixes carbon dioxide into glucose"),
+        ],
+    )
+    assert [c.marker for c in kept] == [1]
+    assert dropped == [2]
+    assert check_grounding(answer, kept, SELECTED).ok
+
+
+def test_dropping_never_rescues_a_bad_quote_on_a_marker_the_answer_uses():
+    answer = "Plants turn light into chemical energy [1]."
+    kept, _ = drop_unreferenced(answer, [cite(1, C1, "Photosynthesis never converts light")])
+    report = check_grounding(answer, kept, SELECTED)
+    assert not report.ok
+    # The rejected quote is in the message, because the log is built from it.
+    assert any("Photosynthesis never converts light" in p for p in report.problems)
+
+
+def test_an_answer_with_no_markers_keeps_its_citations():
+    """Dropping them all would make uncited prose look like a refusal."""
+    citations = [cite(1, C1, "Photosynthesis converts light energy")]
+    kept, dropped = drop_unreferenced("Plants turn light into chemical energy.", citations)
+    assert kept == citations
+    assert dropped == []
+    assert not check_grounding("Plants turn light into chemical energy.", kept, SELECTED).ok
+
+
+def test_a_failed_quote_goes_when_its_marker_keeps_a_verified_one():
+    """[1] still leads to a line the reader can find, so the bad quote goes."""
+    answer = "Plants turn light into chemical energy [1]."
+    good = cite(1, C1, "Photosynthesis converts light energy")
+    bad = cite(1, C1, "Photosynthesis never converts light")
+    kept, dropped = drop_unverified([good, bad], SELECTED)
+    assert kept == [good]
+    assert dropped == [bad]
+    assert check_grounding(answer, kept, SELECTED).ok
+
+
+def test_a_marker_whose_quotes_all_fail_is_not_rescued():
+    """Nothing behind [1] was checked, so the whole answer still fails."""
+    answer = "Plants turn light into chemical energy [1]. Carbon is fixed later [2]."
+    citations = [
+        cite(1, C1, "Photosynthesis never converts light"),
+        cite(2, C2, "fixes carbon dioxide into glucose"),
+    ]
+    kept, dropped = drop_unverified(citations, SELECTED)
+    assert kept == citations
+    assert dropped == []
+    assert not check_grounding(answer, kept, SELECTED).ok
+
+
+def test_a_verified_quote_under_another_marker_rescues_nothing():
+    """[2] holding says nothing about [1]."""
+    citations = [
+        cite(1, C1, "Photosynthesis never converts light"),
+        cite(2, C2, "fixes carbon dioxide into glucose"),
+    ]
+    _, dropped = drop_unverified(citations, SELECTED)
+    assert dropped == []
 
 
 def test_marker_outside_the_supplied_sources_fails():

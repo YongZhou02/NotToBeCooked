@@ -82,6 +82,16 @@ _RESPONSE_SCHEMA: dict[str, Any] = {
 
 REFUSAL = "The supplied material does not cover this question."
 
+# What the reader sees when an answer was written but failed `check_grounding`.
+# It used to be REFUSAL, which told them the material had no answer -- a claim
+# about their files that nobody had checked. What actually happened is that the
+# answer's citations could not be verified, so that is what this says.
+UNVERIFIED = (
+    "An answer was written, but its citations could not be checked against "
+    "the material, so it is not shown. Try asking again, or ask about one part "
+    "of the document at a time."
+)
+
 
 def _verbatim_opening(content: str, limit: int = 110) -> str:
     """A prefix of `content`, cut at a word boundary. Never altered.

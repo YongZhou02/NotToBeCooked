@@ -18,7 +18,7 @@ from app.dependencies.auth import get_current_user
 from app.routers import rag as rag_module
 from app.schemas.chat import ChatRole, Conversation
 from app.schemas.rag import RetrievedChunk
-from app.services.llm import REFUSAL, LlmAnswer
+from app.services.llm import REFUSAL, UNVERIFIED, LlmAnswer
 
 USER_ID = uuid4()
 COURSE_ID = uuid4()
@@ -110,9 +110,47 @@ def test_one_altered_word_in_a_quote_costs_the_whole_answer(client, monkeypatch)
 
     assert body["grounded"] is False
     assert body["citations"] == []
-    assert body["answer"] == REFUSAL
+    assert body["answer"] == UNVERIFIED
     # Not a 500. The pipeline worked; the answer failed its own check.
     assert _assistant_turn(client).grounded is False
+
+
+def test_a_citation_the_answer_never_uses_is_dropped_not_fatal(client, monkeypatch):
+    """Before 24 Sep this refused the whole answer. The extra citation supports
+    nothing the reader sees, so it goes, and the answer it was attached to is sent."""
+    honest = rag_module.generate_answer
+
+    async def lists_an_extra(*, question, context, sources):
+        draft = await honest(question=question, context=context, sources=sources)
+        draft.answer = draft.answer.replace(" [2]", "")
+        return draft
+
+    monkeypatch.setattr(rag_module, "generate_answer", lists_an_extra)
+
+    body = client.post("/rag/query", json={"question": "What is a partial index?"}).json()
+
+    assert body["grounded"] is True
+    assert [c["marker"] for c in body["citations"]] == [1]
+
+
+def test_a_bad_quote_beside_a_good_one_on_the_same_marker_is_dropped(client, monkeypatch):
+    """Before 24 Sep one bad quote refused the whole answer, even when the same
+    marker carried an exact one. Now the bad quote goes and the answer is sent."""
+    honest = rag_module.generate_answer
+
+    async def one_bad_extra(*, question, context, sources):
+        draft = await honest(question=question, context=context, sources=sources)
+        bad = draft.citations[0].model_copy(update={"quote": "a partial index covers every row"})
+        draft.citations.append(bad)
+        return draft
+
+    monkeypatch.setattr(rag_module, "generate_answer", one_bad_extra)
+
+    body = client.post("/rag/query", json={"question": "What is a partial index?"}).json()
+
+    assert body["grounded"] is True
+    assert "every row" not in str(body["citations"])
+    assert [c["marker"] for c in body["citations"]] == [1, 2]
 
 
 def test_a_marker_with_nothing_behind_it_costs_the_whole_answer(client, monkeypatch):
@@ -127,7 +165,7 @@ def test_a_marker_with_nothing_behind_it_costs_the_whole_answer(client, monkeypa
 
     body = client.post("/rag/query", json={"question": "What is a partial index?"}).json()
     assert body["grounded"] is False
-    assert body["answer"] == REFUSAL
+    assert body["answer"] == UNVERIFIED
 
 
 def test_a_failing_generator_refuses_rather_than_500s(client, monkeypatch):
@@ -198,7 +236,7 @@ def test_a_gap_declared_with_no_citations_costs_the_whole_answer(client, monkeyp
 
     body = client.post("/rag/query", json={"question": "Indexes?"}).json()
 
-    assert body["answer"] == REFUSAL
+    assert body["answer"] == UNVERIFIED
     assert body["grounded"] is False
     assert body["uncovered"] is None
     assert _assistant_turn(client).uncovered is None
