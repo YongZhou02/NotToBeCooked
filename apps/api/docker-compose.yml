@@ -29,10 +29,13 @@ services:
   api:
     build: .
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/not_to_be_cooked
-      - ALLOWED_ORIGINS=https://yourdomain.com
+        - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/not_to_be_cooked
+        - ALLOWED_ORIGINS=http://localhost:5173
+        - GEMINI_API_KEY=${GEMINI_API_KEY}
+        - LLM_FAKE_MODE=${LLM_FAKE_MODE:-true}
+
     depends_on:
       db:
         condition: service_healthy
