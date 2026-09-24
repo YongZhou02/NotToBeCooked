@@ -46,7 +46,11 @@ async def ctx(test_database_url):
         assert user.id is not None
 
         course = Course(
-            user_id=user.id, code="C", name="N", year=2026, sem=1,
+            user_id=user.id,
+            code="C",
+            name="N",
+            year=2026,
+            sem=1,
             status=CourseStatus.ACTIVE,
         )
         session.add(course)
@@ -67,6 +71,7 @@ async def ctx(test_database_url):
 async def test_a_message_with_mentioned_files_can_be_written_and_read(ctx):
     maker, (conversation_id, course_id) = ctx
     mentioned = [uuid4(), uuid4()]
+    mentioned_strings = [str(file_id) for file_id in mentioned]
 
     async with maker() as session:
         session.add(
@@ -78,7 +83,7 @@ async def test_a_message_with_mentioned_files_can_be_written_and_read(ctx):
                 content="what does @[L1.pdf] say about recursion",
                 grounded=False,
                 citations=None,
-                mentioned_file_ids=mentioned,
+                mentioned_file_ids=mentioned_strings,
                 created_at=datetime.now(UTC),
             )
         )
@@ -88,7 +93,7 @@ async def test_a_message_with_mentioned_files_can_be_written_and_read(ctx):
     async with maker() as session:
         row = (await session.exec(select(Message))).one()
         # The column holds strings -- that is what JSON is.
-        assert row.mentioned_file_ids == [str(m) for m in mentioned]
+        assert row.mentioned_file_ids == mentioned_strings
         # And the response model is what turns them back into UUIDs, which is
         # the half that makes the string form invisible outside this layer.
         assert MessageRead.model_validate(row).mentioned_file_ids == mentioned

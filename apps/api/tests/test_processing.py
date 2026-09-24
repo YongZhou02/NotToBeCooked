@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 from uuid import UUID, uuid4
 
 import pytest
@@ -11,14 +11,14 @@ from app.services.processing import NoExtractableContentError, process_file, run
 
 
 def test_extract_text_keeps_text_without_page_provenance():
+    paragraph = SimpleNamespace(
+        label=SimpleNamespace(value="text"),
+        text="Text extracted from a DOCX paragraph.",
+        prov=[],
+    )
+
     document = SimpleNamespace(
-        texts=[
-            SimpleNamespace(
-                label=SimpleNamespace(value="text"),
-                text="Text extracted from a DOCX paragraph.",
-                prov=[],
-            )
-        ]
+        iterate_items=Mock(return_value=[(paragraph, 1)]),
     )
 
     assert extract_text(document) == [
@@ -32,39 +32,47 @@ def test_extract_text_keeps_text_without_page_provenance():
 
 
 def test_extract_text_keeps_body_text_and_list_items_only():
+    heading = SimpleNamespace(
+        label=SimpleNamespace(value="section_header"),
+        content_layer=SimpleNamespace(value="body"),
+        text="Conflict",
+        prov=[SimpleNamespace(page_no=3)],
+    )
+    body_text = SimpleNamespace(
+        label=SimpleNamespace(value="text"),
+        content_layer=SimpleNamespace(value="body"),
+        text="Conflict is a perception.",
+        prov=[SimpleNamespace(page_no=3)],
+    )
+    list_item = SimpleNamespace(
+        label=SimpleNamespace(value="list_item"),
+        content_layer=SimpleNamespace(value="body"),
+        text="Interaction is required for conflict.",
+        prov=[SimpleNamespace(page_no=4)],
+    )
+    furniture = SimpleNamespace(
+        label=SimpleNamespace(value="text"),
+        content_layer=SimpleNamespace(value="furniture"),
+        text="SCHOOL OF COMPUTER SCIENCES",
+        prov=[SimpleNamespace(page_no=4)],
+    )
+    footer = SimpleNamespace(
+        label=SimpleNamespace(value="page_footer"),
+        content_layer=SimpleNamespace(value="body"),
+        text="Page 4",
+        prov=[SimpleNamespace(page_no=4)],
+    )
+
     document = SimpleNamespace(
-        texts=[
-            SimpleNamespace(
-                label=SimpleNamespace(value="section_header"),
-                content_layer=SimpleNamespace(value="body"),
-                text="Conflict",
-                prov=[SimpleNamespace(page_no=3)],
-            ),
-            SimpleNamespace(
-                label=SimpleNamespace(value="text"),
-                content_layer=SimpleNamespace(value="body"),
-                text="Conflict is a perception.",
-                prov=[SimpleNamespace(page_no=3)],
-            ),
-            SimpleNamespace(
-                label=SimpleNamespace(value="list_item"),
-                content_layer=SimpleNamespace(value="body"),
-                text="Interaction is required for conflict.",
-                prov=[SimpleNamespace(page_no=4)],
-            ),
-            SimpleNamespace(
-                label=SimpleNamespace(value="text"),
-                content_layer=SimpleNamespace(value="furniture"),
-                text="SCHOOL OF COMPUTER SCIENCES",
-                prov=[SimpleNamespace(page_no=4)],
-            ),
-            SimpleNamespace(
-                label=SimpleNamespace(value="page_footer"),
-                content_layer=SimpleNamespace(value="body"),
-                text="Page 4",
-                prov=[SimpleNamespace(page_no=4)],
-            ),
-        ]
+        iterate_items=Mock(
+            return_value=[
+                (heading, 1),
+                (body_text, 1),
+                (list_item, 1),
+                (furniture, 1),
+                (footer, 1),
+            ]
+        ),
     )
 
     assert extract_text(document) == [
@@ -81,6 +89,31 @@ def test_extract_text_keeps_body_text_and_list_items_only():
             "content": "Interaction is required for conflict.",
         },
     ]
+
+
+def test_extract_text_keeps_tables_in_document_order():
+    table = SimpleNamespace(
+        label=SimpleNamespace(value="table"),
+        content_layer=SimpleNamespace(value="body"),
+        prov=[SimpleNamespace(page_no=7)],
+        export_to_markdown=Mock(return_value="| Model | Accuracy |\n|---|---|\n| CNN | 95% |"),
+    )
+
+    document = SimpleNamespace(
+        iterate_items=Mock(return_value=[(table, 1)]),
+    )
+
+    result = extract_text(document)
+
+    assert result == [
+        {
+            "heading": None,
+            "page_start": 7,
+            "page_end": 7,
+            "content": "| Model | Accuracy |\n|---|---|\n| CNN | 95% |",
+        }
+    ]
+    table.export_to_markdown.assert_called_once_with(doc=document)
 
 
 def make_chunk_create(file_id: UUID) -> ChunkCreate:
@@ -392,3 +425,27 @@ async def test_run_ingestion_marks_run_failed_when_no_extractable_text():
     assert ingestion_run.status == IngestionRunStatus.FAILED
     assert ingestion_run.error_message == "No extractable content found"
     assert ingestion_run.completed_at is not None
+
+
+def test_extract_text_treats_bullet_section_header_as_content():
+    bullet = SimpleNamespace(
+        label=SimpleNamespace(value="section_header"),
+        content_layer=SimpleNamespace(value="body"),
+        text="• Conflict begins with perceived incompatibility.",
+        prov=[SimpleNamespace(page_no=7)],
+    )
+
+    document = SimpleNamespace(
+        iterate_items=Mock(return_value=[(bullet, 1)]),
+    )
+
+    result = extract_text(document)
+
+    assert result == [
+        {
+            "heading": None,
+            "page_start": 7,
+            "page_end": 7,
+            "content": "• Conflict begins with perceived incompatibility.",
+        }
+    ]

@@ -27,8 +27,12 @@ def extract_text(document):
     current_heading = None
     extracted_items = []
 
-    for document_item in document.texts:
+    for document_item, _level in document.iterate_items():
         label = document_item.label.value
+        text = getattr(document_item, "text", "")
+        is_bullet_heading = label == "section_header" and text.lstrip().startswith(
+            ("▪", "•", "-", "–", "—", "●", "○", "◦")
+        )
         content_layer = getattr(
             getattr(document_item, "content_layer", None),
             "value",
@@ -39,25 +43,34 @@ def extract_text(document):
         if content_layer != "body":
             continue
 
-        if label == "section_header":
-            current_heading = document_item.text
+        if label == "section_header" and not is_bullet_heading:
+            current_heading = text
+            continue
 
-        elif label in {"text", "list_item"}:
-            # PDF items carry page provenance. Reflowable formats such as DOCX
-            # can contain valid text without page coordinates; dropping those
-            # items makes a readable document look empty to the indexer.
-            pages = [provenance.page_no for provenance in document_item.prov]
-            page_start = min(pages) if pages else 1
-            page_end = max(pages) if pages else 1
+        if label == "table":
+            content = document_item.export_to_markdown(doc=document)
+        elif label in {"text", "list_item"} or is_bullet_heading:
+            content = text
+        else:
+            continue
 
-            item = {
-                "heading": current_heading,
-                "page_start": page_start,
-                "page_end": page_end,
-                "content": document_item.text,
-            }
+        if not content.strip():
+            continue
+        # PDF items carry page provenance. Reflowable formats such as DOCX
+        # can contain valid text without page coordinates; dropping those
+        # items makes a readable document look empty to the indexer.
+        pages = [provenance.page_no for provenance in document_item.prov]
+        page_start = min(pages) if pages else 1
+        page_end = max(pages) if pages else 1
 
-            extracted_items.append(item)
+        item = {
+            "heading": current_heading,
+            "page_start": page_start,
+            "page_end": page_end,
+            "content": content,
+        }
+
+        extracted_items.append(item)
     return extracted_items
 
 
