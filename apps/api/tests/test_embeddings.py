@@ -7,7 +7,9 @@ download. The last test loads the real model and only runs with RUN_MODEL_TESTS=
 import math
 import os
 import sys
+import time
 import types
+from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -93,6 +95,30 @@ def test_model_is_loaded_once_and_reused(monkeypatch):
     assert first is loaded
     assert second is loaded
     load.assert_called_once()
+
+
+def test_two_threads_asking_at_once_still_load_the_model_once(monkeypatch):
+    """Two uploads that start in the same second both reach `_get_model` from
+    worker threads while the model is still None. Loading it twice at once is
+    not merely wasteful: measured 24 September 2026, one of two concurrent loads
+    came back with 290 of its 310 base weights in float32 instead of bfloat16,
+    and every `encode` on it raised "expected m1 and m2 to have the same dtype".
+    """
+    monkeypatch.setattr(embeddings, "_active_model", None)
+    calls: list[int] = []
+
+    def slow_load():
+        calls.append(1)
+        time.sleep(0.2)  # long enough for the second thread to arrive mid-load
+        return object()
+
+    monkeypatch.setattr(embeddings, "_load_model", slow_load)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        models = list(pool.map(lambda _: embeddings._get_model(), range(2)))
+
+    assert len(calls) == 1
+    assert models[0] is models[1]
 
 
 def test_load_model_uses_cpu_when_no_gpu():
