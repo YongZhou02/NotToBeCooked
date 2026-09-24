@@ -296,9 +296,6 @@ async def query(
             },
         )
     conv_id: UUID = conversation.id
-    mentioned_file_ids = (
-        [str(file_id) for file_id in request.file_ids] if request.file_ids is not None else None
-    )
 
     # 2. Record the user turn. Stores the raw multiline text exactly as sent.
     session.add(
@@ -310,7 +307,7 @@ async def query(
             content=request.question,
             grounded=False,
             citations=None,
-            mentioned_file_ids=mentioned_file_ids,
+            mentioned_file_ids=request.file_ids,
             created_at=datetime.now(UTC),
         )
     )
@@ -347,13 +344,11 @@ async def query(
     # 4. Generate.
     try:
         draft = await generate_answer(
-        question=clean_rag_query,
-        context=context,
-        sources=selected,
-        document_summary=(
-            rag_request.intent == RagIntent.DOCUMENT_SUMMARY
-        ),
-    )
+            question=clean_rag_query,
+            context=context,
+            sources=selected,
+            document_summary=(rag_request.intent == RagIntent.DOCUMENT_SUMMARY),
+        )
     except Exception:
         # There is no retry. The user is already waiting on a chat turn and a
         # second timeout helps nobody; the traceback is for us, the refusal is
@@ -430,7 +425,7 @@ async def query(
             grounded=grounded,
             uncovered=uncovered,
             citations=[c.model_dump(mode="json") for c in citations],
-            mentioned_file_ids=mentioned_file_ids,
+            mentioned_file_ids=request.file_ids,
             scope_snapshot=snapshot.model_dump(mode="json"),
             created_at=datetime.now(UTC),
         )
