@@ -100,6 +100,27 @@ a claim about CDNs is cited with
 
 and not with the whole passage.
 """
+DOCUMENT_SUMMARY_INSTRUCTION = """
+DOCUMENT SUMMARY MODE
+
+The user is asking for a comprehensive explanation of one complete document.
+
+Before writing the answer, inspect all supplied sources from the beginning,
+middle, and end of the document.
+
+Organize the answer by the document's major topics in document order. Explain
+each distinct concept in plain language. Do not stop after explaining only the
+first few sources.
+
+Use a clear heading for every major topic. Merge repeated information instead
+of repeating it.
+
+The answer does not need to reproduce every sentence, but it must represent
+the complete document rather than only its opening pages.
+
+Continue following all citation and verbatim quote rules from the main system
+instruction.
+"""
 
 # Selection policy.
 #
@@ -116,7 +137,11 @@ and not with the whole passage.
 _MAX_SOURCES = 8
 
 
-def build_context(chunks: list[RetrievedChunk]) -> tuple[str, list[RetrievedChunk]]:
+def build_context(
+    chunks: list[RetrievedChunk],
+    *,
+    max_sources: int | None = _MAX_SOURCES,
+) -> tuple[str, list[RetrievedChunk]]:
     """Render retrieved chunks as a numbered, citable source list.
 
     Returns the rendered context and the chunks that actually went into it,
@@ -127,7 +152,7 @@ def build_context(chunks: list[RetrievedChunk]) -> tuple[str, list[RetrievedChun
     other than a tail.
     """
 
-    selected = chunks[:_MAX_SOURCES]
+    selected = chunks if max_sources is None else chunks[:max_sources]
 
     blocks: list[str] = []
 

@@ -39,7 +39,7 @@ interface UploadModalProps {
   initialCategory?: string
   isDirectFolderUpload?: boolean
   onClose: () => void
-  onUploadSuccess: (category: string, filename?: string) => void
+  onUploadSuccess: (category: string, file: File) => Promise<void>
 }
 
 function formatFileSize(bytes: number): string {
@@ -64,8 +64,11 @@ export function UploadModal({
   const [validationMessages, setValidationMessages] = useState<string[]>([])
   const [requestError, setRequestError] = useState<string | null>(null)
 
+  const requestedCategory = categoryOverride ?? initialCategory
   const selectedCategory =
-    categoryOverride ?? initialCategory ?? categories[0] ?? "Lecture Decks"
+    (requestedCategory && categories.includes(requestedCategory)
+      ? requestedCategory
+      : categories[0]) ?? ""
 
   const resetAndClose = () => {
     if (stage === "uploading") return
@@ -129,16 +132,15 @@ export function UploadModal({
     setStage("uploading")
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 700))
       await Promise.all(
-        selectedFiles.map((file) =>
-          Promise.resolve(onUploadSuccess(selectedCategory, file.name))
-        )
+        selectedFiles.map((file) => onUploadSuccess(selectedCategory, file))
       )
       setStage("complete")
-    } catch {
+    } catch (error) {
       setRequestError(
-        "Couldn’t upload these files. Check your connection and try again."
+        error instanceof Error && error.message.trim()
+          ? error.message
+          : "Couldn’t upload these files. Check your connection and try again."
       )
       setStage("selected")
     }

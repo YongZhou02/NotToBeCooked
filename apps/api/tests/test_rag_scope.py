@@ -12,7 +12,7 @@ so the difference between "this user can see nothing here" and "search
 everything anyone has ever uploaded" is one early return.
 """
 
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 import pytest_asyncio
@@ -21,14 +21,24 @@ from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 import app.models  # noqa: F401  -- registers every table before create_all
+from app.core.config import settings
 from app.db.database import make_engine
 from app.routers import rag as rag_module
-from app.routers.rag import _retrieve, _scope_file_ids
+from app.routers.rag import (
+    _retrieve,
+    _retrieve_document_chunks,
+    _scope_file_ids,
+)
+from app.schemas.chunk import Chunk
 from app.schemas.course import Course, CourseStatus
 from app.schemas.file import File as FileRow
 from app.schemas.file import FileStatus
 from app.schemas.folder import Folder
-from app.schemas.rag import RagQueryRequest
+from app.schemas.ingestion_run import (
+    IngestionRun,
+    IngestionRunStatus,
+)
+from app.schemas.rag import RagIntent, RagQueryRequest
 from app.schemas.user import User
 
 
@@ -71,6 +81,53 @@ async def _make_owner(session, code: str):
     file_id = file_row.id
     assert file_id is not None
     return user_id, course_id, file_id
+
+
+async def _make_run(
+    session: AsyncSession,
+    file_id: UUID,
+    *,
+    active: bool,
+) -> UUID:
+    run = IngestionRun(
+        file_id=file_id,
+        status=IngestionRunStatus.READY,
+        chunker_version="test",
+        embedding_model="test",
+        embedding_dim=settings.EMBEDDINGS_DIM,
+        is_active=active,
+    )
+
+    session.add(run)
+    await session.flush()
+
+    assert run.id is not None
+    return run.id
+
+
+async def _make_chunk(
+    session: AsyncSession,
+    *,
+    run_id: UUID,
+    file_id: UUID,
+    course_id: UUID,
+    chunk_index: int,
+    content: str,
+) -> None:
+    session.add(
+        Chunk(
+            ingestion_run_id=run_id,
+            file_id=file_id,
+            course_id=course_id,
+            chunk_index=chunk_index,
+            page_start=chunk_index + 1,
+            page_end=chunk_index + 1,
+            heading=None,
+            content=content,
+            token_count=len(content.split()),
+            embedding=[0.0] * settings.EMBEDDINGS_DIM,
+        )
+    )
 
 
 @pytest_asyncio.fixture
@@ -137,3 +194,65 @@ async def test_an_empty_scope_never_reaches_hybrid_search(two_owners, monkeypatc
     )
     assert chunks == []
     assert calls == [], "hybrid_search was called with a scope the caller cannot see"
+
+
+@pytest.mark.asyncio
+async def test_document_summary_uses_active_run_in_chunk_order(two_owners):
+    session, (user_id, course_id, file_id), _ = two_owners
+
+    inactive_run_id = await _make_run(
+        session,
+        file_id,
+        active=False,
+    )
+    active_run_id = await _make_run(
+        session,
+        file_id,
+        active=True,
+    )
+
+    await _make_chunk(
+        session,
+        run_id=inactive_run_id,
+        file_id=file_id,
+        course_id=course_id,
+        chunk_index=0,
+        content="obsolete content",
+    )
+    await _make_chunk(
+        session,
+        run_id=active_run_id,
+        file_id=file_id,
+        course_id=course_id,
+        chunk_index=1,
+        content="second active chunk",
+    )
+
+    await _make_chunk(
+        session,
+        run_id=active_run_id,
+        file_id=file_id,
+        course_id=course_id,
+        chunk_index=0,
+        content="first active chunk",
+    )
+
+    await session.commit()
+    request = RagQueryRequest(
+        question="Condense",
+        file_ids=[file_id],
+        intent=RagIntent.DOCUMENT_SUMMARY,
+    )
+    chunks = await _retrieve_document_chunks(
+        request,
+        session,
+        user_id,
+    )
+    assert [chunk.content for chunk in chunks] == [
+        "first active chunk",
+        "second active chunk",
+    ]
+
+    assert all(chunk.file_id == file_id for chunk in chunks)
+
+    assert "obsolete content" not in [chunk.content for chunk in chunks]

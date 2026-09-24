@@ -7,6 +7,17 @@ export type { ApiClientError } from "./api_client.js";
 // Helper type exports for clean imports in frontend apps
 export type UserRead = components["schemas"]["UserRead"];
 
+export type CourseRead = components["schemas"]["CourseRead"];
+export type FolderRead = components["schemas"]["FolderRead"];
+export type FolderCreate =
+    components["schemas"]["FolderCreate"];
+export type FolderUpdate =
+    components["schemas"]["FolderUpdate"];
+export type FileRead = components["schemas"]["FileRead"];
+export type FileUpdate = components["schemas"]["FileUpdate"];
+export type IngestionResponse =
+    components["schemas"]["IngestionResponse"];
+
 export type LoginRequest = components["schemas"]["LoginRequest"];
 export type RegisterRequest = components["schemas"]["RegisterRequest"];
 export type TokenResponse = components["schemas"]["TokenResponse"];

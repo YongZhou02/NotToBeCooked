@@ -1,13 +1,23 @@
 from uuid import uuid4
 
-from docling.document_converter import DocumentConverter
+from docling.datamodel.base_models import InputFormat
+from docling.datamodel.pipeline_options import PdfPipelineOptions
+from docling.document_converter import DocumentConverter, PdfFormatOption
 
 from app.schemas.chunk import ChunkCreate
 from app.services.embeddings import count_token, get_tokenizer
 
 
 def ingest_document(file_path):
-    converter = DocumentConverter()
+    # Keep native PDF text, but do not turn decorative images and logos into
+    # searchable OCR noise. Other formats continue to use their normal parser.
+    pdf_options = PdfPipelineOptions()
+    pdf_options.do_ocr = False
+    converter = DocumentConverter(
+        format_options={
+            InputFormat.PDF: PdfFormatOption(pipeline_options=pdf_options),
+        }
+    )
     result = converter.convert(file_path)
     document = result.document
     return document
@@ -17,29 +27,50 @@ def extract_text(document):
     current_heading = None
     extracted_items = []
 
-    for document_item in document.texts:
-        if document_item.label.value == "section_header":
-            current_heading = document_item.text
+    for document_item, _level in document.iterate_items():
+        label = document_item.label.value
+        text = getattr(document_item, "text", "")
+        is_bullet_heading = label == "section_header" and text.lstrip().startswith(
+            ("▪", "•", "-", "–", "—", "●", "○", "◦")
+        )
+        content_layer = getattr(
+            getattr(document_item, "content_layer", None),
+            "value",
+            "body",
+        )
 
-        elif document_item.label.value == "text":
-            if not document_item.prov:
-                continue
+        # Furniture is repeated page decoration such as headers and footers.
+        if content_layer != "body":
+            continue
 
-            pages = []
-            for provenance in document_item.prov:
-                pages.append(provenance.page_no)
+        if label == "section_header" and not is_bullet_heading:
+            current_heading = text
+            continue
 
-            page_start = min(pages)
-            page_end = max(pages)
+        if label == "table":
+            content = document_item.export_to_markdown(doc=document)
+        elif label in {"text", "list_item"} or is_bullet_heading:
+            content = text
+        else:
+            continue
 
-            item = {
-                "heading": current_heading,
-                "page_start": page_start,
-                "page_end": page_end,
-                "content": document_item.text,
-            }
+        if not content.strip():
+            continue
+        # PDF items carry page provenance. Reflowable formats such as DOCX
+        # can contain valid text without page coordinates; dropping those
+        # items makes a readable document look empty to the indexer.
+        pages = [provenance.page_no for provenance in document_item.prov]
+        page_start = min(pages) if pages else 1
+        page_end = max(pages) if pages else 1
 
-            extracted_items.append(item)
+        item = {
+            "heading": current_heading,
+            "page_start": page_start,
+            "page_end": page_end,
+            "content": content,
+        }
+
+        extracted_items.append(item)
     return extracted_items
 
 

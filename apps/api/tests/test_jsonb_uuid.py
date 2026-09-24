@@ -46,7 +46,11 @@ async def ctx(test_database_url):
         assert user.id is not None
 
         course = Course(
-            user_id=user.id, code="C", name="N", year=2026, sem=1,
+            user_id=user.id,
+            code="C",
+            name="N",
+            year=2026,
+            sem=1,
             status=CourseStatus.ACTIVE,
         )
         session.add(course)

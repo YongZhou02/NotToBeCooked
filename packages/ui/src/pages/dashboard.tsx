@@ -15,7 +15,11 @@ import { UploadModal } from "../components/upload/UploadModal"
 import { TabBar } from "../components/tabs"
 import { DocumentViewer } from "../components/workspace/DocumentViewer"
 import { Maximize2, Minimize2, FileText } from "lucide-react"
-import type { FileStatus, MockCourse, MockDocumentFile } from "../types/course"
+import type { MockCourse, MockDocumentFile } from "../types/course"
+import { useExplorerData } from "../hooks/useExplorerData"
+import { useExplorerMutations } from "../hooks/useExplorerMutations"
+import { toUiCourse, toUiFiles } from "../lib/explorerData"
+import { classifyChatRequest } from "../lib/chatRequest"
 
 export interface DashboardPageProps {
   platform?: "web" | "tauri"
@@ -49,316 +53,55 @@ function useLruList(
 // ---------------------------------------------------------------------------
 // Mock / Stub Course Catalog & File Repository for Development and Testing
 // ---------------------------------------------------------------------------
-const MOCK_COURSES: MockCourse[] = [
-  {
-    id: "c2020000-0000-4000-8000-000000000202",
-    code: "CS202",
-    name: "Software Engineering",
-    year: 2,
-    semester: 2,
-    week: 5,
-    weeks: 14,
-    target: "finish Lab 3 and read Lecture 4 before Friday",
-    description:
-      "Design patterns, architecture, agile methodologies, and testing.",
-    roadmap: [
-      { w: "Week 1", n: "Complexity analysis & asymptotic notation", s: 1 },
-      { w: "Week 2", n: "Cost models and empirical timing", s: 1 },
-      { w: "Week 3", n: "Arrays & dynamic arrays", s: 1 },
-      { w: "Week 4", n: "Linked lists, stacks & queues", s: 1 },
-      { w: "Week 4", n: "Tutorial 1 submission", s: 1 },
-      {
-        w: "Week 5",
-        n: "Sorting — QuickSort, MergeSort, HeapSort",
-        s: 0,
-        now: true,
-      },
-      { w: "Week 5", n: "Lab 3 — State Management & Hooks", s: 0, now: true },
-      { w: "Week 6", n: "Binary search trees & self-balancing trees", s: 0 },
-      { w: "Week 7", n: "Heaps & priority queues", s: 0 },
-      { w: "Week 8", n: "Midterm examination", s: 0, tag: "exam" },
-      { w: "Week 9", n: "Graphs & topological traversal", s: 0 },
-      { w: "Week 11", n: "Hashing & collision resolution", s: 0 },
-      { w: "Week 14", n: "Final examination", s: 0, tag: "exam" },
-    ],
-  },
-  {
-    id: "c2100000-0000-4000-8000-000000000210",
-    code: "CS210",
-    name: "Data Structures & Algorithms",
-    year: 2,
-    semester: 2,
-    week: 5,
-    weeks: 14,
-    target: "submit Lab 2 and start the graph algorithms problem set",
-    description: "Trees, graphs, dynamic programming, and complexity analysis.",
-    roadmap: [
-      { w: "Week 1", n: "Relational model & key constraints", s: 1 },
-      { w: "Week 2", n: "Relational algebra & calculus", s: 1 },
-      { w: "Week 3", n: "Lab 1 — Red-Black trees implementation", s: 1 },
-      { w: "Week 5", n: "Graph algorithms & network flow", s: 0, now: true },
-      { w: "Week 7", n: "Project schema design draft", s: 0 },
-      { w: "Week 9", n: "B+ Trees & indexing structures", s: 0 },
-      { w: "Week 14", n: "Final examination", s: 0, tag: "exam" },
-    ],
-  },
-  {
-    id: "a2010000-0000-4000-8000-000000000201",
-    code: "MA201",
-    name: "Linear Algebra & Probability",
-    year: 2,
-    semester: 1,
-    week: 4,
-    weeks: 14,
-    target: "complete Problem Set 2 on eigenvalues before tutorial",
-    description: "Vector spaces, eigenvalues, SVD, and Bayesian inference.",
-    roadmap: [
-      { w: "Week 1", n: "Vector spaces and subspaces", s: 1 },
-      { w: "Week 2", n: "Linear independence and basis", s: 1 },
-      { w: "Week 3", n: "Eigenvalues & diagonalization", s: 1 },
-      { w: "Week 4", n: "Singular Value Decomposition (SVD)", s: 0, now: true },
-      { w: "Week 8", n: "Midterm examination", s: 0, tag: "exam" },
-      { w: "Week 14", n: "Final examination", s: 0, tag: "exam" },
-    ],
-  },
-  {
-    id: "c1010000-0000-4000-8000-000000000101",
-    code: "CS101",
-    name: "Computer Systems & Architecture",
-    year: 1,
-    semester: 1,
-    week: 6,
-    weeks: 14,
-    target: "review cache hierarchy and practice assembly tracing",
-    description: "Digital logic, CPU pipeline, cache hierarchy, and assembly.",
-    roadmap: [
-      { w: "Week 1", n: "Digital logic gates & boolean algebra", s: 1 },
-      { w: "Week 2", n: "CPU pipelines & registers", s: 1 },
-      { w: "Week 3", n: "Cache hierarchy & memory mapping", s: 1 },
-      { w: "Week 6", n: "Assembly language instructions", s: 0, now: true },
-      { w: "Week 14", n: "Final examination", s: 0, tag: "exam" },
-    ],
-  },
-]
 
-const MOCK_FILES_BY_COURSE: Record<string, MockDocumentFile[]> = {
-  "c2020000-0000-4000-8000-000000000202": [
-    {
-      id: "f2020004-0000-4000-8000-000000000004",
-      name: "Lecture 4 - Architectural Patterns & Component Decoupling.pdf",
-      category: "Lecture Decks",
-      totalPages: 32,
-      uploadedAt: "2 days ago",
-      size: "2.4 MB",
-      status: "ready",
-      contentByPage: {
-        1: "Lecture 4: Architectural Patterns & Decoupled Systems\n\nOverview:\nIn this session, we investigate event-driven systems, layered architectures, and microkernel plugins.",
-        4: "Microkernel & Plugin Architecture:\n\nThe core system provides minimal functionality required for operations. Plugins extend the core with specific domain logic and custom adapters.",
-        8: "Clean Architecture & Dependency Inversion Principle (DIP):\nHigh-level modules should not depend on low-level modules. Both should depend on abstractions.",
-      },
-    },
-    {
-      id: "f2020005-0000-4000-8000-000000000005",
-      name: "Lecture 5 - Advanced Distributed Systems, Consensus Protocols & Raft Architecture (Spring 2026 Comprehensive Edition).pdf",
-      category: "Lecture Decks",
-      totalPages: 56,
-      uploadedAt: "Yesterday",
-      size: "6.8 MB",
-      status: "processing",
-      contentByPage: {
-        1: "Lecture 5: Distributed Consensus and Fault Tolerance\n\nKey Topics:\n- The CAP Theorem in modern cloud deployments\n- Leader election and log replication with Raft\n- Byzantine Fault Tolerance (BFT) fundamentals",
-        12: "Raft Leader Election:\nFollowers increment their term and transition to candidate state if no heartbeat is received within the randomized election timeout window.",
-        24: "Log Replication & Safety Invariants:\nOnce an entry is committed by a majority of cluster nodes, it is guaranteed to survive subsequent leader failovers.",
-        48: "Network Partition Scenarios (Split-Brain):\nHow quorum consensus guarantees that a minority partition cannot commit writes independently.",
-      },
-    },
-    {
-      id: "f2020001-0000-4000-8000-000000000001",
-      name: "Lecture 1 - SOLID Principles & OOP Fundamentals.pdf",
-      category: "Lecture Decks",
-      totalPages: 24,
-      uploadedAt: "1 week ago",
-      size: "1.8 MB",
-      status: "failed",
-      errorMessage: "No extractable content was found.",
-      contentByPage: {
-        1: "Lecture 1: SOLID Principles & Object-Oriented Design\n\nSingle Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, Dependency Inversion.",
-        5: "Single Responsibility Principle (SRP):\nA module or class should have one, and only one, reason to change.",
-        15: "Liskov Substitution Principle (LSP):\nFunctions that use pointers or references to base classes must be able to use objects of derived classes without knowing it.",
-      },
-    },
-    {
-      id: "f2020002-0000-4000-8000-000000000020",
-      name: "Lecture 2 - Object-Oriented Domain Modeling, UML Class Diagrams & Design Heuristics.pdf",
-      category: "Lecture Decks",
-      totalPages: 28,
-      uploadedAt: "6 days ago",
-      size: "2.1 MB",
-      status: "uploaded",
-      contentByPage: {
-        1: "Lecture 2: Domain Modeling & UML Design\n\nRepresenting entity relationships, aggregation vs composition, and state machine transitions.",
-      },
-    },
-    {
-      id: "f2020003-0000-4000-8000-000000000003",
-      name: "Lab 3 - State Management & Reactive UI Hooks.pdf",
-      category: "Lab Handouts",
-      totalPages: 14,
-      uploadedAt: "3 days ago",
-      size: "1.2 MB",
-      contentByPage: {
-        1: "Lab 3 Instructions: Integrating Zustand with React\n\nTask: Build a multi-pane layout syncing tab state across separate component trees.",
-        4: "Exercise 2: Fine-Grained Selectors and Memoization\nEnsure that active document switching does not trigger re-renders in unmounted sidebar components.",
-      },
-    },
-    {
-      id: "f2020004-0000-4000-8000-000000000040",
-      name: "Lab 4 - Full-Stack Concurrent State Synchronization & Optimistic UI Updates in Distributed React Applications.pdf",
-      category: "Lab Handouts",
-      totalPages: 18,
-      uploadedAt: "2 days ago",
-      size: "1.9 MB",
-      contentByPage: {
-        1: "Lab 4: Optimistic Concurrency and Conflict Resolution\n\nBuilding responsive UI states with rollback mechanisms when network requests fail.",
-      },
-    },
-    {
-      id: "f2020002-0000-4000-8000-000000000002",
-      name: "Tutorial 1 - Component Testing & Mocking Frameworks.pdf",
-      category: "Tutorials & PYQs",
-      totalPages: 10,
-      uploadedAt: "5 days ago",
-      size: "1.1 MB",
-      contentByPage: {
-        1: "Tutorial 1: Testing and Mocking in TypeScript\n\nExercise: How to test components with external backend dependencies using stubs and mocks.",
-      },
-    },
-    {
-      id: "f2020003-0000-4000-8000-000000000030",
-      name: "Tutorial 3 - Microservices Decomposition, Domain-Driven Design (DDD) Bounded Contexts & Event Sourcing Case Studies.pdf",
-      category: "Tutorials & PYQs",
-      totalPages: 22,
-      uploadedAt: "3 days ago",
-      size: "3.4 MB",
-      contentByPage: {
-        1: "Tutorial 3: DDD Bounded Contexts & CQRS\n\nCase study on breaking down monolithic architectures into decoupled microservices.",
-      },
-    },
-    {
-      id: "f2020025-0000-4000-8000-000000000025",
-      name: "Midterm Examination 2025 Comprehensive Solutions & Examiner Commentary.pdf",
-      category: "Tutorials & PYQs",
-      totalPages: 20,
-      uploadedAt: "2 weeks ago",
-      size: "4.2 MB",
-      contentByPage: {
-        1: "CS202 Midterm Examination 2025 — Official Solutions\n\nSection A: Multiple Choice Questions\nSection B: Architecture & Design Pattern Problems",
-      },
-    },
-    {
-      id: "f2020099-0000-4000-8000-000000000099",
-      name: "Past Year Final Examination 2023-2024 Semester 2 With Detailed Worked Solutions.pdf",
-      category: "Tutorials & PYQs",
-      totalPages: 36,
-      uploadedAt: "1 month ago",
-      size: "5.1 MB",
-    },
-    {
-      id: "f2020000-0000-4000-8000-000000000000",
-      name: "Course Planner, Learning Outcomes & Syllabus 2026.pdf",
-      category: "Course Planner",
-      totalPages: 6,
-      uploadedAt: "1 month ago",
-      size: "620 KB",
-      contentByPage: {
-        1: "CS202 Software Engineering (AY2025/2026 Semester 2)\n\nInstructor: Prof. Alan Turing\nPrerequisites: CS101, CS102",
-      },
-    },
-    {
-      id: "f2020088-0000-4000-8000-000000000088",
-      name: "Software Engineering Capstone Team Project Specification Guidelines & Grading Rubric (v3.4 Final Release).pdf",
-      category: "Course Planner",
-      totalPages: 44,
-      uploadedAt: "3 weeks ago",
-      size: "4.8 MB",
-    },
-  ],
-  "c2100000-0000-4000-8000-000000000210": [
-    {
-      id: "f2100006-0000-4000-8000-000000000006",
-      name: "Lecture 6 - Graph Algorithms & Flow.pdf",
-      category: "Lecture Decks",
-      totalPages: 28,
-      uploadedAt: "4 days ago",
-      size: "3.1 MB",
-    },
-    {
-      id: "f2100002-0000-4000-8000-000000000002",
-      name: "Lab 2 - Red-Black Trees Implementation.pdf",
-      category: "Lab Handouts",
-      totalPages: 5,
-      uploadedAt: "1 week ago",
-      size: "640 KB",
-    },
-    {
-      id: "f2100024-0000-4000-8000-000000000024",
-      name: "Past Year Final Exam 2024.pdf",
-      category: "Tutorials & PYQs",
-      totalPages: 16,
-      uploadedAt: "3 weeks ago",
-      size: "4.5 MB",
-    },
-  ],
-  "a2010000-0000-4000-8000-000000000201": [
-    {
-      id: "fa201003-0000-4000-8000-000000000003",
-      name: "Lecture 3 - Singular Value Decomposition.pdf",
-      category: "Lecture Decks",
-      totalPages: 20,
-      uploadedAt: "6 days ago",
-      size: "2.1 MB",
-    },
-    {
-      id: "fa201002-0000-4000-8000-000000000002",
-      name: "Tutorial 2 - Eigenvalues & Diagonalization.pdf",
-      category: "Tutorials & PYQs",
-      totalPages: 7,
-      uploadedAt: "2 weeks ago",
-      size: "980 KB",
-    },
-  ],
-  "c1010000-0000-4000-8000-000000000101": [
-    {
-      id: "fc101002-0000-4000-8000-000000000002",
-      name: "Lecture 2 - Memory Hierarchy & Cache.pdf",
-      category: "Lecture Decks",
-      totalPages: 18,
-      uploadedAt: "1 month ago",
-      size: "1.5 MB",
-    },
-  ],
-}
-
-const DEFAULT_COURSE_ID = "c2020000-0000-4000-8000-000000000202"
-const CATEGORIES = [
-  "Course Planner",
-  "Lecture Decks",
-  "Lab Handouts",
-  "Tutorials & PYQs",
-]
-
-interface MockFolder {
-  name: string
-  parentFolder: string | null
+const EMPTY_COURSE: MockCourse = {
+  id: "",
+  code: "—",
+  name: "No course selected",
+  year: 0,
+  semester: 0,
+  description: "",
+  week: 0,
+  weeks: 0,
+  target: "",
+  roadmap: [],
 }
 
 export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
   const { user, logout } = useAuth()
 
   // Workspace Zustand store
-  const activeCourseId =
-    useWorkspace((s) => s.activeCourseId) || DEFAULT_COURSE_ID
+  const activeCourseId = useWorkspace((s) => s.activeCourseId) || ""
   const switchCourse = useWorkspace((s) => s.switchCourse)
+  const { coursesQuery, foldersQuery, filesQuery } =
+    useExplorerData(activeCourseId)
+  const {
+    uploadFileMutation,
+    updateFileMutation,
+    deleteFileMutation,
+    ingestFileMutation,
+    createFolderMutation,
+    updateFolderMutation,
+    deleteFolderMutation,
+  } = useExplorerMutations(activeCourseId)
+
+  const courses = useMemo(
+    () => (coursesQuery.data ?? []).map(toUiCourse),
+    [coursesQuery.data]
+  )
+  const apiFolders = useMemo(() => foldersQuery.data ?? [], [foldersQuery.data])
+
+  const apiCourseFiles = useMemo(
+    () => toUiFiles(filesQuery.data ?? [], apiFolders),
+    [apiFolders, filesQuery.data]
+  )
+
+  const explorerStatus =
+    foldersQuery.isLoading || filesQuery.isLoading
+      ? "loading"
+      : foldersQuery.isError || filesQuery.isError
+        ? "error"
+        : "ready"
   const tabs = useWorkspace(selectTabs)
   const activeCourseWorkspace = useWorkspace(selectActiveCourse)
   const activeFileId =
@@ -369,54 +112,15 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
   const setActiveFile = useWorkspace((s) => s.setActiveFile)
   const updateTabViewState = useWorkspace((s) => s.updateTabViewState)
   const openCitation = useWorkspace((s) => s.openCitation)
-  const [fileNameOverrides, setFileNameOverrides] = useState<
-    Record<string, string>
-  >({})
-  const [fileFolderOverrides, setFileFolderOverrides] = useState<
-    Record<string, string>
-  >({})
-  const [fileStatusOverrides, setFileStatusOverrides] = useState<
-    Record<string, FileStatus>
-  >({})
-  const [deletedFileIds, setDeletedFileIds] = useState<string[]>([])
-  const [uploadedFilesByCourse, setUploadedFilesByCourse] = useState<
-    Record<string, MockDocumentFile[]>
-  >({})
-  const [customFoldersByCourse, setCustomFoldersByCourse] = useState<
-    Record<string, MockFolder[]>
-  >({})
-  const [folderNameOverridesByCourse, setFolderNameOverridesByCourse] =
-    useState<Record<string, Record<string, string>>>({})
-  const [deletedBaseFoldersByCourse, setDeletedBaseFoldersByCourse] = useState<
-    Record<string, string[]>
-  >({})
+
   // Repository of all files across all courses
-  const allFiles = useMemo(() => {
-    return [
-      ...Object.values(MOCK_FILES_BY_COURSE).flat(),
-      ...Object.values(uploadedFilesByCourse).flat(),
-    ]
-      .filter((file) => !deletedFileIds.includes(file.id))
-      .map((file) => ({
-        ...file,
-        name: fileNameOverrides[file.id] ?? file.name,
-        category: fileFolderOverrides[file.id] ?? file.category,
-        status: fileStatusOverrides[file.id] ?? file.status,
-      }))
-  }, [
-    deletedFileIds,
-    fileFolderOverrides,
-    fileNameOverrides,
-    fileStatusOverrides,
-    uploadedFilesByCourse,
-  ])
+  const allFiles = apiCourseFiles
 
   // Chat Session Hook
   const {
     sessions,
     messages,
     activeConversationId,
-    isLoadingMessages,
     isSending,
     sendMessage,
     deleteSession,
@@ -431,6 +135,11 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [isWorkspaceFullscreen, setIsWorkspaceFullscreen] =
     useState<boolean>(false)
+  const [dismissedChatScopeFileId, setDismissedChatScopeFileId] = useState<
+    string | null
+  >(null)
+  const chatScopeFileId =
+    activeFileId === dismissedChatScopeFileId ? null : activeFileId
 
   // Modals state (Roadmap & Upload)
   const [isRoadmapOpen, setIsRoadmapOpen] = useState(false)
@@ -449,82 +158,64 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
 
   // Initialize course if not selected
   useEffect(() => {
-    if (!useWorkspace.getState().activeCourseId) {
-      switchCourse(DEFAULT_COURSE_ID)
+    const activeCourseExists = courses.some(
+      (course) => course.id === activeCourseId || course.code === activeCourseId
+    )
+
+    if (courses.length > 0 && !activeCourseExists) {
+      switchCourse(courses[0]!.id)
     }
-  }, [switchCourse])
+  }, [activeCourseId, courses, switchCourse])
+
+  useEffect(() => {
+    if (explorerStatus !== "ready") {
+      return
+    }
+
+    const availableFileIds = new Set(allFiles.map((file) => file.id))
+
+    for (const tab of tabs) {
+      if (!availableFileIds.has(tab.fileId)) {
+        closeTab(activeCourseId, tab.fileId)
+      }
+    }
+  }, [activeCourseId, allFiles, closeTab, explorerStatus, tabs])
 
   // Current course metadata & files
-  const currentCourse = useMemo(() => {
-    return (
-      MOCK_COURSES.find(
-        (c) => c.id === activeCourseId || c.code === activeCourseId
-      ) ?? MOCK_COURSES[0]!
+  const currentCourse = useMemo(
+    () =>
+      courses.find(
+        (course) =>
+          course.id === activeCourseId || course.code === activeCourseId
+      ) ??
+      courses[0] ??
+      EMPTY_COURSE,
+    [activeCourseId, courses]
+  )
+
+  const apiFolderNames = useMemo(
+    () => apiFolders.map((folder) => folder.name),
+    [apiFolders]
+  )
+
+  const courseCategories = apiFolderNames
+
+  const folderParents = useMemo(() => {
+    const folderNamesById = new Map(
+      apiFolders.map((folder) => [folder.id, folder.name])
     )
-  }, [activeCourseId])
 
-  const folderNameOverrides = useMemo(
-    () => folderNameOverridesByCourse[currentCourse.id] ?? {},
-    [currentCourse.id, folderNameOverridesByCourse]
-  )
+    return Object.fromEntries(
+      apiFolders.map((folder) => [
+        folder.name,
+        folder.parent_folder_id
+          ? (folderNamesById.get(folder.parent_folder_id) ?? null)
+          : null,
+      ])
+    ) as Record<string, string | null>
+  }, [apiFolders])
 
-  const deletedBaseFolders = useMemo(
-    () => deletedBaseFoldersByCourse[currentCourse.id] ?? [],
-    [currentCourse.id, deletedBaseFoldersByCourse]
-  )
-
-  const customFolders = useMemo(
-    () => customFoldersByCourse[currentCourse.id] ?? [],
-    [currentCourse.id, customFoldersByCourse]
-  )
-
-  const baseFolderNames = useMemo(
-    () =>
-      CATEGORIES.filter(
-        (folderName) => !deletedBaseFolders.includes(folderName)
-      ).map((folderName) => folderNameOverrides[folderName] ?? folderName),
-    [deletedBaseFolders, folderNameOverrides]
-  )
-
-  const courseCategories = useMemo(
-    () => [...baseFolderNames, ...customFolders.map((folder) => folder.name)],
-    [baseFolderNames, customFolders]
-  )
-
-  const folderParents = useMemo(
-    () =>
-      Object.fromEntries([
-        ...baseFolderNames.map((folderName) => [folderName, null]),
-        ...customFolders.map((folder) => [folder.name, folder.parentFolder]),
-      ]) as Record<string, string | null>,
-    [baseFolderNames, customFolders]
-  )
-
-  const courseFiles = useMemo(() => {
-    const files = [
-      ...(MOCK_FILES_BY_COURSE[currentCourse.id] ??
-        MOCK_FILES_BY_COURSE[currentCourse.code] ??
-        []),
-      ...(uploadedFilesByCourse[currentCourse.id] ?? []),
-    ]
-
-    return files
-      .filter((file) => !deletedFileIds.includes(file.id))
-      .map((file) => ({
-        ...file,
-        name: fileNameOverrides[file.id] ?? file.name,
-        category: fileFolderOverrides[file.id] ?? file.category,
-        status: fileStatusOverrides[file.id] ?? file.status,
-      }))
-  }, [
-    deletedFileIds,
-    currentCourse,
-    fileFolderOverrides,
-    fileNameOverrides,
-    fileStatusOverrides,
-    uploadedFilesByCourse,
-  ])
-
+  const courseFiles = apiCourseFiles
   // Roadmap calculations (from workspace.html)
   const courseRoadmap = useMemo(() => {
     const base = currentCourse.roadmap
@@ -572,41 +263,51 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
     setTimeout(() => setToastMessage(null), 3000)
   }
 
-  const handleRenameFile = (fileId: string, newFileName: string) => {
-    setFileNameOverrides((current) => ({
-      ...current,
-      [fileId]: newFileName,
-    }))
+  const handleRenameFile = async (fileId: string, newFileName: string) => {
+    await updateFileMutation.mutateAsync({
+      fileId,
+      data: {
+        filename: newFileName,
+      },
+    })
 
     renameFileReferences(fileId, newFileName)
     showToast(`Renamed to ${newFileName}`)
   }
 
-  const handleMoveFile = (fileId: string, destinationFolder: string) => {
-    setFileFolderOverrides((current) => ({
-      ...current,
-      [fileId]: destinationFolder,
-    }))
+  const handleMoveFile = async (fileId: string, destinationFolder: string) => {
+    const destination = apiFolders.find(
+      (folder) => folder.name === destinationFolder
+    )
+
+    if (!destination) {
+      throw new Error("Destination folder not found")
+    }
+
+    await updateFileMutation.mutateAsync({
+      fileId,
+      data: {
+        folder_id: destination.id,
+      },
+    })
 
     showToast(`Moved file to ${destinationFolder}`)
   }
 
-  const handleRetryIndexing = (fileId: string) => {
-    setFileStatusOverrides((current) => ({
-      ...current,
-      [fileId]: "processing",
-    }))
-
+  const handleRetryIndexing = async (fileId: string) => {
+    await ingestFileMutation.mutateAsync(fileId)
     showToast("Indexing restarted in the background")
   }
 
-  const handleDeleteFile = (fileId: string) => {
+  const handleDeleteFile = async (fileId: string) => {
     const file = courseFiles.find((candidate) => candidate.id === fileId)
-    if (!file) throw new Error("File not found")
 
-    setDeletedFileIds((current) =>
-      current.includes(fileId) ? current : [...current, fileId]
-    )
+    if (!file) {
+      throw new Error("File not found")
+    }
+
+    await deleteFileMutation.mutateAsync(fileId)
+
     closeTab(activeCourseId, fileId)
     setSelectedCitation((current) => (current?.f === fileId ? null : current))
     showToast(`Deleted ${file.name}`)
@@ -634,7 +335,20 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
 
   const handleSendMessage = async (text: string) => {
     try {
-      const res = await sendMessage(text)
+      const chatRequest = classifyChatRequest(text)
+      if (chatRequest.scopesCurrentDocument && !activeFileId) {
+        throw new Error("Open a document before referring to this file")
+      }
+
+      const res = await sendMessage(text, {
+        intent: chatRequest.intent,
+        fileIds:
+          chatRequest.scopesCurrentDocument && activeFileId
+            ? [activeFileId]
+            : chatScopeFileId
+              ? [chatScopeFileId]
+              : undefined,
+      })
       if (res && res.answer) {
         return {
           text: res.answer,
@@ -643,8 +357,12 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
           ),
         }
       }
-    } catch {
-      // Fallback handled in Chat component
+    } catch (error) {
+      showToast(
+        error instanceof Error
+          ? `Couldn't send message: ${error.message}`
+          : "Couldn't send message. Please try again."
+      )
     }
   }
 
@@ -669,107 +387,63 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
     setIsUploadModalOpen(true)
   }
 
-  const handleCreateSubfolder = (parentFolder: string, folderName: string) => {
-    const folderAlreadyExists = courseCategories.some(
-      (category) => category.toLowerCase() === folderName.toLowerCase()
-    )
+  const handleCreateSubfolder = async (
+    parentFolder: string,
+    folderName: string
+  ) => {
+    const parent = apiFolders.find((folder) => folder.name === parentFolder)
 
-    if (folderAlreadyExists) {
-      throw new Error("Folder already exists")
+    if (!parent) {
+      throw new Error("Parent folder not found")
     }
 
-    setCustomFoldersByCourse((current) => ({
-      ...current,
-      [currentCourse.id]: [
-        ...(current[currentCourse.id] ?? []),
-        {
-          name: folderName,
-          parentFolder,
-        },
-      ],
-    }))
+    await createFolderMutation.mutateAsync({
+      name: folderName,
+      parent_folder_id: parent.id,
+      sort_order: apiFolders.length,
+    })
 
     showToast(`Created ${folderName} inside ${parentFolder}`)
   }
 
-  const handleRenameFolder = (folderName: string, newFolderName: string) => {
-    const duplicateExists = courseCategories.some(
-      (category) =>
-        category !== folderName &&
-        category.toLowerCase() === newFolderName.toLowerCase()
-    )
+  const handleCreateFolder = async (folderName: string) => {
+    await createFolderMutation.mutateAsync({
+      name: folderName,
+      parent_folder_id: null,
+      sort_order: apiFolders.length,
+    })
 
-    if (duplicateExists) throw new Error("Folder already exists")
+    showToast(`Created ${folderName}`)
+  }
 
-    const originalBaseFolder = CATEGORIES.find(
-      (originalName) =>
-        (folderNameOverrides[originalName] ?? originalName) === folderName
-    )
+  const handleRenameFolder = async (
+    folderName: string,
+    newFolderName: string
+  ) => {
+    const folder = apiFolders.find((candidate) => candidate.name === folderName)
 
-    if (originalBaseFolder) {
-      setFolderNameOverridesByCourse((current) => ({
-        ...current,
-        [currentCourse.id]: {
-          ...(current[currentCourse.id] ?? {}),
-          [originalBaseFolder]: newFolderName,
-        },
-      }))
+    if (!folder) {
+      throw new Error("Folder not found")
     }
 
-    setCustomFoldersByCourse((current) => ({
-      ...current,
-      [currentCourse.id]: (current[currentCourse.id] ?? []).map((folder) => ({
-        ...folder,
-        name: folder.name === folderName ? newFolderName : folder.name,
-        parentFolder:
-          folder.parentFolder === folderName
-            ? newFolderName
-            : folder.parentFolder,
-      })),
-    }))
-
-    setFileFolderOverrides((current) => {
-      const next = { ...current }
-      courseFiles.forEach((file) => {
-        if (file.category === folderName) next[file.id] = newFolderName
-      })
-      return next
+    await updateFolderMutation.mutateAsync({
+      folderId: folder.id,
+      data: {
+        name: newFolderName,
+      },
     })
 
     showToast(`Renamed ${folderName} to ${newFolderName}`)
   }
 
-  const handleDeleteFolder = (folderName: string) => {
-    const hasFiles = courseFiles.some((file) => file.category === folderName)
-    const hasChildren = customFolders.some(
-      (folder) => folder.parentFolder === folderName
-    )
+  const handleDeleteFolder = async (folderName: string) => {
+    const folder = apiFolders.find((candidate) => candidate.name === folderName)
 
-    if (hasFiles || hasChildren) {
-      throw new Error("Folder is not empty")
+    if (!folder) {
+      throw new Error("Folder not found")
     }
 
-    const originalBaseFolder = CATEGORIES.find(
-      (originalName) =>
-        (folderNameOverrides[originalName] ?? originalName) === folderName
-    )
-
-    if (originalBaseFolder) {
-      setDeletedBaseFoldersByCourse((current) => ({
-        ...current,
-        [currentCourse.id]: [
-          ...(current[currentCourse.id] ?? []),
-          originalBaseFolder,
-        ],
-      }))
-    } else {
-      setCustomFoldersByCourse((current) => ({
-        ...current,
-        [currentCourse.id]: (current[currentCourse.id] ?? []).filter(
-          (folder) => folder.name !== folderName
-        ),
-      }))
-    }
+    await deleteFolderMutation.mutateAsync(folder.id)
 
     showToast(`Deleted ${folderName}`)
   }
@@ -790,7 +464,7 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
         <TopBar
           platform={platform}
           currentCourse={currentCourse}
-          courses={MOCK_COURSES}
+          courses={courses}
           userEmail={user?.email}
           onSwitchCourse={(id) => switchCourse(id)}
           onLogout={() => logout()}
@@ -804,6 +478,11 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
               categories={courseCategories}
               folderParents={folderParents}
               files={courseFiles}
+              explorerStatus={explorerStatus}
+              onRetryLoad={() => {
+                void foldersQuery.refetch()
+                void filesQuery.refetch()
+              }}
               activeFileId={activeFileId}
               courseWeek={currentCourse.week}
               courseWeeks={currentCourse.weeks}
@@ -817,6 +496,7 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
               onOpenRoadmapModal={() => setIsRoadmapOpen(true)}
               onOpenBatchUpload={handleOpenBatchUpload}
               onOpenDirectFolderUpload={handleOpenDirectFolderUpload}
+              onCreateFolder={handleCreateFolder}
               onCreateSubfolder={handleCreateSubfolder}
               onRenameFolder={handleRenameFolder}
               onDeleteFolder={handleDeleteFolder}
@@ -935,16 +615,20 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
               filesCount={courseFiles.length}
               files={courseFiles}
               categories={courseCategories}
+              scopeFile={
+                courseFiles.find((file) => file.id === chatScopeFileId) ?? null
+              }
               messages={messages}
               sessions={sessions}
               activeSessionId={activeConversationId}
-              isTyping={isSending || isLoadingMessages}
+              isTyping={isSending}
               onSendMessage={handleSendMessage}
               onSelectSession={(id) => selectSession(id)}
               onDeleteSession={(id) => deleteSession(id)}
               onNewChat={() => startNewChat()}
               onOpenDocument={handleOpenDocumentFromChat}
               onCiteClick={handleCitationClick}
+              onClearFileScope={() => setDismissedChatScopeFileId(activeFileId)}
             />
           )}
         </div>
@@ -970,27 +654,28 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
         initialCategory={uploadCategory}
         isDirectFolderUpload={isDirectFolderUpload}
         onClose={() => setIsUploadModalOpen(false)}
-        onUploadSuccess={(category, filename) => {
-          const uploadedFileName = filename ?? "Uploaded document.pdf"
-          setUploadedFilesByCourse((current) => ({
-            ...current,
-            [currentCourse.id]: [
-              ...(current[currentCourse.id] ?? []),
-              {
-                id: crypto.randomUUID(),
-                name: uploadedFileName,
-                category,
-                totalPages: 1,
-                uploadedAt: "Just now",
-                size: "Pending",
-                status: "uploaded",
-                contentByPage: {
-                  1: `${uploadedFileName} is waiting to be indexed.`,
-                },
-              },
-            ],
-          }))
-          showToast(`Uploaded ${uploadedFileName} to ${category}.`)
+        onUploadSuccess={async (category, file) => {
+          const destinationFolder = apiFolders.find(
+            (folder) => folder.name === category
+          )
+
+          if (!destinationFolder) {
+            throw new Error(`Folder not found: ${category}`)
+          }
+
+          const uploadedFile = await uploadFileMutation.mutateAsync({
+            folderId: destinationFolder.id,
+            file,
+          })
+
+          try {
+            await ingestFileMutation.mutateAsync(uploadedFile.id)
+            showToast(`Uploaded ${file.name}. Indexing started.`)
+          } catch {
+            showToast(
+              `Uploaded ${file.name}, but indexing could not start. Retry from the file menu.`
+            )
+          }
         }}
       />
     </div>

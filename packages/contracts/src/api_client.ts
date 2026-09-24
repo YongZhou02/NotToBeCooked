@@ -3,6 +3,13 @@ import {
     type RegisterRequest,
     type TokenResponse,
     type UserRead,
+    type CourseRead,
+    type FolderRead,
+    type FolderCreate,
+    type FolderUpdate,
+    type FileRead,
+    type FileUpdate,
+    type IngestionResponse,
     type ApiError,
     type HTTPValidationError,
     type ValidationIssue,
@@ -93,9 +100,11 @@ export class ApiClient {
         return env?.VITE_API_URL || "http://localhost:8000"
     }
 
-    private async request<T>(
+        private async request<T>(
         endpoint: string,
-        options: RequestInit & { parseAs?: "json" | "blob" } = {}
+        options: RequestInit & {
+            parseAs?: "json" | "blob" | "none"
+        } = {}
     ): Promise<T> {
         // `parseAs` is ours, not fetch's, so it is taken out before the rest of
         // `options` is spread into the request. It survives the 401 retry below
@@ -103,9 +112,15 @@ export class ApiClient {
         const { parseAs = "json", ...init } = options
         const token = this.getToken()
 
+const isFormData =
+    typeof FormData !== "undefined" && init.body instanceof FormData
+
         const headers: Record<string, string> = {
-            "Content-Type": "application/json",
             ...((init.headers as Record<string, string>) || {}),
+        }
+
+        if (!isFormData && !headers["Content-Type"]) {
+            headers["Content-Type"] = "application/json"
         }
 
         if (token) {
@@ -197,11 +212,118 @@ export class ApiClient {
             return response.blob() as Promise<T>
         }
 
+        if (parseAs === "none") {
+            return undefined as T
+        }
+
         return response.json()
+    }
+
+    // Course Endpoints
+    public courses = {
+        list: (): Promise<CourseRead[]> =>
+            this.request<CourseRead[]>("/courses", {
+                method: "GET",
+            }),
+    }
+
+    // Folder Endpoints
+    public folders = {
+        list: (courseId: string): Promise<FolderRead[]> =>
+            this.request<FolderRead[]>(
+                `/courses/${encodeURIComponent(courseId)}/folders`,
+                {
+                    method: "GET",
+                }
+            ),
+
+        create: (
+            courseId: string,
+            data: FolderCreate
+        ): Promise<FolderRead> =>
+            this.request<FolderRead>(
+                `/courses/${encodeURIComponent(courseId)}/folders`,
+                {
+                    method: "POST",
+                    body: JSON.stringify(data),
+                }
+            ),
+
+        update: (
+            courseId: string,
+            folderId: string,
+            data: FolderUpdate
+        ): Promise<FolderRead> =>
+            this.request<FolderRead>(
+                `/courses/${encodeURIComponent(courseId)}/folders/${encodeURIComponent(folderId)}`,
+                {
+                    method: "PATCH",
+                    body: JSON.stringify(data),
+                }
+            ),
+
+        delete: (
+            courseId: string,
+            folderId: string
+        ): Promise<void> =>
+            this.request<void>(
+                `/courses/${encodeURIComponent(courseId)}/folders/${encodeURIComponent(folderId)}`,
+                {
+                    method: "DELETE",
+                    parseAs: "none",
+                }
+            ),
     }
 
     // File Endpoints
     public files = {
+        upload: (folderId: string, file: File): Promise<FileRead> => {
+        const formData = new FormData()
+        formData.append("folder_id", folderId)
+        formData.append("upload", file)
+
+        return this.request<FileRead>("/files", {
+            method: "POST",
+            body: formData,
+        })
+    },
+
+        list: (courseId: string): Promise<FileRead[]> =>
+            this.request<FileRead[]>(
+                `/courses/${encodeURIComponent(courseId)}/files`,
+                {
+                    method: "GET",
+                },
+            ),
+
+        update: (
+            fileId: string,
+            data: FileUpdate
+        ): Promise<FileRead> =>
+            this.request<FileRead>(
+                `/files/${encodeURIComponent(fileId)}`,
+                {
+                    method: "PATCH",
+                    body: JSON.stringify(data),
+                }
+            ),
+
+        delete: (fileId: string): Promise<void> =>
+            this.request<void>(
+                `/files/${encodeURIComponent(fileId)}`,
+                {
+                    method: "DELETE",
+                    parseAs: "none",
+                }
+            ),
+
+        ingest: (fileId: string): Promise<IngestionResponse> =>
+            this.request<IngestionResponse>(
+                `/files/${encodeURIComponent(fileId)}/ingest`,
+                {
+                    method: "POST",
+                }
+            ),
         /**
          * The stored bytes of one file, as a Blob.
          *

@@ -4,9 +4,15 @@ Owned by AI-3. Retrieval must produce `RetrievedChunk` exactly as defined here;
 any change to that shape needs agreement from AI-1.
 """
 
+from enum import StrEnum
 from uuid import UUID
 
 from sqlmodel import Field, SQLModel
+
+
+class RagIntent(StrEnum):
+    QUESTION = "question"
+    DOCUMENT_SUMMARY = "document_summary"
 
 
 class RagQueryRequest(SQLModel):
@@ -36,6 +42,7 @@ class RagQueryRequest(SQLModel):
         default=None,
         description="Explicit @-mention scope. May cross courses. When set, overrides course_id.",
     )
+    intent: RagIntent = RagIntent.QUESTION
     top_k: int = Field(default=5, ge=1, le=20)
 
 

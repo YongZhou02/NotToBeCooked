@@ -13,6 +13,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app.core.config import settings
 from app.db.database import get_session
 from app.dependencies.auth import get_current_user
 from app.routers import rag as rag_module
@@ -26,14 +27,26 @@ CONVERSATION_ID = uuid4()
 
 SOURCES = [
     RetrievedChunk(
-        chunk_id=uuid4(), file_id=uuid4(), course_id=COURSE_ID, filename="Lecture 3.pdf",
-        page_start=12, page_end=12, heading="Indexing", score=0.81,
+        chunk_id=uuid4(),
+        file_id=uuid4(),
+        course_id=COURSE_ID,
+        filename="Lecture 3.pdf",
+        page_start=12,
+        page_end=12,
+        heading="Indexing",
+        score=0.81,
         content="A partial index covers only the rows matching its WHERE clause,\n"
-                "so it is smaller than a full index.",
+        "so it is smaller than a full index.",
     ),
     RetrievedChunk(
-        chunk_id=uuid4(), file_id=uuid4(), course_id=COURSE_ID, filename="Lecture 4.pdf",
-        page_start=5, page_end=5, heading=None, score=0.74,
+        chunk_id=uuid4(),
+        file_id=uuid4(),
+        course_id=COURSE_ID,
+        filename="Lecture 4.pdf",
+        page_start=5,
+        page_end=5,
+        heading=None,
+        score=0.74,
         content="A B-tree index stores keys in sorted order.",
     ),
 ]
@@ -58,6 +71,7 @@ def client(monkeypatch):
 
     monkeypatch.setattr(rag_module, "get_or_create_conversation", fake_conversation)
     monkeypatch.setattr(rag_module, "_retrieve", fake_retrieve)
+    monkeypatch.setattr(settings, "LLM_FAKE_MODE", True)
 
     session = AsyncMock()
     session.add = Mock(side_effect=added.append)
@@ -99,8 +113,13 @@ def test_one_altered_word_in_a_quote_costs_the_whole_answer(client, monkeypatch)
     """only -> never. The sentence still reads; it is no longer in the source."""
     honest = rag_module.generate_answer
 
-    async def liar(*, question, context, sources):
-        draft = await honest(question=question, context=context, sources=sources)
+    async def liar(*, question, context, sources, **kwargs):
+        draft = await honest(
+            question=question,
+            context=context,
+            sources=sources,
+            **kwargs,
+        )
         draft.citations[0].quote = draft.citations[0].quote.replace("only", "never")
         return draft
 
@@ -120,8 +139,19 @@ def test_a_citation_the_answer_never_uses_is_dropped_not_fatal(client, monkeypat
     nothing the reader sees, so it goes, and the answer it was attached to is sent."""
     honest = rag_module.generate_answer
 
-    async def lists_an_extra(*, question, context, sources):
-        draft = await honest(question=question, context=context, sources=sources)
+    async def lists_an_extra(
+        *,
+        question,
+        context,
+        sources,
+        **kwargs,
+    ):
+        draft = await honest(
+            question=question,
+            context=context,
+            sources=sources,
+            **kwargs,
+        )
         draft.answer = draft.answer.replace(" [2]", "")
         return draft
 
@@ -138,8 +168,13 @@ def test_a_bad_quote_beside_a_good_one_on_the_same_marker_is_dropped(client, mon
     marker carried an exact one. Now the bad quote goes and the answer is sent."""
     honest = rag_module.generate_answer
 
-    async def one_bad_extra(*, question, context, sources):
-        draft = await honest(question=question, context=context, sources=sources)
+    async def one_bad_extra(*, question, context, sources, **kwargs):
+        draft = await honest(
+            question=question,
+            context=context,
+            sources=sources,
+            **kwargs,
+        )
         bad = draft.citations[0].model_copy(update={"quote": "a partial index covers every row"})
         draft.citations.append(bad)
         return draft
@@ -156,8 +191,13 @@ def test_a_bad_quote_beside_a_good_one_on_the_same_marker_is_dropped(client, mon
 def test_a_marker_with_nothing_behind_it_costs_the_whole_answer(client, monkeypatch):
     honest = rag_module.generate_answer
 
-    async def over_cites(*, question, context, sources):
-        draft = await honest(question=question, context=context, sources=sources)
+    async def over_cites(*, question, context, sources, **kwargs):
+        draft = await honest(
+            question=question,
+            context=context,
+            sources=sources,
+            **kwargs,
+        )
         draft.answer += " And a third point [3]."
         return draft
 
@@ -206,8 +246,13 @@ def test_a_named_gap_reaches_the_response_and_the_stored_turn(client, monkeypatc
     honest = rag_module.generate_answer
     GAP = "The sources do not cover B-tree range scans."
 
-    async def partial(*, question, context, sources):
-        draft = await honest(question=question, context=context, sources=sources)
+    async def partial(*, question, context, sources, **kwargs):
+        draft = await honest(
+            question=question,
+            context=context,
+            sources=sources,
+            **kwargs,
+        )
         draft.uncovered = GAP
         return draft
 
@@ -224,7 +269,7 @@ def test_a_gap_declared_with_no_citations_costs_the_whole_answer(client, monkeyp
     """The model says the sources cover part of the question and then cites
     none of them. Both claims cannot be true, so neither is sent."""
 
-    async def inconsistent(*, question, context, sources):
+    async def inconsistent(*, question, context, sources, **_kwargs):
         return LlmAnswer(
             answer="Partial indexes are covered by the material.",
             grounded=True,
@@ -247,8 +292,13 @@ def test_an_ungrounded_answer_carries_no_gap(client, monkeypatch):
     narrower claim than the refusal sitting beside it."""
     honest = rag_module.generate_answer
 
-    async def modest(*, question, context, sources):
-        draft = await honest(question=question, context=context, sources=sources)
+    async def modest(*, question, context, sources, **kwargs):
+        draft = await honest(
+            question=question,
+            context=context,
+            sources=sources,
+            **kwargs,
+        )
         draft.citations = []
         draft.answer = "Indexes are complicated."
         draft.uncovered = None

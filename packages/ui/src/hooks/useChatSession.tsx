@@ -10,10 +10,7 @@ import {
   type ChatMessage,
   groupCitations,
 } from "../components/chat/ChatMessage"
-import {
-  extractMentionsAndResolve,
-  type FileItem,
-} from "../lib/mentions"
+import { extractMentionsAndResolve, type FileItem } from "../lib/mentions"
 
 export type FilesInput =
   | FileItem[]
@@ -96,15 +93,18 @@ function createOptimisticUserMessage(
   }
 }
 
+export interface SendMessageInput {
+  text: string
+  fileIds?: string[]
+  intent?: "question" | "document_summary"
+}
+
 interface MutationContext {
   previousDetail?: ConversationDetail
   conversationId: string | null
 }
 
-export const useChatSession = (
-  courseId: string | null,
-  files?: FilesInput
-) => {
+export const useChatSession = (courseId: string | null, files?: FilesInput) => {
   const queryClient = useQueryClient()
   const { fileList, lookupName } = normalizeFiles(files)
 
@@ -133,14 +133,15 @@ export const useChatSession = (
   const sendMessageMutation = useMutation<
     RagAnswer,
     Error,
-    string,
+    SendMessageInput,
     MutationContext
   >({
-    mutationFn: async (text: string) => {
+    mutationFn: async ({ text, fileIds, intent }: SendMessageInput) => {
       const scope = ragScope(useWorkspace.getState())
       // Parse @[Filename] mentions from text and resolve to file_ids
       const mentionResult = extractMentionsAndResolve(text, fileList)
-      const effectiveFileIds = mentionResult.fileIds ?? scope.file_ids ?? null
+      const effectiveFileIds =
+        mentionResult.fileIds ?? fileIds ?? scope.file_ids ?? null
 
       return api.chat.query({
         question: mentionResult.cleanQuestion || text,
@@ -148,12 +149,14 @@ export const useChatSession = (
         conversation_id: activeConversationId,
         file_ids: effectiveFileIds,
         top_k: 5,
+        intent: intent ?? "question",
       })
     },
-    onMutate: async (text: string) => {
+    onMutate: async ({ text, fileIds }: SendMessageInput) => {
       const scope = ragScope(useWorkspace.getState())
       const mentionResult = extractMentionsAndResolve(text, fileList)
-      const effectiveFileIds = mentionResult.fileIds ?? scope.file_ids ?? null
+      const effectiveFileIds =
+        mentionResult.fileIds ?? fileIds ?? scope.file_ids ?? null
       const currentConvId = activeConversationId
 
       if (currentConvId) {
@@ -201,7 +204,7 @@ export const useChatSession = (
 
       return { previousDetail: undefined, conversationId: null }
     },
-    onError: (_err, _text, context) => {
+    onError: (_err, _input, context) => {
       if (context?.conversationId && context.previousDetail) {
         queryClient.setQueryData(
           ["chat", "session", context.conversationId],
@@ -209,7 +212,7 @@ export const useChatSession = (
         )
       }
     },
-    onSuccess: (data, _text, context) => {
+    onSuccess: (data, _input, context) => {
       // If turn 1 created a new session, update activeConversationId in Zustand
       const newConversationId =
         (data as { conversation_id?: string; id?: string })?.conversation_id ??
@@ -283,7 +286,11 @@ export const useChatSession = (
     isSending: sendMessageMutation.isPending,
 
     // Actions
-    sendMessage: (text: string) => sendMessageMutation.mutateAsync(text),
+    sendMessage: (text: string, options?: Omit<SendMessageInput, "text">) =>
+      sendMessageMutation.mutateAsync({
+        text,
+        ...options,
+      }),
     deleteSession: (sessionId: string) =>
       deleteSessionMutation.mutateAsync(sessionId),
     selectSession: (sessionId: string | null) => {

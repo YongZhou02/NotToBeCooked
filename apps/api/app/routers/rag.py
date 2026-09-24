@@ -20,13 +20,16 @@ from app.db.database import get_session
 from app.db.vector_ops import SearchConfig, hybrid_search
 from app.dependencies.auth import get_current_user
 from app.schemas.chat import ChatRole, Message
+from app.schemas.chunk import Chunk
 from app.schemas.course import Course
 from app.schemas.errors import ApiError
 from app.schemas.file import File as FileRow
 from app.schemas.folder import Folder
+from app.schemas.ingestion_run import IngestionRun
 from app.schemas.rag import (
     Citation,
     RagAnswer,
+    RagIntent,
     RagQueryRequest,
     RetrievedChunk,
     ScopeSnapshot,
@@ -124,6 +127,53 @@ async def _retrieve(
         file_ids=file_ids,
         config=SearchConfig(final_limit=request.top_k),
     )
+
+
+async def _retrieve_document_chunks(
+    request: RagQueryRequest,
+    session: AsyncSession,
+    user_id: UUID,
+) -> list[RetrievedChunk]:
+    if request.file_ids is None or len(request.file_ids) != 1:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Document summary requires exactly one file",
+        )
+    owned_file_ids = await _scope_file_ids(request, session, user_id)
+
+    if not owned_file_ids:
+        return []
+
+    file_id = owned_file_ids[0]
+
+    statement = (
+        select(Chunk, FileRow)
+        .join(FileRow, col(Chunk.file_id) == col(FileRow.id))
+        .join(
+            IngestionRun,
+            col(Chunk.ingestion_run_id) == col(IngestionRun.id),
+        )
+        .where(
+            col(Chunk.file_id) == file_id,
+            col(IngestionRun.is_active).is_(True),
+        )
+        .order_by(Chunk.chunk_index)
+    )
+    rows = (await session.exec(statement)).all()
+    return [
+        RetrievedChunk(
+            chunk_id=chunk.id,
+            file_id=chunk.file_id,
+            course_id=chunk.course_id,
+            filename=file_row.filename,
+            page_start=chunk.page_start,
+            page_end=chunk.page_end,
+            heading=chunk.heading,
+            content=chunk.content,
+            score=1.0,
+        )
+        for chunk, file_row in rows
+    ]
 
 
 def _placeholder_sources(request: RagQueryRequest, course_id: UUID) -> list[RetrievedChunk]:
@@ -267,15 +317,38 @@ async def query(
     clean_rag_query = " ".join(request.question.split()).strip()
     rag_request = request.model_copy(update={"question": clean_rag_query})
 
-    chunks = await _retrieve(rag_request, session, UUID(str(user_id)))
-    if not chunks and settings.LLM_FAKE_MODE:
+    if rag_request.intent == RagIntent.DOCUMENT_SUMMARY:
+        chunks = await _retrieve_document_chunks(
+            rag_request,
+            session,
+            UUID(str(user_id)),
+        )
+    else:
+        chunks = await _retrieve(
+            rag_request,
+            session,
+            UUID(str(user_id)),
+        )
+    if not chunks and settings.LLM_FAKE_MODE and rag_request.intent == RagIntent.QUESTION:
         chunks = _placeholder_sources(rag_request, conversation.course_id)
 
-    context, selected = build_context(chunks)
+    # A normal question needs only the strongest few search results. A document
+    # summary is different: `_retrieve_document_chunks` deliberately returns
+    # the complete active ingestion run in document order, so truncating it to
+    # the normal source cap would summarize only the opening pages.
+    context, selected = build_context(
+        chunks,
+        max_sources=None if rag_request.intent == RagIntent.DOCUMENT_SUMMARY else 8,
+    )
 
     # 4. Generate.
     try:
-        draft = await generate_answer(question=clean_rag_query, context=context, sources=selected)
+        draft = await generate_answer(
+            question=clean_rag_query,
+            context=context,
+            sources=selected,
+            document_summary=(rag_request.intent == RagIntent.DOCUMENT_SUMMARY),
+        )
     except Exception:
         # There is no retry. The user is already waiting on a chat turn and a
         # second timeout helps nobody; the traceback is for us, the refusal is
