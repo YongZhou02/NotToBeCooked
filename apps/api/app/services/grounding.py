@@ -66,6 +66,37 @@ def extract_markers(answer: str) -> set[int]:
     return {int(m) for m in _MARKER.findall(answer)}
 
 
+def drop_unreferenced(answer: str, citations: list[Citation]) -> tuple[list[Citation], list[int]]:
+    """Remove the citations the answer text never points at.
+
+    Returns the citations to keep and the markers that were dropped.
+
+    From the API log of 24 September 2026, a whole-document summary: the model
+    listed citations [12], [18], [27] and [28] and wrote none of them into the
+    answer. `check_grounding` counted each as a problem, and one problem is
+    enough to refuse the whole answer, so four extras nobody would ever see
+    were part of why the reader got a refusal.
+
+    Dropping them is safe because an unreferenced citation supports no sentence
+    the reader sees. Taking it away removes nothing from the prose, and it
+    removes exactly the defect `check_grounding` objects to: a source the reader
+    is told was used and cannot find. Every citation that IS referenced stays and
+    still has to pass the quote check -- `drop_unverified` is the one narrow
+    exception, and it never leaves a marker without a verified quote.
+
+    An answer with no markers at all is left alone. There the citations are the
+    only sign the answer claims to rest on the sources, and dropping every one
+    would turn uncited prose into something that passes as a refusal.
+    """
+    in_answer = extract_markers(answer)
+    if not in_answer:
+        return citations, []
+
+    kept = [c for c in citations if c.marker in in_answer]
+    dropped = sorted({c.marker for c in citations if c.marker not in in_answer})
+    return kept, dropped
+
+
 def _normalise(text: str) -> str:
     """Collapse whitespace and case for quote comparison.
 
@@ -82,6 +113,48 @@ def _normalise(text: str) -> str:
     catching.
     """
     return " ".join(text.split()).casefold()
+
+
+def drop_unverified(
+    citations: list[Citation], selected: list[RetrievedChunk]
+) -> tuple[list[Citation], list[Citation]]:
+    """Remove a failed quote when its marker has another quote that holds.
+
+    Returns the citations to keep and the ones that were dropped.
+
+    Measured 24 September 2026, a whole-document summary of 33 sources: 46
+    citations sat under markers the answer uses, and 45 quotes were exact. The one
+    that failed sat under [6] next to two exact quotes from the same page.
+    docling had read that page's first bullet as a heading, so the sentence
+    was split between the heading and the chunk text; the model joined the two
+    halves back up, and the check compares against the text alone. One citation
+    like that refused the whole summary.
+
+    What the reader is promised is that every marker in the answer leads to a
+    line they can find in the source it names. A marker that keeps at least one
+    exact quote still keeps that promise, so its failed quotes go. A marker
+    whose quotes ALL fail is left exactly as it was, for `check_grounding` to
+    reject: then nothing behind that marker has been checked at all.
+
+    Out-of-range markers are left alone too. `_resolve_citations` has already
+    dropped them, and if one got through, the range check should see it.
+    """
+
+    def holds(citation: Citation) -> bool:
+        if not 1 <= citation.marker <= len(selected):
+            return True  # not this function's call -- see above
+        source = selected[citation.marker - 1]
+        return _normalise(citation.quote) in _normalise(source.content)
+
+    verified_markers = {c.marker for c in citations if holds(c)}
+    kept: list[Citation] = []
+    dropped: list[Citation] = []
+    for citation in citations:
+        if not holds(citation) and citation.marker in verified_markers:
+            dropped.append(citation)
+        else:
+            kept.append(citation)
+    return kept, dropped
 
 
 def check_grounding(
@@ -151,9 +224,12 @@ def check_grounding(
 
         source = selected[citation.marker - 1]
         if _normalise(citation.quote) not in _normalise(source.content):
+            # The quote goes into the message because the log line built from
+            # these strings is the only place a rejected quote survives. "[10]
+            # does not appear" says that it failed, never how.
             problems.append(
                 f"the quote on [{citation.marker}] does not appear in the source "
-                f"it points at ({source.filename})"
+                f"it points at ({source.filename}): {citation.quote!r}"
             )
 
     return GroundingReport(ok=not problems, problems=problems)

@@ -36,8 +36,8 @@ from app.schemas.rag import (
 )
 from app.services.chat import get_or_create_conversation
 from app.services.embeddings import embed_query
-from app.services.grounding import check_grounding
-from app.services.llm import REFUSAL, LlmAnswer, LlmCitation, generate_answer
+from app.services.grounding import check_grounding, drop_unreferenced, drop_unverified
+from app.services.llm import REFUSAL, UNVERIFIED, LlmAnswer, LlmCitation, generate_answer
 from app.services.prompt import build_context
 
 logger = logging.getLogger(__name__)
@@ -365,6 +365,23 @@ async def query(
     #    something: the model's own claim is an input to the decision, never the
     #    decision itself.
     citations = _resolve_citations(draft.citations, selected)
+    citations, dropped = drop_unreferenced(draft.answer, citations)
+    if dropped:
+        logger.info(
+            "dropped citations the answer never refers to: conversation_id=%s markers=%s",
+            conv_id,
+            dropped,
+        )
+    citations, unverified = drop_unverified(citations, selected)
+    if unverified:
+        # The quote text is logged because this is the only place it survives:
+        # the citation is gone from the response and from the stored turn.
+        logger.info(
+            "dropped quotes that failed while their marker kept a verified one: "
+            "conversation_id=%s quotes=%s",
+            conv_id,
+            [(c.marker, c.quote) for c in unverified],
+        )
     report = check_grounding(draft.answer, citations, selected, uncovered=draft.uncovered)
 
     if report.ok:
@@ -378,13 +395,14 @@ async def query(
     else:
         # Not a 500. The pipeline worked; the answer failed its own check, and
         # sending it with grounded=False would still put unverifiable citations
-        # in front of the reader.
+        # in front of the reader. Nor REFUSAL: that says the material has no
+        # answer, and nothing here checked that.
         logger.warning(
             "answer rejected by grounding check: conversation_id=%s problems=%s",
             conv_id,
             report.problems,
         )
-        answer_text, citations, grounded, uncovered = REFUSAL, [], False, None
+        answer_text, citations, grounded, uncovered = UNVERIFIED, [], False, None
 
     # 6. Record the assistant turn, with the scope frozen alongside it.
     #    ScopeSnapshot is written here and never updated: it is the evidence for
