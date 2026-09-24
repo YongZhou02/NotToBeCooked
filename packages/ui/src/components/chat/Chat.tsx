@@ -7,7 +7,7 @@ import {
 import { ChatInput, type ChatFile } from "./ChatInput"
 import { History, type ChatSessionItem } from "./History"
 import { CitationDrawer } from "./CitationDrawer"
-import { Plus, Clock, Trash2, GripVertical } from "lucide-react"
+import { Plus, Clock, Trash2, GripVertical, X } from "lucide-react"
 
 export type { CitationItem, ChatMessage, ChatFile, ChatSessionItem }
 
@@ -17,6 +17,7 @@ export interface ChatProps {
   files?: ChatFile[]
   categories?: string[]
   quickPrompts?: string[]
+  scopeFile?: ChatFile | null
 
   // Controlled or uncontrolled message state
   messages?: ChatMessage[]
@@ -43,6 +44,7 @@ export interface ChatProps {
   onNewChat?: () => void
   onClearChat?: () => void
   onOpenDocument?: (fileId: string, page: number) => void
+  onClearFileScope?: () => void
 
   className?: string
 }
@@ -67,6 +69,7 @@ export const Chat: React.FC<ChatProps> = ({
     "Tutorials & PYQs",
   ],
   quickPrompts = ["Condense", "Quiz me", "Simplify", "Storyboard"],
+  scopeFile = null,
   messages: controlledMessages,
   initialMessages,
   sessions = [],
@@ -80,6 +83,7 @@ export const Chat: React.FC<ChatProps> = ({
   onNewChat,
   onClearChat,
   onOpenDocument,
+  onClearFileScope,
   className = "",
 }) => {
   // Horizontal Resizing State
@@ -347,6 +351,24 @@ export const Chat: React.FC<ChatProps> = ({
             </button>
           </div>
         </div>
+
+        {scopeFile && (
+          <div className="flex flex-none items-center gap-1.5 border-b border-(--line-soft,#1B2530) px-3 py-2 text-[11px] text-(--tx-dim,#8B98A7)">
+            <span className="shrink-0">Asking:</span>
+            <span className="min-w-0 flex-1 truncate font-medium text-(--tx,#DCE3EA)">
+              {scopeFile.name}
+            </span>
+            <button
+              type="button"
+              onClick={onClearFileScope}
+              aria-label={"Ask the whole course instead of " + scopeFile.name}
+              title="Ask the whole course"
+              className="flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded text-(--tx-dim,#8B98A7) hover:bg-(--bg-hover,#213040) hover:text-(--tx,#DCE3EA)"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* History Drawer Overlay */}
         <History

@@ -141,7 +141,7 @@ export const useChatSession = (courseId: string | null, files?: FilesInput) => {
       // Parse @[Filename] mentions from text and resolve to file_ids
       const mentionResult = extractMentionsAndResolve(text, fileList)
       const effectiveFileIds =
-        fileIds ?? mentionResult.fileIds ?? scope.file_ids ?? null
+        mentionResult.fileIds ?? fileIds ?? scope.file_ids ?? null
 
       return api.chat.query({
         question: mentionResult.cleanQuestion || text,
@@ -156,7 +156,7 @@ export const useChatSession = (courseId: string | null, files?: FilesInput) => {
       const scope = ragScope(useWorkspace.getState())
       const mentionResult = extractMentionsAndResolve(text, fileList)
       const effectiveFileIds =
-        fileIds ?? mentionResult.fileIds ?? scope.file_ids ?? null
+        mentionResult.fileIds ?? fileIds ?? scope.file_ids ?? null
       const currentConvId = activeConversationId
 
       if (currentConvId) {

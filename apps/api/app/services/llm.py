@@ -21,7 +21,10 @@ from pydantic import BaseModel, Field
 
 from app.core.config import settings
 from app.schemas.rag import RetrievedChunk
-from app.services.prompt import SYSTEM_INSTRUCTION
+from app.services.prompt import (
+    DOCUMENT_SUMMARY_INSTRUCTION,
+    SYSTEM_INSTRUCTION,
+)
 
 
 class LlmCitation(BaseModel):
@@ -129,6 +132,7 @@ async def generate_answer(
     question: str,
     context: str,
     sources: list[RetrievedChunk],
+    document_summary: bool = False,
 ) -> LlmAnswer:
     """Ask the model one question against one rendered source list.
 
@@ -156,10 +160,15 @@ async def generate_answer(
     # The instruction goes in system_instruction rather than being pasted on top
     # of the question. Prepending it would put the rules inside the same turn as
     # user-supplied text, where "ignore the above" is one sentence away.
+    system_instruction = SYSTEM_INSTRUCTION
+
+    if document_summary:
+        system_instruction += "\n\n" + DOCUMENT_SUMMARY_INSTRUCTION
     payload = {
-        "system_instruction": {"parts": [{"text": SYSTEM_INSTRUCTION}]},
+        "system_instruction": {"parts": [{"text": system_instruction}]},
         "contents": [{"parts": [{"text": f"SOURCES\n\n{context}\n\nQUESTION\n\n{question}"}]}],
         "generationConfig": {
+            "temperature": 0,
             "responseMimeType": "application/json",
             "responseSchema": _RESPONSE_SCHEMA,
         },

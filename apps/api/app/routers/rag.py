@@ -335,11 +335,25 @@ async def query(
     if not chunks and settings.LLM_FAKE_MODE and rag_request.intent == RagIntent.QUESTION:
         chunks = _placeholder_sources(rag_request, conversation.course_id)
 
-    context, selected = build_context(chunks)
+    # A normal question needs only the strongest few search results. A document
+    # summary is different: `_retrieve_document_chunks` deliberately returns
+    # the complete active ingestion run in document order, so truncating it to
+    # the normal source cap would summarize only the opening pages.
+    context, selected = build_context(
+        chunks,
+        max_sources=None if rag_request.intent == RagIntent.DOCUMENT_SUMMARY else 8,
+    )
 
     # 4. Generate.
     try:
-        draft = await generate_answer(question=clean_rag_query, context=context, sources=selected)
+        draft = await generate_answer(
+        question=clean_rag_query,
+        context=context,
+        sources=selected,
+        document_summary=(
+            rag_request.intent == RagIntent.DOCUMENT_SUMMARY
+        ),
+    )
     except Exception:
         # There is no retry. The user is already waiting on a chat turn and a
         # second timeout helps nobody; the traceback is for us, the refusal is

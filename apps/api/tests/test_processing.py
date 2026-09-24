@@ -31,6 +31,58 @@ def test_extract_text_keeps_text_without_page_provenance():
     ]
 
 
+def test_extract_text_keeps_body_text_and_list_items_only():
+    document = SimpleNamespace(
+        texts=[
+            SimpleNamespace(
+                label=SimpleNamespace(value="section_header"),
+                content_layer=SimpleNamespace(value="body"),
+                text="Conflict",
+                prov=[SimpleNamespace(page_no=3)],
+            ),
+            SimpleNamespace(
+                label=SimpleNamespace(value="text"),
+                content_layer=SimpleNamespace(value="body"),
+                text="Conflict is a perception.",
+                prov=[SimpleNamespace(page_no=3)],
+            ),
+            SimpleNamespace(
+                label=SimpleNamespace(value="list_item"),
+                content_layer=SimpleNamespace(value="body"),
+                text="Interaction is required for conflict.",
+                prov=[SimpleNamespace(page_no=4)],
+            ),
+            SimpleNamespace(
+                label=SimpleNamespace(value="text"),
+                content_layer=SimpleNamespace(value="furniture"),
+                text="SCHOOL OF COMPUTER SCIENCES",
+                prov=[SimpleNamespace(page_no=4)],
+            ),
+            SimpleNamespace(
+                label=SimpleNamespace(value="page_footer"),
+                content_layer=SimpleNamespace(value="body"),
+                text="Page 4",
+                prov=[SimpleNamespace(page_no=4)],
+            ),
+        ]
+    )
+
+    assert extract_text(document) == [
+        {
+            "heading": "Conflict",
+            "page_start": 3,
+            "page_end": 3,
+            "content": "Conflict is a perception.",
+        },
+        {
+            "heading": "Conflict",
+            "page_start": 4,
+            "page_end": 4,
+            "content": "Interaction is required for conflict.",
+        },
+    ]
+
+
 def make_chunk_create(file_id: UUID) -> ChunkCreate:
 
     test = ChunkCreate(

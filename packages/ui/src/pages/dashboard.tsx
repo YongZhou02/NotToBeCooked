@@ -19,6 +19,7 @@ import type { MockCourse, MockDocumentFile } from "../types/course"
 import { useExplorerData } from "../hooks/useExplorerData"
 import { useExplorerMutations } from "../hooks/useExplorerMutations"
 import { toUiCourse, toUiFiles } from "../lib/explorerData"
+import { classifyChatRequest } from "../lib/chatRequest"
 
 export interface DashboardPageProps {
   platform?: "web" | "tauri"
@@ -134,6 +135,11 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [isWorkspaceFullscreen, setIsWorkspaceFullscreen] =
     useState<boolean>(false)
+  const [dismissedChatScopeFileId, setDismissedChatScopeFileId] = useState<
+    string | null
+  >(null)
+  const chatScopeFileId =
+    activeFileId === dismissedChatScopeFileId ? null : activeFileId
 
   // Modals state (Roadmap & Upload)
   const [isRoadmapOpen, setIsRoadmapOpen] = useState(false)
@@ -329,20 +335,19 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
 
   const handleSendMessage = async (text: string) => {
     try {
-      const normalizedText = text.trim().toLowerCase()
-
-      const isDocumentSummary =
-        normalizedText === "condense" ||
-        normalizedText === "summarize this document" ||
-        normalizedText === "summarise this document"
-
-      if (isDocumentSummary && !activeFileId) {
-        throw new Error("Open a document before requesting a summary")
+      const chatRequest = classifyChatRequest(text)
+      if (chatRequest.scopesCurrentDocument && !activeFileId) {
+        throw new Error("Open a document before referring to this file")
       }
 
       const res = await sendMessage(text, {
-        intent: isDocumentSummary ? "document_summary" : "question",
-        fileIds: isDocumentSummary && activeFileId ? [activeFileId] : undefined,
+        intent: chatRequest.intent,
+        fileIds:
+          chatRequest.scopesCurrentDocument && activeFileId
+            ? [activeFileId]
+            : chatScopeFileId
+              ? [chatScopeFileId]
+              : undefined,
       })
       if (res && res.answer) {
         return {
@@ -610,6 +615,9 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
               filesCount={courseFiles.length}
               files={courseFiles}
               categories={courseCategories}
+              scopeFile={
+                courseFiles.find((file) => file.id === chatScopeFileId) ?? null
+              }
               messages={messages}
               sessions={sessions}
               activeSessionId={activeConversationId}
@@ -620,6 +628,7 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
               onNewChat={() => startNewChat()}
               onOpenDocument={handleOpenDocumentFromChat}
               onCiteClick={handleCitationClick}
+              onClearFileScope={() => setDismissedChatScopeFileId(activeFileId)}
             />
           )}
         </div>
