@@ -352,6 +352,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/courses/{course_id}/milestones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Milestones */
+        get: operations["list_milestones_courses__course_id__milestones_get"];
+        put?: never;
+        /** Create Milestone */
+        post: operations["create_milestone_courses__course_id__milestones_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/courses/{course_id}/milestones/{milestone_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Milestone */
+        get: operations["get_milestone_courses__course_id__milestones__milestone_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Milestone */
+        delete: operations["delete_milestone_courses__course_id__milestones__milestone_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Milestone */
+        patch: operations["update_milestone_courses__course_id__milestones__milestone_id__patch"];
+        trace?: never;
+    };
     "/": {
         parameters: {
             query?: never;
@@ -778,6 +815,86 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** MilestoneCreate */
+        MilestoneCreate: {
+            /** Title */
+            title: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /**
+             * Position
+             * @default 0
+             */
+            position: number;
+            /** Week */
+            week?: number | null;
+            /** Due Date */
+            due_date?: string | null;
+            /** File Ids */
+            file_ids?: string[];
+        };
+        /** MilestoneRead */
+        MilestoneRead: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /** Position */
+            position: number;
+            /** Title */
+            title: string;
+            /** Description */
+            description: string;
+            /** Week */
+            week: number | null;
+            status: components["schemas"]["MilestoneStatus"];
+            /** Due Date */
+            due_date: string | null;
+            /** File Ids */
+            file_ids: string[];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * MilestoneStatus
+         * @description The three states US-16 counts. `StrEnum`, matching every other status
+         *     enum here, so that the member and the string it stores compare equal.
+         * @enum {string}
+         */
+        MilestoneStatus: "not_started" | "in_progress" | "completed";
+        /** MilestoneUpdate */
+        MilestoneUpdate: {
+            /** Title */
+            title?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Position */
+            position?: number | null;
+            /** Week */
+            week?: number | null;
+            status?: components["schemas"]["MilestoneStatus"] | null;
+            /** Due Date */
+            due_date?: string | null;
+            /** File Ids */
+            file_ids?: string[] | null;
         };
         /**
          * RagAnswer
@@ -1797,6 +1914,170 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FileRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_milestones_courses__course_id__milestones_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MilestoneRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_milestone_courses__course_id__milestones_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MilestoneCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MilestoneRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_milestone_courses__course_id__milestones__milestone_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                milestone_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MilestoneRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_milestone_courses__course_id__milestones__milestone_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                milestone_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_milestone_courses__course_id__milestones__milestone_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                milestone_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MilestoneUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MilestoneRead"];
                 };
             };
             /** @description Validation Error */

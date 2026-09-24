@@ -13,13 +13,13 @@ import pytest
 import pytest_asyncio
 from fastapi import UploadFile
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlmodel import SQLModel, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 import app.models  # noqa: F401  -- registers every table before create_all
 from app.core.config import settings
-from app.db.database import get_session
+from app.db.database import get_session, make_engine
 from app.dependencies.auth import get_current_user
 from app.main import app
 from app.schemas.course import Course, CourseStatus
@@ -45,7 +45,7 @@ async def ctx(tmp_path, monkeypatch, test_database_url):
     deleting the developer's work with no warning. See tests/conftest.py.
     """
     monkeypatch.setattr(settings, "STORAGE_DIR", tmp_path)
-    engine = create_async_engine(test_database_url)
+    engine = make_engine(test_database_url)
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.drop_all)
         await conn.run_sync(SQLModel.metadata.create_all)

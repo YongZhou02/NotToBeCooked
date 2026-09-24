@@ -44,7 +44,11 @@ what makes it live again.** The long-form Summary with measurements stays at the
 
 | # | One line | State | Owner / trigger |
 |---|---|---|---|
-| **R34** | Replacing a file's bytes leaves the old chunks retrievable, under the new filename | **Open**, raised 15 Sep | AI-2 — deactivate the old run inside the PUT. **Due 22 Sep** |
+| **R38** | `POST /files/{file_id}/ingest` has no test at all, and r81 is about to wire it | **Open, raised 22 Sep** — found while checking what `origin/bao-sheng` still holds | The two tests that covered it live only on a branch nobody has merged. **Trigger: r81, 23–30 Sep** |
+| **R37** | The zero-chunk path tells the user their PDF has no selectable text, which for a lecture deck is the wrong culprit | **Open, raised 22 Sep** — the original claim that zero chunks reach `READY` was wrong and is corrected below | Whoever fixes R36 — the message and the cause move together |
+| **R36** | Real lecture slides produce almost no chunks — not because the text is missing, but because `extract_text` discards the label the text carries | **Open, raised 22 Sep** — cause measured 22 Sep on the CPC251 deck; the fix is unowned | Whoever takes `ingestion.py:16-43`. **Trigger: the day anyone uploads a real lecture deck** |
+| **R35** | A JSONB column typed `list[UUID]` could not be written at all — every `/rag/query` carrying an @-mention raised | **Closed 21 Sep** — found while building r51, fixed the same day (`json_serializer` on the engine) | Reopens the day someone builds an engine with `create_async_engine` instead of `make_engine` |
+| **R34** | Replacing a file's bytes leaves the old chunks retrievable, under the new filename | **Closed 22 Sep** — the fix is merged (`9878edd`, into `dev` as `631a7e0`). **No test proves it: the regression test is r82, 1–3 Oct** | Reopens if r82 slips. Until it lands, this is closed on a reading of the code, not on a measurement |
 | **R30** | A corrected re-upload becomes a second FILE row, both retrievable | **Closed 15 Sep** — the PUT landed (`02e8647`) | Its remaining half is now R34 |
 | **R27** | Deleting a FILE row leaves its bytes on disk | **Deferred, with a trigger** | Whoever writes the delete-file endpoint. **Trigger: the day it lands** |
 | **R5b** | Cross-file `embedding_model` filter | **Deferred, with a trigger** | Whoever changes `settings.MODEL_TYPE` without re-indexing every chunk |
@@ -971,6 +975,268 @@ Note the shape it shares with R33: `PUT .../content` has tests, they pass, and
 none of them could have caught this — a test of the PUT asserts what the PUT
 writes, and the damage is in what a *different* endpoint reads.
 
+**Closed 22 September.** AI-2 pushed the fix to `fix/file-replace-ingestion-run`
+on 17 September (`9878edd`, nine lines in `routers/files.py` plus five test
+assertions) and merged it into `dev` on 22 September as `631a7e0`. It sat unmerged
+and unnoticed for five days; the Lead read it as an old commit on 20 September.
+
+**It is closed on a reading of the code, not on a measurement.** The five new
+assertions (`tests/test_file_routing.py:862-866`) check that an UPDATE setting
+`is_active = False` was composed against `ingestion_run`. They do not check that a
+replaced file's old chunk stops coming back from retrieval, which is what this
+finding is about — the R33 shape once more. The regression test that would close it
+on evidence is **r82, AI-2, 1–3 Oct**. If r82 slips, reopen this.
+
+---
+
+### R35 — a JSONB column typed `list[UUID]` could not be written at all
+
+`MESSAGE.mentioned_file_ids` is declared `list[UUID] | None` over a JSONB column.
+A JSONB column is written by calling `json.dumps` on the Python value, and
+`json.dumps` has never accepted a `UUID`. So the column committed while it was
+`None` or `[]`, and raised the moment it held a single id.
+
+**Measured 21 September 2026** on the test database, against
+`PGDialect_asyncpg` — the dialect this project runs:
+
+```
+mentioned_file_ids = None      OK
+mentioned_file_ids = []        OK
+mentioned_file_ids = [UUID]    StatementError: (builtins.TypeError)
+                               Object of type UUID is not JSON serializable
+```
+
+**What a user sees.** They type `@[Lecture 1.pdf]` in the chat box and the
+request fails. `useChatSession.tsx:143` builds `file_ids` from the resolved
+mentions, falls back to the workspace scope, and sends it; `rag.py:260` puts
+that list straight into the user turn, and the `await session.commit()` a few
+lines later raises. **Not a wrong answer — a 500.** Selecting files in the
+workspace does the same thing, because `ragScope` fills the same field.
+
+**Two lines in the same constructor got it right.** `rag.py:337`:
+
+```python
+citations=[c.model_dump(mode="json") for c in citations],      # converted
+mentioned_file_ids=request.file_ids,                           # not converted
+scope_snapshot=snapshot.model_dump(mode="json"),               # converted
+```
+
+The pattern existed. It was applied to two of three fields.
+
+**Why nothing caught it.** pyright cannot: `list[UUID]` is exactly what the
+column claims to hold, and the error happens inside the driver. The tests
+cannot: the ones covering `/rag/query` replace the session with a mock, and a
+mock serialises nothing. **This is the third finding of that shape — R33, R34,
+and now this.** Each time the test asserted what the handler intended and the
+damage was one layer down.
+
+**Fix.** `json_serializer` on the engine, so that it covers every JSON and JSONB
+column rather than the two that happen to be known today:
+
+```python
+def _json_default(value: Any) -> str:
+    if isinstance(value, UUID):
+        return str(value)
+    raise TypeError(f"Object of type {type(value).__name__} is not JSON serializable")
+```
+
+Deliberately not `default=str`: that would make every unserialisable object
+succeed, so a model instance left in a payload by mistake would be stored as
+`"<Course object at 0x7f...>"` and nobody would find out. Anything that is not
+a `UUID` still raises exactly as before.
+
+Reading the column back gives strings, and every response is built through a
+Read model declaring `list[UUID]` — `MessageRead`, `MilestoneRead` — so pydantic
+converts them back and the string form never leaves the database layer.
+
+**The second half of the fix is the part that keeps it fixed.** Four test
+fixtures built their own engines with a bare `create_async_engine(url)`, which
+would not have carried the serializer — a test on such an engine passes on code
+that fails in production, which is how this stayed hidden. Engines are now built
+through one constructor, `app.db.database.make_engine`, and no call to
+`create_async_engine` remains outside it.
+
+Covered by `tests/test_jsonb_uuid.py`. Commenting out the one keyword argument
+turns that test red with the exact `StatementError` above, which is how the test
+was checked to have teeth.
+
+---
+
+### R36 — real lecture slides produce almost no chunks
+
+Raised 22 September by AI-2 at the meeting: the corpus r52 was measured on
+(`apps/api/evaluation/controlled_retrieval_evaluation_corpus.pdf`) was generated
+for the purpose and extracts cleanly, while last semester's CPC251 lecture slides
+produce almost nothing. AI-2 attributed it to image-only PDFs; AI-1 suggested a
+VLM. **The symptom is real. Both explanations are wrong for this file.**
+
+Measured 22 September on `1 - Deep Learning_v2.pdf`, one of sixteen CPC251 decks:
+
+```
+Creator                 Acrobat PDFMaker 25 for PowerPoint
+Embedded fonts          13      (Calibri, Arial, CambriaMath, CourierNew, ...)
+Tagged                  yes
+Pages                   59
+pdftotext characters    20,414
+Pages with no text      0
+```
+
+Three other decks in the same folder behave the same way: Reinforcement Learning
+83 pages / 29,609 characters, SVM 41 / 10,529, Fuzzy Sets 38 / 12,992. These are
+PowerPoint exports, not scans. **There is nothing wrong with the text layer, and
+OCR is not involved** — docling 2.119.0 defaults to `do_ocr=True` with
+`ocr engine = auto` in any case.
+
+**What the text actually is.** Page 8, line by line, as `pdftotext` returns it:
+
+```
+'Kami Memimpin | We Lead'                            <- page_header
+'Why use Deep Learning?'                             <- the slide title
+'* Works tremendously well with more data.'          <- list_item
+'* Automatic feature extraction in deep learning.'   <- list_item
+'* Text'                                             <- list_item
+'* Images (raw pixels)'                              <- list_item
+'* Sounds tracks'                                    <- list_item
+'* Etc.'                                             <- list_item
+'* Able to learn non-linear relationships ...'       <- list_item
+'20/05/2025   (c) MNAW, USM, 2025'                   <- page_footer
+```
+
+Not one line on that page is a paragraph. Over the whole deck, of 429 non-empty
+lines, 152 carry a bullet glyph (`\u2022` or Wingdings `\uf0a7`) and 116 are the
+header/footer boilerplate that repeats on all 59 pages. **Strip the boilerplate
+and the slide title, and 32 of the 59 pages contain nothing but bullets.** Most of
+what remains on the other 27 is wrapped continuations of those bullets, title-slide
+lines, formulas and image captions.
+
+**Why that empties the pipeline.** `apps/api/app/services/ingestion.py:16-43`:
+
+```python
+if document_item.label.value == "section_header":
+    current_heading = document_item.text      # stored, never emitted
+elif document_item.label.value == "text":
+    ...
+    extracted_items.append(item)              # the only path that emits
+```
+
+Two of `DocItemLabel`'s thirty members survive the loop, and **one of the two
+emits nothing** — a `section_header` only sets the heading for a later `text`
+item. A page made of a heading and bullets therefore produces an empty
+`extracted_items`, and `create_chunk` turns an empty list into zero chunks.
+`ingestion.py:25` separately drops any item with no `prov`.
+
+Discarded along with `list_item`: `title`, `paragraph`, `table`, `caption`,
+`code`, `formula`, `page_header`, `page_footer` and twenty more.
+
+**Not measured:** `Counter(t.label.value for t in document.texts)` over this PDF.
+docling will not run on this machine (`ImportError: libgthread-2.0.so.0`, out of
+`cv2`), so the labels named above are read off `DocItemLabel` and matched to the
+extracted text by hand, not printed by docling. That count would confirm the
+mapping; **it is no longer what decides the cause**, because the question it was
+going to answer — does the text come out at all — now has an answer.
+
+**A VLM is a separate question.** The deck carries 409 images, only two of which
+are full-bleed (the title and closing backgrounds); the rest are diagrams whose
+content exists nowhere else. Reading those is worth discussing on its own terms.
+It is not why the chunk count is zero.
+
+**Bearing on r52 and r53.** Decision 1 of 22 September read the two
+configurations' 20/20 Hit@5 as a ceiling effect and moved r53 to Recall@1 and MRR.
+If the evaluation corpus is prose while the real material is bullets, the corpus is
+not merely easy, it is a different shape of document — and a sharper metric on it
+still measures the wrong thing. That does not change what r53 does this week; it
+changes what its number is worth.
+
+**Unowned.** The fix is a change to which labels `extract_text` accepts, plus a
+decision about what a bullet list should become: one chunk per bullet is too
+small to retrieve well, and a whole slide as one chunk loses the heading
+structure. That is a design call, not a one-line edit, and it belongs in a row
+nobody has opened yet. See also **R37**: the message a user gets when this
+happens blames their PDF, and for this file that is the wrong culprit.
+
+---
+
+### R37 — the zero-chunk path names the wrong culprit
+
+**This entry was first written as "a file that yields zero chunks still reaches
+`READY`, with no error". That was wrong.** It was written from
+`files.py:288` alone, without following the exception path that reaches it. The
+guard exists and is thorough:
+
+```python
+# app/services/processing.py:53
+if not chunk_creates:
+    raise NoExtractableContentError("No extractable content found")
+
+# app/services/processing.py:110  -- the run row
+ingestion_run.status = IngestionRunStatus.FAILED
+ingestion_run.error_message = "No extractable content found"
+
+# app/routers/files.py:241  -- the file row
+file_row.status = FileStatus.FAILED
+file_row.error_message = (
+    "This PDF has no selectable text (usually a scan or images only)."
+)
+```
+
+Both rows are marked, the run carries a completion time, and
+`tests/test_processing.py:177` asserts the raise. A file that produces no chunks
+reaches `FAILED`, not `READY`, and the UI can say so.
+
+**What is actually wrong is the message.** It does not report a symptom, it
+asserts a cause — *"usually a scan or images only"* — and for the case measured
+in R36 that cause is false. `1 - Deep Learning_v2.pdf` has 13 embedded fonts and
+20,414 characters of selectable text across 59 pages. The text is there; this
+codebase discards it because it is labelled `list_item`. A user reading that
+message would go and re-scan or re-export a file that was never the problem, and
+the one line that could have pointed at `ingestion.py` instead points away from it.
+
+**Proposed:** say what was observed and not why. "No indexable text was extracted
+from this file" is true in both cases. If a cause is worth guessing at, it belongs
+in the log beside the chunk count, not in the message the reader gets.
+
+**This moves with R36**, not separately: the same change that stops discarding
+bullets decides how often this message is seen at all.
+
+---
+
+### R38 — the ingest endpoint has no test
+
+Found 22 September while checking what would be lost by deleting
+`origin/bao-sheng`. Two commits exist only on that branch (`f6bb273`, `fa63696`,
+both AI-2, 31 August), and the file they carry, `apps/api/tests/test_files.py`,
+has never existed in `dev`'s history.
+
+Its replacement on `dev` is `test_ingestion_runs.py` (`1d9bc54`, AI-2,
+1 September). The two files are the same size and test different endpoints:
+
+```
+test_files.py            (branch only)     test_ingestion_runs.py   (dev)
+  ingest_file 202 + body shape               get_ingestion_run own run
+  ingest_file 404                            get_ingestion_run 404
+  get_ingestion_run 401                      get_ingestion_run 401
+```
+
+**`POST /files/{file_id}/ingest` has no test anywhere on `dev`.** No test file
+issues a request to that path; the only match for "ingest" in
+`test_file_routing.py` is the `ingestion_run` table name inside R34's assertion.
+`test_processing.py` covers `process_file` and `run_ingestion`, the service layer
+below, not the route.
+
+The lost coverage was specific: a 202, the response body's `file_id`,
+`ingestion_run_id`, `status = "queued"`, `chunk_count = None` and `error = None`,
+that the session executed, added, committed and refreshed, and a 404 for a file
+that is not there.
+
+**Why it matters now.** `POST /files/{file_id}/ingest` is one of the six calls on
+the Usable RAG path, and r81 wires it between 23 and 30 September. It is the
+one endpoint on that path with no test behind it.
+
+**The branch is not to be deleted until this is resolved** — that file is the
+only copy of those two tests. Recovering them is `git show
+fa63696:apps/api/tests/test_files.py`, not a merge; they were written against the
+August shape of the router and will need reworking.
+
 ---
 
 ## Not a defect
@@ -1342,7 +1608,7 @@ SQLAlchemy's default, not anybody's mistake.
 | R31 | Uploaded files live in the container's writable layer | **Fixed 9 Sep — a named volume on the `api` service.** Verified against the real stack: a file written in the container survived `docker compose rm -sf` and a rebuild, contents intact, so a redeploy on the r45 host now keeps the uploads. A healthcheck went in beside it — `api` had none while `db` did, so `ps` printed `Up` through the twenty-odd seconds `init_db()` spends reflecting under `echo=True`, and Docker binds the port at container start rather than when uvicorn listens. In that window a request is accepted and dropped: `curl` says `(52) Empty reply`, a browser's `fetch` rejects with a `TypeError` that serialises to `{}`, and the whole outage reads as a frontend defect — which is exactly how it presented on 9 Sep. Background: `docker-compose.yml` gives `db` a named volume and `api` none, while `STORAGE_DIR` resolves to `/app/storage` inside the image — so every uploaded blob sits in the writable layer Docker deletes with the container. The FILE rows are in the `db` volume and survive, so after a redeploy the browser lists every file and each resolves to a path that is gone. **Nothing raises at redeploy time**; it surfaces later, one read at a time. Measured 9 Sep on Docker 29.4.0-ce: same create/write/destroy/recreate cycle, `No such file or directory` without a volume and the file intact with one. **Opposite of R27** — R27 is bytes outliving their row, R31 is rows outliving their bytes; both are `storage_key` naming an object nothing owns. **Trigger: the first `docker compose down && up` on a host holding real uploads** (the r45 OCI instance). Fix is one volume on `api`. Goes with whoever does the deployment |
 | R32 | Moving a file between courses is not supported | **Closed 8 Sep — Decision 5, option A.** The `409` from `PATCH /files/{file_id}` is the final answer, not a placeholder. Measured 9 Sep on the development database: with one ingested chunk present, **both** a `course_id`-only move and a `folder_id`+`course_id` move raise `ForeignKeyViolationError` on `fk_chunk_file_course_agree` — the constraint declares `ON DELETE CASCADE` and nothing for `ON UPDATE`, whose default is `NO ACTION`. So the router's guard is not what prevents the move; it is what turns an unhandled violation into a readable answer. Supporting it would mean deciding whether chunks move or are re-ingested, which changes what retrieval scope means while retrieval is unfinished (r48). No user story asks for it. Reopen only if one does |
 | R33 | What a mocked session cannot test | **Recorded 9 Sep, not a defect.** `AsyncMock` has no foreign key, CHECK, partial unique index, `ON DELETE` behaviour, column default or timezone coercion — it accepts every correctly-shaped value. Four findings survived a green suite this way: R8, R25, the cross-course move (6 Sep) and R28. **The sharpest is the third: the passing test asserted the broken behaviour**, because a mock cannot disagree with the code under test. Rule: anything the database enforces is tested against a database, seeded inside a transaction that is rolled back; call order, branching and response shape stay on mocks |
-| R34 | Replacing a file's bytes leaves the old chunks retrievable | **Open, raised 15 Sep.** `PUT /files/{file_id}/content` writes `status = 'uploaded'` and `indexed_at = NULL` and never touches `IngestionRun`; the code that retires a previous run lives in `_ingest_in_background` (`routers/files.py:282-286`), reached only by `POST .../ingest`. Retrieval filters on `IngestionRun.is_active` alone (`vector_ops.py:74`, `:111`) and reads neither field that the PUT wrote. Measured 15 Sep on the test database: the replaced file's old chunk still comes back from `_full_text_search` after the replacement, and stops coming back the moment the old run is deactivated. The user-visible shape is an answer quoting a sentence they just deleted, cited to the right filename and the right `file_id`. **AI-2, due 22 Sep** — the other half of r79. The instruction that caused it (「旧版自己会退场」, 8 Sep todo list) was the Lead's |
+| R34 | Replacing a file's bytes leaves the old chunks retrievable | **Closed 22 Sep — `9878edd`, merged into `dev` as `631a7e0`. Closed on a reading of the code; the regression test is r82, 1–3 Oct.** Originally: **open, raised 15 Sep.** `PUT /files/{file_id}/content` writes `status = 'uploaded'` and `indexed_at = NULL` and never touches `IngestionRun`; the code that retires a previous run lives in `_ingest_in_background` (`routers/files.py:282-286`), reached only by `POST .../ingest`. Retrieval filters on `IngestionRun.is_active` alone (`vector_ops.py:74`, `:111`) and reads neither field that the PUT wrote. Measured 15 Sep on the test database: the replaced file's old chunk still comes back from `_full_text_search` after the replacement, and stops coming back the moment the old run is deactivated. The user-visible shape is an answer quoting a sentence they just deleted, cited to the right filename and the right `file_id`. **AI-2, due 22 Sep** — the other half of r79. The instruction that caused it (「旧版自己会退场」, 8 Sep todo list) was the Lead's |
 | R8 | `is_active` needs a partial unique index | **Done 22 Aug** (`efda7a3`) — `ix_ingestion_run_one_active` UNIQUE on `(file_id) WHERE is_active`. Verified from empty: a second active run raises `UniqueViolation`, further inactive runs are accepted |
 | R17 | `UNIQUE (user_id, code, year, sem)` | **Done 22 Aug** — declared on `Course.__table_args__` and created in the initial migration as `uq_course_user_code_year_sem`. Verified from an empty database: a duplicate raises `UniqueViolationError`, while a second semester, a second year and a second user all insert. |
 | R18 | `UNIQUE (ingestion_run_id, chunk_index)` | **Done 22 Aug** (`efda7a3`) — `uq_chunk_run_index`. Verified: a second chunk 0 in one run is rejected; chunk 0 in a re-index run is accepted |

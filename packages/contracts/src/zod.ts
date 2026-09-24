@@ -35,6 +35,10 @@ const CourseUpdate = z.object({ code: z.union([z.string(), z.null()]), name: z.u
 const FolderCreate = z.object({ name: z.string(), parent_folder_id: z.union([z.string(), z.null()]).optional(), sort_order: z.number().int().optional().default(0) }).passthrough();
 const FolderRead = z.object({ id: z.string().uuid(), course_id: z.string().uuid(), parent_folder_id: z.union([z.string(), z.null()]), name: z.string(), is_root: z.boolean(), sort_order: z.number().int(), created_at: z.string().datetime({ offset: true }) }).passthrough();
 const FolderUpdate = z.object({ name: z.union([z.string(), z.null()]), sort_order: z.union([z.number(), z.null()]) }).partial().passthrough();
+const MilestoneCreate = z.object({ title: z.string(), description: z.string().optional().default(""), position: z.number().int().optional().default(0), week: z.union([z.number(), z.null()]).optional(), due_date: z.union([z.string(), z.null()]).optional(), file_ids: z.array(z.string().uuid()).optional() }).passthrough();
+const MilestoneStatus = z.enum(["not_started", "in_progress", "completed"]);
+const MilestoneRead = z.object({ id: z.string().uuid(), course_id: z.string().uuid(), position: z.number().int(), title: z.string(), description: z.string(), week: z.union([z.number(), z.null()]), status: MilestoneStatus, due_date: z.union([z.string(), z.null()]), file_ids: z.array(z.string().uuid()), created_at: z.string().datetime({ offset: true }), updated_at: z.string().datetime({ offset: true }) }).passthrough();
+const MilestoneUpdate = z.object({ title: z.union([z.string(), z.null()]), description: z.union([z.string(), z.null()]), position: z.union([z.number(), z.null()]), week: z.union([z.number(), z.null()]), status: z.union([MilestoneStatus, z.null()]), due_date: z.union([z.string(), z.null()]), file_ids: z.union([z.array(z.string().uuid()), z.null()]) }).partial().passthrough();
 
 export const schemas = {
 	UserRead,
@@ -68,6 +72,10 @@ export const schemas = {
 	FolderCreate,
 	FolderRead,
 	FolderUpdate,
+	MilestoneCreate,
+	MilestoneStatus,
+	MilestoneRead,
+	MilestoneUpdate,
 };
 
 const endpoints = makeApi([
@@ -483,6 +491,136 @@ const endpoints = makeApi([
 			},
 			{
 				name: "folder_id",
+				type: "Path",
+				schema: z.string().uuid()
+			},
+		],
+		response: z.void(),
+		errors: [
+			{
+				status: 422,
+				description: `Validation Error`,
+				schema: HTTPValidationError
+			},
+		]
+	},
+	{
+		method: "post",
+		path: "/courses/:course_id/milestones",
+		alias: "create_milestone_courses__course_id__milestones_post",
+		requestFormat: "json",
+		parameters: [
+			{
+				name: "body",
+				type: "Body",
+				schema: MilestoneCreate
+			},
+			{
+				name: "course_id",
+				type: "Path",
+				schema: z.string().uuid()
+			},
+		],
+		response: MilestoneRead,
+		errors: [
+			{
+				status: 422,
+				description: `Validation Error`,
+				schema: HTTPValidationError
+			},
+		]
+	},
+	{
+		method: "get",
+		path: "/courses/:course_id/milestones",
+		alias: "list_milestones_courses__course_id__milestones_get",
+		requestFormat: "json",
+		parameters: [
+			{
+				name: "course_id",
+				type: "Path",
+				schema: z.string().uuid()
+			},
+		],
+		response: z.array(MilestoneRead),
+		errors: [
+			{
+				status: 422,
+				description: `Validation Error`,
+				schema: HTTPValidationError
+			},
+		]
+	},
+	{
+		method: "get",
+		path: "/courses/:course_id/milestones/:milestone_id",
+		alias: "get_milestone_courses__course_id__milestones__milestone_id__get",
+		requestFormat: "json",
+		parameters: [
+			{
+				name: "course_id",
+				type: "Path",
+				schema: z.string().uuid()
+			},
+			{
+				name: "milestone_id",
+				type: "Path",
+				schema: z.string().uuid()
+			},
+		],
+		response: MilestoneRead,
+		errors: [
+			{
+				status: 422,
+				description: `Validation Error`,
+				schema: HTTPValidationError
+			},
+		]
+	},
+	{
+		method: "patch",
+		path: "/courses/:course_id/milestones/:milestone_id",
+		alias: "update_milestone_courses__course_id__milestones__milestone_id__patch",
+		requestFormat: "json",
+		parameters: [
+			{
+				name: "body",
+				type: "Body",
+				schema: MilestoneUpdate
+			},
+			{
+				name: "course_id",
+				type: "Path",
+				schema: z.string().uuid()
+			},
+			{
+				name: "milestone_id",
+				type: "Path",
+				schema: z.string().uuid()
+			},
+		],
+		response: MilestoneRead,
+		errors: [
+			{
+				status: 422,
+				description: `Validation Error`,
+				schema: HTTPValidationError
+			},
+		]
+	},
+	{
+		method: "delete",
+		path: "/courses/:course_id/milestones/:milestone_id",
+		alias: "delete_milestone_courses__course_id__milestones__milestone_id__delete",
+		requestFormat: "json",
+		parameters: [
+			{
+				name: "course_id",
+				type: "Path",
+				schema: z.string().uuid()
+			},
+			{
+				name: "milestone_id",
 				type: "Path",
 				schema: z.string().uuid()
 			},
