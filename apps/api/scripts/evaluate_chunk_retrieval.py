@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import json
+import math
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID, uuid4
@@ -142,6 +143,86 @@ def is_relevant_chunk(chunk, question: dict) -> bool:
     content = normalize_text(chunk.content)
     evidence_matches = any(normalize_text(evidence) in content for evidence in acceptable_evidence)
     return page_matches and evidence_matches
+
+
+# rank of the first relevant chunk, counted from 1; None when none was retrieved
+def first_relevant_rank(results, question: dict) -> int | None:
+    for rank, chunk in enumerate(results, start=1):
+        if is_relevant_chunk(chunk, question):
+            return rank
+    return None
+
+
+# Hit@k and Recall@1 are yes/no per question; MRR gives rank 1 -> 1, rank 2 -> 1/2, ...
+# and a miss -> 0, so it still separates two configurations that tie on both
+def summarize_ranks(ranks: list[int | None]) -> dict[str, float]:
+    total = len(ranks)
+    return {
+        "hit_at_k": sum(rank is not None for rank in ranks) / total,
+        "recall_at_1": sum(rank == 1 for rank in ranks) / total,
+        "mrr": sum(1 / rank for rank in ranks if rank is not None) / total,
+    }
+
+
+async def evaluate_configuration(
+    label: str,
+    questions: list[dict],
+    query_vectors: dict[str, list[float]],
+    course_id: UUID,
+    evaluation_file_id: UUID,
+    session,
+    config: SearchConfig,
+) -> list[int | None]:
+    ranks = []
+
+    for question in questions:
+        results = await hybrid_search(
+            query_text=question["question"],
+            query_vector=query_vectors[question["id"]],
+            course_id=course_id,
+            session=session,
+            file_ids=[evaluation_file_id],
+            config=config,
+        )
+        rank = first_relevant_rank(results, question)
+        ranks.append(rank)
+        print(f"{label} {question['id']}: {'MISS' if rank is None else f'rank {rank}'}")
+
+    k = config.final_limit
+    total = len(ranks)
+    hits = sum(rank is not None for rank in ranks)
+    top_ranks = sum(rank == 1 for rank in ranks)
+    metrics = summarize_ranks(ranks)
+    print(f"{label} Hit@{k}: {hits}/{total}={metrics['hit_at_k']:.1%}")
+    print(f"{label} Recall@1: {top_ranks}/{total}={metrics['recall_at_1']:.1%}")
+    # ranks past k are never seen, so this is MRR@k; equal to full MRR when Hit@k is 100%
+    print(f"{label} MRR@{k}: {metrics['mrr']:.3f}")
+
+    return ranks
+
+
+def print_comparison(questions: list[dict], ranks_350, ranks_500, k: int) -> None:
+    metrics_350 = summarize_ranks(ranks_350)
+    metrics_500 = summarize_ranks(ranks_500)
+
+    print("\nComparison (350 vs 500):")
+    print(f"  Hit@{k}:    {metrics_350['hit_at_k']:.1%} vs {metrics_500['hit_at_k']:.1%}")
+    print(f"  Recall@1: {metrics_350['recall_at_1']:.1%} vs {metrics_500['recall_at_1']:.1%}")
+    print(f"  MRR@{k}:    {metrics_350['mrr']:.3f} vs {metrics_500['mrr']:.3f}")
+
+    differing = [
+        (question["id"], rank_350, rank_500)
+        for question, rank_350, rank_500 in zip(questions, ranks_350, ranks_500, strict=True)
+        if rank_350 != rank_500
+    ]
+    print(f"Questions ranked differently: {len(differing)}/{len(questions)}")
+    for question_id, rank_350, rank_500 in differing:
+        print(f"  {question_id}: 350 rank {rank_350}, 500 rank {rank_500}")
+
+    recall_tied = metrics_350["recall_at_1"] == metrics_500["recall_at_1"]
+    mrr_tied = math.isclose(metrics_350["mrr"], metrics_500["mrr"])
+    if recall_tied and mrr_tied:
+        print("Recall@1 and MRR both tie: the corpus is too easy to separate the configurations")
 
 
 async def main() -> None:
@@ -328,46 +409,37 @@ async def main() -> None:
             )
 
             config = SearchConfig(final_limit=5)
-            hits_350 = 0
-
-            for question in questions:
-                results = await hybrid_search(
-                    query_text=question["question"],
-                    query_vector=query_vectors[question["id"]],
-                    course_id=course_id,
-                    session=session,
-                    file_ids=[evaluation_file_id],
-                    config=config,
-                )
-                hit = any(is_relevant_chunk(chunk, question) for chunk in results)
-                hits_350 += int(hit)
-                print(f"350 {question['id']}: {'HIT' if hit else 'MISS'}")
-            print(f"350 Hit@5: {hits_350}/{len(questions)}={hits_350 / len(questions):.1%}")
+            ranks_350 = await evaluate_configuration(
+                "350",
+                questions,
+                query_vectors,
+                course_id,
+                evaluation_file_id,
+                session,
+                config,
+            )
+            # Deactivate before activate, flushed separately: ix_ingestion_run_one_active
+            # allows one active run per file, and a single flush orders the two
+            # UPDATEs by the (random) primary key, so it failed about half the time.
             run_350.is_active = False
+            await session.flush()
             run_500.is_active = True
             await session.flush()
             assert not run_350.is_active
             assert run_500.is_active
 
             print("Switched active ingestion run from 350 to 500")
-            hits_500 = 0
+            ranks_500 = await evaluate_configuration(
+                "500",
+                questions,
+                query_vectors,
+                course_id,
+                evaluation_file_id,
+                session,
+                config,
+            )
 
-            for question in questions:
-                results = await hybrid_search(
-                    query_text=question["question"],
-                    query_vector=query_vectors[question["id"]],
-                    course_id=course_id,
-                    session=session,
-                    file_ids=[evaluation_file_id],
-                    config=config,
-                )
-
-                hit = any(is_relevant_chunk(chunk, question) for chunk in results)
-                hits_500 += int(hit)
-
-                print(f"500 {question['id']}: {'HIT' if hit else 'MISS'}")
-
-            print(f"500 Hit@5: {hits_500}/{len(questions)}={hits_500 / len(questions):.1%}")
+            print_comparison(questions, ranks_350, ranks_500, config.final_limit)
         finally:
             await session.rollback()
             print("Database evaluation rolled back")
