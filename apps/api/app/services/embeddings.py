@@ -35,6 +35,13 @@ def _load_model():
             config_kwargs["_attn_implementation"] = "flash_attention_2"
         except ImportError:
             pass
+    else:
+        # Without this the checkpoint's own dtype is kept, which is bfloat16.
+        # Measured 10 October 2026 on the OCI VM (2 Neoverse-N1 cores, no bf16
+        # instructions), one 356-token passage: float32 5.6 s, bfloat16 not done
+        # after 16 minutes. A 37-page lecture sat in `processing` for over two
+        # hours. Costs memory -- the weights roughly double -- not accuracy.
+        model_kwargs["dtype"] = torch.float32
 
     return SentenceTransformer(
         settings.MODEL_TYPE,
