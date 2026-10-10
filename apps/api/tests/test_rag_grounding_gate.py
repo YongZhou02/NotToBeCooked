@@ -19,7 +19,7 @@ from app.dependencies.auth import get_current_user
 from app.routers import rag as rag_module
 from app.schemas.chat import ChatRole, Conversation
 from app.schemas.rag import RetrievedChunk
-from app.services.llm import REFUSAL, UNVERIFIED, LlmAnswer
+from app.services.llm import GENERATION_FAILED, REFUSAL, UNVERIFIED, LlmAnswer
 
 USER_ID = uuid4()
 COURSE_ID = uuid4()
@@ -208,7 +208,7 @@ def test_a_marker_with_nothing_behind_it_costs_the_whole_answer(client, monkeypa
     assert body["answer"] == UNVERIFIED
 
 
-def test_a_failing_generator_refuses_rather_than_500s(client, monkeypatch):
+def test_a_failing_generator_says_so_rather_than_500s(client, monkeypatch):
     async def boom(**_kwargs):
         raise RuntimeError("Gemini 503: upstream unavailable")
 
@@ -216,7 +216,10 @@ def test_a_failing_generator_refuses_rather_than_500s(client, monkeypatch):
 
     response = client.post("/rag/query", json={"question": "What is a partial index?"})
     assert response.status_code == 200
-    assert response.json()["answer"] == REFUSAL
+    # Not REFUSAL: nobody checked the material, so "it does not cover this"
+    # would be an unchecked claim about the user's notes.
+    assert response.json()["answer"] == GENERATION_FAILED
+    assert response.json()["answer"] != REFUSAL
     assert response.json()["grounded"] is False
 
 
