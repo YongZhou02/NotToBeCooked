@@ -6,8 +6,25 @@ import pytest
 
 from app.schemas.chunk import ChunkCreate
 from app.schemas.ingestion_run import IngestionRun, IngestionRunStatus
-from app.services.ingestion import extract_text
+from app.services.ingestion import count_pages, extract_text
 from app.services.processing import NoExtractableContentError, process_file, run_ingestion
+
+
+@pytest.fixture(autouse=True)
+def _pages():
+    """The process_file tests hand in a string as the parsed document, which has no
+    num_pages(). Page counting has its own tests below."""
+    with patch("app.services.processing.count_pages", return_value=3):
+        yield
+
+
+def test_count_pages_reads_the_document():
+    assert count_pages(SimpleNamespace(num_pages=lambda: 59)) == 59
+
+
+def test_count_pages_is_none_for_formats_without_pages():
+    # Docling reports 0 pages for a DOCX; 0 would render as "page 1 of 0".
+    assert count_pages(SimpleNamespace(num_pages=lambda: 0)) is None
 
 
 def test_extract_text_keeps_text_without_page_provenance():
@@ -164,7 +181,7 @@ async def test_process_file_creates_and_save_chunks():
                         ingestion_run_id = uuid4()
                         fake_session = AsyncMock()
 
-                        await process_file(
+                        page_count = await process_file(
                             file_id=test_file_id,
                             course_id=course_id,
                             ingestion_run_id=ingestion_run_id,
@@ -172,6 +189,7 @@ async def test_process_file_creates_and_save_chunks():
                             session=fake_session,
                         )
 
+                        assert page_count == 3
                         assert mock_ingest.call_count == 1
                         assert mock_extract.call_count == 1
                         assert mock_create.call_count == 1

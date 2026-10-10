@@ -8,14 +8,14 @@ from app.db.vector_ops import add_chunks
 from app.schemas.chunk import Chunk, ChunkCreate
 from app.schemas.ingestion_run import IngestionRun, IngestionRunStatus
 from app.services.embeddings import embed_text
-from app.services.ingestion import create_chunk, extract_text, ingest_document
+from app.services.ingestion import count_pages, create_chunk, extract_text, ingest_document
 
 
 class NoExtractableContentError(Exception):
     """Raised when a document produces no extractable chunks."""
 
 
-def _parse_and_chunk(file_path: str, file_id: UUID) -> list[ChunkCreate]:
+def _parse_and_chunk(file_path: str, file_id: UUID) -> tuple[list[ChunkCreate], int | None]:
     """The synchronous half of ingestion, kept in one function so it costs one hop.
 
     Docling's parse and the tokenizer behind `create_chunk` are CPU work inside C
@@ -39,7 +39,7 @@ def _parse_and_chunk(file_path: str, file_id: UUID) -> list[ChunkCreate]:
     document, so splitting them buys nothing and costs two more context switches.
     """
     document = ingest_document(file_path)
-    return create_chunk(extract_text(document), file_id)
+    return create_chunk(extract_text(document), file_id), count_pages(document)
 
 
 async def process_file(
@@ -48,8 +48,9 @@ async def process_file(
     ingestion_run_id: UUID,
     file_path: str,
     session: AsyncSession,
-):
-    chunk_creates = await asyncio.to_thread(_parse_and_chunk, file_path, file_id)
+) -> int | None:
+    """Returns the page count, which only the parsed document knows."""
+    chunk_creates, page_count = await asyncio.to_thread(_parse_and_chunk, file_path, file_id)
     if not chunk_creates:
         raise NoExtractableContentError("No extractable content found")
 
@@ -79,6 +80,7 @@ async def process_file(
         database_chunks.append(database_chunk)
 
     await add_chunks(database_chunks, session)
+    return page_count
 
 
 async def run_ingestion(
@@ -87,7 +89,8 @@ async def run_ingestion(
     ingestion_run_id: UUID,
     file_path: str,
     session: AsyncSession,
-) -> None:
+) -> int | None:
+    """Returns the page count from process_file, for the FILE row."""
     ingestion_run = await session.get(
         IngestionRun, ingestion_run_id
     )  # 去 database 的 IngestionRun 里面，根据 ingestion_run_id 找到那一笔 record/object。
@@ -100,7 +103,7 @@ async def run_ingestion(
     await session.commit()
 
     try:
-        await process_file(
+        page_count = await process_file(
             file_id=file_id,
             course_id=course_id,
             ingestion_run_id=ingestion_run_id,
@@ -126,3 +129,4 @@ async def run_ingestion(
     ingestion_run.status = IngestionRunStatus.READY
     ingestion_run.completed_at = datetime.now(UTC)
     await session.commit()
+    return page_count
