@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     # Local development runs over plain HTTP, where browsers reject Secure
     # cookies. Production deployments must set this to true when using HTTPS.
     AUTH_COOKIE_SECURE: bool = False
+    # A public deployment answers with the team's shared Gemini key, so anyone who
+    # can register can spend its quota. Set false there and create accounts with
+    # scripts/create_user.py instead.
+    ALLOW_REGISTRATION: bool = True
 
     # Database Settings
     DATABASE_URL: str = "postgresql+asyncpg://postgres:password@localhost:5432/not_to_be_cooked"
@@ -33,6 +37,10 @@ class Settings(BaseSettings):
     # bound parameter values with them. Set SQL_ECHO=true in .env on a machine
     # where you want them back.
     SQL_ECHO: bool = False
+
+    # Level for the app's own loggers (app/core/logging.py). INFO by default so
+    # that grounding-check rejections and dropped quotes reach the log.
+    LOG_LEVEL: str = "INFO"
 
     # Embedding Settings
     BATCH_SIZE: int = 32

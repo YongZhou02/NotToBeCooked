@@ -99,45 +99,67 @@ def split_long_text(text, max_token=500):
 
 
 def create_chunk(extracted_items, file_id, max_token=350) -> list[ChunkCreate]:
+    """Group extracted items into chunks of at most `max_token` tokens.
 
-    chunks = []
-    heading = None  # 是旧箱子的 Introduction
-    page = []
-    content = []
+    A new chunk starts when the budget is full, when the heading changes, or
+    when the page changes. Two rules added 10 October 2026, both measured on a
+    real 37-page lecture deck on the production VM:
+
+    **One page per chunk.** Slides under one title were merged across pages --
+    "Syntax" became one chunk spanning pages 18-25 -- and a citation shows the
+    chunk's first page, so a quote from page 24 pointed the reader at page 18.
+
+    **The heading is part of the text.** It used to live only in `heading`, which
+    neither keyword search (`content_tsv` is built from `content`) nor the
+    embedding sees. The slide titled "Applications of Language Processing" holds
+    a bare list with no word "application" in it, so "list the applications"
+    retrieved the contents page and the references instead, and the answer
+    failed. Putting the title on the first line also makes it quotable.
+    """
+
+    chunks: list[ChunkCreate] = []
+    heading = None
+    page: list[int] = []
+    content: list[str] = []
     total_token = 0
 
+    def flush() -> None:
+        body = " ".join(content)
+        text = f"{heading}\n{body}" if heading else body
+        chunks.append(
+            ChunkCreate(
+                chunk_index=len(chunks),
+                heading=heading,
+                page_start=min(page),
+                page_end=max(page),
+                content=text,
+                file_id=file_id,
+                token_count=count_token(text),
+            )
+        )
+
     for item in extracted_items:
-        current_heading = item["heading"]  # 是刚读到的 Methods
-        current_content = item["content"]
-        pieces = split_long_text(current_content, max_token)
+        current_heading = item["heading"]
+        pieces = split_long_text(item["content"], max_token)
 
         for piece in pieces:
             token_count = count_token(piece)
 
-            if (content and total_token + token_count > max_token) or (
-                content and current_heading != heading
+            if content and (
+                total_token + token_count > max_token
+                or current_heading != heading
+                or item["page_start"] > max(page)
             ):
-                join_content = " ".join(content)
-
-                chunk = ChunkCreate(
-                    chunk_index=len(chunks),
-                    heading=heading,
-                    page_start=min(page),
-                    page_end=max(page),
-                    content=join_content,
-                    file_id=file_id,
-                    token_count=count_token(join_content),
-                )
-
+                flush()
                 heading = None
                 page = []
                 content = []
                 total_token = 0
 
-                chunks.append(chunk)
-
             if not content:
                 heading = current_heading
+                # The heading is written into the chunk, so it spends budget too.
+                total_token = count_token(heading) if heading else 0
 
             content.append(piece)
             page.append(item["page_start"])
@@ -145,19 +167,7 @@ def create_chunk(extracted_items, file_id, max_token=350) -> list[ChunkCreate]:
             total_token += token_count
 
     if content:
-        join_content = " ".join(content)
-
-        chunk = ChunkCreate(
-            chunk_index=len(chunks),
-            heading=heading,
-            page_start=min(page),
-            page_end=max(page),
-            content=join_content,
-            file_id=file_id,
-            token_count=count_token(join_content),
-        )
-
-        chunks.append(chunk)
+        flush()
 
     return chunks
 

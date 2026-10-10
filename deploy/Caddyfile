@@ -1,0 +1,27 @@
+# NotToBeCooked on the OCI VM -- one origin for both halves.
+#
+# The frontend and the API share this hostname on purpose. The refresh token is
+# a SameSite=Lax cookie (apps/api/app/routers/auth.py); a frontend on another
+# site would never get it back, and every user would be logged out when the
+# access token expires.
+#
+# sslip.io resolves 149-118-140-61.sslip.io to 149.118.140.61, so there is no
+# domain to buy; Caddy fetches the Let's Encrypt certificate on first start.
+
+149-118-140-61.sslip.io {
+	encode zstd gzip
+
+	# /api/auth/login -> 127.0.0.1:8000/auth/login. The API itself has no /api
+	# prefix; handle_path strips it here.
+	handle_path /api/* {
+		reverse_proxy 127.0.0.1:8000
+	}
+
+	# The built web app. Unknown paths fall back to index.html so a reload on
+	# /login or /dashboard reaches the client-side router instead of a 404.
+	handle {
+		root * /srv/nttbc/web
+		try_files {path} /index.html
+		file_server
+	}
+}

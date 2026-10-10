@@ -132,7 +132,9 @@ def test_load_model_uses_cpu_when_no_gpu():
         settings.MODEL_TYPE,
         trust_remote_code=True,
         device="cpu",
-        model_kwargs={},
+        # Pinned: left to the checkpoint it loads as bfloat16, which on the
+        # OCI VM's ARM cores took >16 min per passage against 5.6 s in float32.
+        model_kwargs={"dtype": torch.float32},
         config_kwargs={},
     )
 

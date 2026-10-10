@@ -95,6 +95,16 @@ UNVERIFIED = (
     "of the document at a time."
 )
 
+# What the reader sees when the call to the model itself failed -- a timeout, a
+# 5xx, a safety block. It used to be REFUSAL, which tells the reader their
+# material has no answer when nobody has looked at the material at all; the same
+# mistake UNVERIFIED was introduced to stop. This one says what happened and
+# that trying again is reasonable.
+GENERATION_FAILED = (
+    "The answer could not be generated just now because the AI service did not "
+    "respond. Your material was not checked, so please try again in a moment."
+)
+
 
 def _verbatim_opening(content: str, limit: int = 110) -> str:
     """A prefix of `content`, cut at a word boundary. Never altered.

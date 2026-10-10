@@ -5,6 +5,7 @@ import httpx
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.logging import configure_logging
 from app.db.database import engine, init_db
 from app.dependencies.auth import get_current_user
 from app.routers import (
@@ -18,6 +19,8 @@ from app.routers import (
     milestones_router,
     rag_router,
 )
+
+configure_logging()
 
 
 @asynccontextmanager

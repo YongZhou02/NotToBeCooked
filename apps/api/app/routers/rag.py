@@ -37,7 +37,13 @@ from app.schemas.rag import (
 from app.services.chat import get_or_create_conversation
 from app.services.embeddings import embed_query
 from app.services.grounding import check_grounding, drop_unreferenced, drop_unverified
-from app.services.llm import REFUSAL, UNVERIFIED, LlmAnswer, LlmCitation, generate_answer
+from app.services.llm import (
+    GENERATION_FAILED,
+    UNVERIFIED,
+    LlmAnswer,
+    LlmCitation,
+    generate_answer,
+)
 from app.services.prompt import build_context
 
 logger = logging.getLogger(__name__)
@@ -351,10 +357,11 @@ async def query(
         )
     except Exception:
         # There is no retry. The user is already waiting on a chat turn and a
-        # second timeout helps nobody; the traceback is for us, the refusal is
-        # for them.
+        # second timeout helps nobody; the traceback is for us, the message is
+        # for them. Not REFUSAL: that claims the material has no answer, and
+        # nothing here looked at the material.
         logger.exception("generation failed: conversation_id=%s", conv_id)
-        draft = LlmAnswer(answer=REFUSAL, grounded=False, citations=[])
+        draft = LlmAnswer(answer=GENERATION_FAILED, grounded=False, citations=[])
 
     # 5. Verify, then decide. This is the step that makes `grounded` mean
     #    something: the model's own claim is an input to the decision, never the

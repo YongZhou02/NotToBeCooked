@@ -207,6 +207,17 @@ async def register(
 ):
     """Registers a new user account."""
 
+    # Checked before the email lookup, so a closed server does not even confirm
+    # whether an address already has an account.
+    if not settings.ALLOW_REGISTRATION:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "code": "REGISTRATION_CLOSED",
+                "message": "Registration is closed on this server. Ask the team for an account.",
+            },
+        )
+
     statement = select(User).where(col(User.email) == body.email)
     result = await session.execute(statement)
     existing_user = result.scalar_one_or_none()
