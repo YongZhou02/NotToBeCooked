@@ -30,8 +30,11 @@ echo "[1/5] build web ($COMMIT)"
 VITE_API_URL="$ORIGIN/api" pnpm --filter web build
 
 echo "[2/5] push $COMMIT to the VM"
-git push --force "ssh://opc@$HOST$REPO_ON_VM" HEAD:refs/heads/deploy
-ssh "opc@$HOST" "cd $REPO_ON_VM && git checkout --force deploy && git log --oneline -1"
+# Pushed to a ref outside refs/heads: once `deploy` is checked out on the VM,
+# git refuses a push to it ("branch is currently checked out"), which is what
+# the second deploy on 10 Oct hit. -B then moves `deploy` to the new commit.
+git push --force "ssh://opc@$HOST$REPO_ON_VM" HEAD:refs/deploy/incoming
+ssh "opc@$HOST" "cd $REPO_ON_VM && git checkout --force -B deploy refs/deploy/incoming && git log --oneline -1"
 
 echo "[3/5] dependencies and migrations"
 ssh "opc@$HOST" "cd $REPO_ON_VM/apps/api && ~/.local/bin/uv sync --frozen && ~/.local/bin/uv run --no-sync alembic upgrade head"
