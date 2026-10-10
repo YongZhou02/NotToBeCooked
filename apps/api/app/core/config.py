@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     # Local development runs over plain HTTP, where browsers reject Secure
     # cookies. Production deployments must set this to true when using HTTPS.
     AUTH_COOKIE_SECURE: bool = False
+    # A public deployment answers with the team's shared Gemini key, so anyone who
+    # can register can spend its quota. Set false there and create accounts with
+    # scripts/create_user.py instead.
+    ALLOW_REGISTRATION: bool = True
 
     # Database Settings
     DATABASE_URL: str = "postgresql+asyncpg://postgres:password@localhost:5432/not_to_be_cooked"
