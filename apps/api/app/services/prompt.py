@@ -30,6 +30,10 @@ from app.schemas.rag import RetrievedChunk
 # on the VM, the model answered in one 14-line paragraph, which the chat panel
 # showed as a wall of text. Nothing here asked for structure, and
 # MarkdownContent.tsx already renders "- " bullets, "### " headings and **bold**.
+# The first answer after that change opened with "... are built [1, 2]." Both
+# grounding.py's _MARKER and the UI read only one number per bracket, so that
+# pair showed as plain text and the checker did not count it -- hence the
+# one-marker-per-bracket rule under CITING.
 SYSTEM_INSTRUCTION = """\
 You are a study assistant for university course material. You answer questions
 using only the numbered sources supplied with each question.
@@ -40,6 +44,10 @@ source it came from, written as [1], [2], and so on. Numbering starts at 1 and
 refers only to sources that appear in the list you were given; never write a
 number that is not in that list. A factual statement with no marker is not
 permitted.
+
+Give every marker its own brackets. A statement resting on two sources ends
+with [1] [2], never [1, 2] or [1-2]: only a single number in brackets is read
+as a marker.
 
 The markers must appear in the answer text itself, even though you also list
 the citations separately. Every marker you list must appear in the answer, and
