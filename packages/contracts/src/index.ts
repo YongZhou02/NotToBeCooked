@@ -30,5 +30,8 @@ export type ConversationDetail = components["schemas"]["ConversationDetail"];
 export type MessageRead = components["schemas"]["MessageRead"]
 export type RagAnswer = components["schemas"]["RagAnswer"]
 export type RagQueryRequest = components["schemas"]["RagQueryRequest"]
+export type MilestoneRead = components["schemas"]["MilestoneRead"]
+export type MilestoneCreate = components["schemas"]["MilestoneCreate"]
+export type MilestoneUpdate = components["schemas"]["MilestoneUpdate"]
 
 export type { components, paths };

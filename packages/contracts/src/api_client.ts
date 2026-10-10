@@ -18,6 +18,9 @@ import {
     type ConversationDetail,
     type RagAnswer,
     type RagQueryRequest,
+    type MilestoneRead,
+    type MilestoneCreate,
+    type MilestoneUpdate,
 } from "./index.js"
 
 /**
@@ -225,6 +228,41 @@ const isFormData =
             this.request<CourseRead[]>("/courses", {
                 method: "GET",
             }),
+    }
+
+    // Milestone Endpoints (F4 roadmap). Same nesting as folders: a milestone
+    // belongs to one course, and every path names that course.
+    public milestones = {
+        list: (courseId: string): Promise<MilestoneRead[]> =>
+            this.request<MilestoneRead[]>(
+                `/courses/${encodeURIComponent(courseId)}/milestones`,
+                { method: "GET" }
+            ),
+
+        create: (
+            courseId: string,
+            data: MilestoneCreate
+        ): Promise<MilestoneRead> =>
+            this.request<MilestoneRead>(
+                `/courses/${encodeURIComponent(courseId)}/milestones`,
+                { method: "POST", body: JSON.stringify(data) }
+            ),
+
+        update: (
+            courseId: string,
+            milestoneId: string,
+            data: MilestoneUpdate
+        ): Promise<MilestoneRead> =>
+            this.request<MilestoneRead>(
+                `/courses/${encodeURIComponent(courseId)}/milestones/${encodeURIComponent(milestoneId)}`,
+                { method: "PATCH", body: JSON.stringify(data) }
+            ),
+
+        delete: (courseId: string, milestoneId: string): Promise<void> =>
+            this.request<void>(
+                `/courses/${encodeURIComponent(courseId)}/milestones/${encodeURIComponent(milestoneId)}`,
+                { method: "DELETE", parseAs: "none" }
+            ),
     }
 
     // Folder Endpoints

@@ -29,10 +29,16 @@ export function RoadmapWidget({
           <span className="font-semibold text-(--ok,#38A169)">
             {progressPct}%
           </span>
-          <span className="text-(--tx-faint,#5C6976)">·</span>
-          <span className="text-(--tx-dim,#8B98A7)">
-            W{week}/{weeks}
-          </span>
+          {/* COURSE stores no teaching calendar yet, so weeks is 0 for every
+              real course; "W0/0" would read as a bug. */}
+          {weeks > 0 && (
+            <>
+              <span className="text-(--tx-faint,#5C6976)">·</span>
+              <span className="text-(--tx-dim,#8B98A7)">
+                W{week}/{weeks}
+              </span>
+            </>
+          )}
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 import type { Milestone, MockCourse } from "../../types/course"
-import { Clock } from "lucide-react"
+import { useState } from "react"
+import { Clock, Plus, Trash2 } from "lucide-react"
 
 interface RoadmapModalProps {
   isOpen: boolean
@@ -8,7 +9,13 @@ interface RoadmapModalProps {
   progressPct: number
   doneCount: number
   totalCount: number
-  onToggleMilestone: (index: number) => void
+  isLoading?: boolean
+  isError?: boolean
+  isSaving?: boolean
+  onToggleMilestone: (milestoneId: string) => void
+  /** Resolves true when saved, so the form clears only on success. */
+  onAddMilestone: (title: string, week: number | null) => Promise<boolean>
+  onDeleteMilestone: (milestoneId: string) => void
   onClose: () => void
 }
 
@@ -19,10 +26,32 @@ export function RoadmapModal({
   progressPct,
   doneCount,
   totalCount,
+  isLoading = false,
+  isError = false,
+  isSaving = false,
   onToggleMilestone,
+  onAddMilestone,
+  onDeleteMilestone,
   onClose,
 }: RoadmapModalProps) {
+  const [title, setTitle] = useState("")
+  const [week, setWeek] = useState("")
+
   if (!isOpen) return null
+
+  const weekNumber = week.trim() === "" ? null : Number(week)
+  const canAdd =
+    title.trim() !== "" &&
+    !isSaving &&
+    (weekNumber === null || (Number.isInteger(weekNumber) && weekNumber > 0))
+
+  const submit = async () => {
+    if (!canAdd) return
+    if (await onAddMilestone(title.trim(), weekNumber)) {
+      setTitle("")
+      setWeek("")
+    }
+  }
 
   return (
     <div
@@ -40,7 +69,9 @@ export function RoadmapModal({
               {course.code} — Learning Roadmap
             </h3>
             <p className="mt-0.5 text-xs text-(--tx-faint,#5C6976)">
-              Semester {course.semester}, 2026 · {course.weeks} teaching weeks ·
+              {/* The default Unsorted course has no semester (0, 0). */}
+              {course.semester > 0 &&
+                `Semester ${course.semester}, ${course.year} · `}
               tick a milestone to update progress
             </p>
           </div>
@@ -77,27 +108,41 @@ export function RoadmapModal({
           </div>
           <div className="flex flex-col">
             <span className="font-mono text-[10px] text-(--tx-faint,#5C6976) uppercase">
-              Current Week
+              Remaining
             </span>
             <span className="font-mono text-base font-bold text-(--tx,#DCE3EA)">
-              {course.week}
-              <small className="text-xs text-(--tx-faint,#5C6976)">
-                {" "}
-                / {course.weeks}
-              </small>
+              {totalCount - doneCount}
             </span>
           </div>
         </div>
 
         {/* Milestones Checklist Body */}
         <div className="flex max-h-80 scrollbar-thin [scrollbar-color:var(--line,#25313E)_transparent] flex-col gap-1.5 overflow-y-auto p-3">
+          {isLoading && (
+            <p className="p-2 text-xs text-(--tx-faint,#5C6976)">
+              Loading milestones…
+            </p>
+          )}
+          {isError && (
+            <p className="p-2 text-xs text-red-400">
+              Could not load milestones.
+            </p>
+          )}
+          {!isLoading && !isError && roadmap.length === 0 && (
+            <p className="p-2 text-xs text-(--tx-faint,#5C6976)">
+              No milestones yet. Add the first one below.
+            </p>
+          )}
           {roadmap.map((m, idx) => {
             const isDone = m.s === 1
             const isNow = m.now && !isDone
+            const id = m.id
             return (
               <div
-                key={idx}
-                onClick={() => onToggleMilestone(idx)}
+                key={id ?? idx}
+                onClick={() => {
+                  if (id && !isSaving) onToggleMilestone(id)
+                }}
                 className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-2.5 text-xs transition-colors ${
                   isDone
                     ? "border-(--line-soft,#1B2530) bg-(--bg-raise,#1C2833)/40 text-(--tx-faint,#5C6976)"
@@ -134,33 +179,74 @@ export function RoadmapModal({
                   </div>
                 </div>
 
-                {/* Tag badge */}
-                {m.tag === "exam" ? (
-                  <span className="shrink-0 rounded border border-red-500/20 bg-red-500/10 px-1.5 py-0.5 font-mono text-[9px] font-bold text-red-400">
-                    EXAM
-                  </span>
-                ) : isNow ? (
-                  <span className="shrink-0 rounded border border-(--acc,#52A8EA)/30 bg-(--acc,#52A8EA)/15 px-1.5 py-0.5 font-mono text-[9px] font-bold text-(--acc,#52A8EA)">
-                    THIS WEEK
-                  </span>
-                ) : isDone ? (
-                  <span className="shrink-0 font-mono text-[9px] text-(--ok,#38A169)">
-                    DONE
-                  </span>
-                ) : null}
+                <div className="flex shrink-0 items-center gap-1.5">
+                  {/* Tag badge */}
+                  {m.tag === "exam" ? (
+                    <span className="shrink-0 rounded border border-red-500/20 bg-red-500/10 px-1.5 py-0.5 font-mono text-[9px] font-bold text-red-400">
+                      EXAM
+                    </span>
+                  ) : isNow ? (
+                    <span className="shrink-0 rounded border border-(--acc,#52A8EA)/30 bg-(--acc,#52A8EA)/15 px-1.5 py-0.5 font-mono text-[9px] font-bold text-(--acc,#52A8EA)">
+                      NEXT
+                    </span>
+                  ) : isDone ? (
+                    <span className="shrink-0 font-mono text-[9px] text-(--ok,#38A169)">
+                      DONE
+                    </span>
+                  ) : null}
+                  {id && (
+                    <button
+                      type="button"
+                      aria-label={`Delete ${m.n}`}
+                      disabled={isSaving}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onDeleteMilestone(id)
+                      }}
+                      className="shrink-0 cursor-pointer rounded p-1 text-(--tx-faint,#5C6976) hover:bg-(--bg-bar,#101821) hover:text-red-400 disabled:opacity-40"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
             )
           })}
         </div>
 
-        {/* Target Footer */}
-        <div className="flex items-center gap-2 border-t border-(--line-soft,#1B2530) bg-(--bg-bar,#101821) p-3 text-xs text-(--tx-dim,#8B98A7)">
+        {/* Add Milestone Footer */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            void submit()
+          }}
+          className="flex items-center gap-2 border-t border-(--line-soft,#1B2530) bg-(--bg-bar,#101821) p-3 text-xs"
+        >
           <Clock className="h-3.5 w-3.5 shrink-0 text-(--acc,#52A8EA)" />
-          <span className="truncate text-xs">
-            This week:{" "}
-            <strong className="text-(--tx,#DCE3EA)">{course.target}</strong>
-          </span>
-        </div>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="New milestone"
+            aria-label="Milestone title"
+            className="min-w-0 flex-1 rounded border border-(--line,#25313E) bg-(--bg-panel,#121A23) px-2 py-1 text-(--tx,#DCE3EA) outline-none focus:border-(--acc,#52A8EA)"
+          />
+          <input
+            value={week}
+            onChange={(e) => setWeek(e.target.value)}
+            placeholder="Week"
+            aria-label="Week (optional)"
+            inputMode="numeric"
+            className="w-16 rounded border border-(--line,#25313E) bg-(--bg-panel,#121A23) px-2 py-1 text-(--tx,#DCE3EA) outline-none focus:border-(--acc,#52A8EA)"
+          />
+          <button
+            type="submit"
+            disabled={!canAdd}
+            className="flex shrink-0 cursor-pointer items-center gap-1 rounded bg-(--acc,#52A8EA) px-2 py-1 font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add
+          </button>
+        </form>
       </div>
     </div>
   )
