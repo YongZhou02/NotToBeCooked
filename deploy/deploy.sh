@@ -51,5 +51,5 @@ for _ in $(seq 1 30); do
   fi
   sleep 2
 done
-echo "API did not answer $ORIGIN/api/health within 60 s; see: ssh opc@$HOST journalctl --user -u nttbc-api -n 50" >&2
+echo "API did not answer $ORIGIN/api/health within 60 s; see: ssh opc@$HOST tail -n 50 ~/logs/nttbc-api.log" >&2
 exit 1

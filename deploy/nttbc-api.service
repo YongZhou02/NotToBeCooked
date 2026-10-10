@@ -1,0 +1,26 @@
+# ~/.config/systemd/user/nttbc-api.service on the OCI VM (user opc, lingering on).
+# Install: copy there, then `systemctl --user daemon-reload`.
+[Unit]
+Description=NotToBeCooked API
+
+[Service]
+Type=simple
+WorkingDirectory=/home/opc/NotToBeCooked/apps/api
+
+# torch 要在 import 之前就读到这个变数。
+# .env 没用 -- pydantic-settings 只读进 Settings 物件,不进 os.environ。
+Environment=TORCHDYNAMO_DISABLE=1
+
+ExecStart=/home/opc/NotToBeCooked/apps/api/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+# The user journal on this VM keeps nothing (journalctl --user was empty on
+# 10 Oct 2026), so output goes to a file. Read it with:
+#   tail -f ~/logs/nttbc-api.log
+StandardOutput=append:/home/opc/logs/nttbc-api.log
+StandardError=append:/home/opc/logs/nttbc-api.log
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

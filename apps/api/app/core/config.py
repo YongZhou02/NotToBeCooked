@@ -38,6 +38,10 @@ class Settings(BaseSettings):
     # where you want them back.
     SQL_ECHO: bool = False
 
+    # Level for the app's own loggers (app/core/logging.py). INFO by default so
+    # that grounding-check rejections and dropped quotes reach the log.
+    LOG_LEVEL: str = "INFO"
+
     # Embedding Settings
     BATCH_SIZE: int = 32
     EMBEDDINGS_DIM: int = 1024
