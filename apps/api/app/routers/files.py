@@ -227,8 +227,13 @@ async def _ingest_in_background(
             # already taken.
             return
 
+        # The file list shows FILE.status, not the run's. Without this the row
+        # reads `uploaded` for the whole parse -- minutes on a real deck.
+        file_row.status = FileStatus.PROCESSING
+        await session.commit()
+
         try:
-            await run_ingestion(
+            page_count = await run_ingestion(
                 file_id=file_id,
                 course_id=course_id,
                 ingestion_run_id=ingestion_run_id,
@@ -286,6 +291,7 @@ async def _ingest_in_background(
         run.is_active = True
 
         file_row.status = FileStatus.READY
+        file_row.page_count = page_count
         file_row.error_message = None
         file_row.indexed_at = datetime.now(UTC)
         await session.commit()

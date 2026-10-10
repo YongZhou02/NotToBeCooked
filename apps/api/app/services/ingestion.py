@@ -23,6 +23,15 @@ def ingest_document(file_path):
     return document
 
 
+def count_pages(document) -> int | None:
+    """FILE.page_count. None for formats with no pages (Docling reports 0 for them).
+
+    Read from the document, not from the chunks: a closing slide that is only an
+    image yields no chunk, and the reader would then refuse to turn to it.
+    """
+    return document.num_pages() or None
+
+
 def extract_text(document):
     current_heading = None
     extracted_items = []
