@@ -18,6 +18,7 @@ import { Maximize2, Minimize2, FileText } from "lucide-react"
 import type { MockCourse, MockDocumentFile } from "../types/course"
 import { useExplorerData } from "../hooks/useExplorerData"
 import { useExplorerMutations } from "../hooks/useExplorerMutations"
+import { useRoadmap } from "../hooks/useRoadmap"
 import { toUiCourse, toUiFiles } from "../lib/explorerData"
 import { classifyChatRequest } from "../lib/chatRequest"
 
@@ -151,11 +152,6 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
   const tabFileIds = useMemo(() => tabs.map((t) => t.fileId), [tabs])
   const cachedFileIds = useLruList(activeFileId, tabFileIds, 4)
 
-  // Interactive Roadmap Milestone check state
-  const [milestoneOverrides, setMilestoneOverrides] = useState<
-    Record<string, Record<number, number>>
-  >({})
-
   // Initialize course if not selected
   useEffect(() => {
     const activeCourseExists = courses.some(
@@ -216,47 +212,7 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
   }, [apiFolders])
 
   const courseFiles = apiCourseFiles
-  // Roadmap calculations (from workspace.html)
-  const courseRoadmap = useMemo(() => {
-    const base = currentCourse.roadmap
-    const overrides = milestoneOverrides[currentCourse.id] || {}
-    const overridesForCourse = overrides
-    return base.map((m, idx) => ({
-      ...m,
-      s: overridesForCourse[idx] !== undefined ? overridesForCourse[idx]! : m.s,
-    }))
-  }, [currentCourse, milestoneOverrides])
-
-  const roadmapStats = useMemo(() => {
-    const total = courseRoadmap.length
-    const done = courseRoadmap.filter((m) => m.s === 1).length
-    const pct = total ? Math.round((done / total) * 100) : 0
-    const nowItem =
-      courseRoadmap.find((m) => m.now && m.s === 0) ||
-      courseRoadmap.find((m) => m.s === 0)
-    const nextText = total
-      ? nowItem
-        ? nowItem.n.split("—")[0]?.trim() || nowItem.n
-        : "all clear"
-      : "no milestones yet"
-
-    return { done, total, pct, nextText }
-  }, [courseRoadmap])
-
-  const toggleMilestone = (idx: number) => {
-    setMilestoneOverrides((prev) => {
-      const courseMap = { ...(prev[currentCourse.id] || {}) }
-      const currentVal =
-        courseMap[idx] !== undefined
-          ? courseMap[idx]
-          : currentCourse.roadmap[idx]?.s || 0
-      courseMap[idx] = currentVal === 1 ? 0 : 1
-      return {
-        ...prev,
-        [currentCourse.id]: courseMap,
-      }
-    })
-  }
+  const roadmap = useRoadmap(currentCourse.id)
 
   const showToast = (msg: string) => {
     setToastMessage(msg)
@@ -486,8 +442,8 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
               activeFileId={activeFileId}
               courseWeek={currentCourse.week}
               courseWeeks={currentCourse.weeks}
-              roadmapProgressPct={roadmapStats.pct}
-              nextMilestoneText={roadmapStats.nextText}
+              roadmapProgressPct={roadmap.stats.pct}
+              nextMilestoneText={roadmap.stats.nextText}
               onOpenFile={handleOpenFile}
               onRenameFile={handleRenameFile}
               onMoveFile={handleMoveFile}
@@ -638,11 +594,32 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
       <RoadmapModal
         isOpen={isRoadmapOpen}
         course={currentCourse}
-        roadmap={courseRoadmap}
-        progressPct={roadmapStats.pct}
-        doneCount={roadmapStats.done}
-        totalCount={roadmapStats.total}
-        onToggleMilestone={toggleMilestone}
+        roadmap={roadmap.roadmap}
+        progressPct={roadmap.stats.pct}
+        doneCount={roadmap.stats.done}
+        totalCount={roadmap.stats.total}
+        isLoading={roadmap.isLoading}
+        isError={roadmap.isError}
+        isSaving={roadmap.isSaving}
+        onToggleMilestone={(id) => {
+          roadmap
+            .toggle(id)
+            .catch(() => showToast("Could not update the milestone"))
+        }}
+        onAddMilestone={(title, week) =>
+          roadmap.add({ title, week }).then(
+            () => true,
+            () => {
+              showToast("Could not add the milestone")
+              return false
+            }
+          )
+        }
+        onDeleteMilestone={(id) => {
+          roadmap
+            .remove(id)
+            .catch(() => showToast("Could not delete the milestone"))
+        }}
         onClose={() => setIsRoadmapOpen(false)}
       />
 
