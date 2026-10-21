@@ -78,7 +78,7 @@ async def _checked_file_ids(
     can be written into a JSONB array, including one belonging to another user's
     course. Without this check the attachment list is an unchecked reference.
 
-    SECOND, the uuids are turned into strings. A JSONB column is serialised with
+    SECOND, the uuids are turned into strings. A JSONB column is serialized with
     `json.dumps`, and `json.dumps(UUID(...))` raises
     `TypeError: Object of type UUID is not JSON serializable`. Measured on
     2026-09-21 against `PGDialect_asyncpg`, which is the dialect this project
@@ -204,8 +204,8 @@ async def update_milestone(
 
     if "file_ids" in changes:
         file_ids = changes.pop("file_ids")
-        milestone.file_ids = (  # type: ignore[assignment]
-            await _checked_file_ids(file_ids, course_id, session) if file_ids else []
+        milestone.file_ids = (
+            await _checked_file_ids(file_ids, course_id, session) if file_ids else []  # type: ignore[assignment]
         )
 
     for field, value in changes.items():

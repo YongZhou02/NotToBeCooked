@@ -9,18 +9,16 @@ from app.services.embeddings import count_token, get_tokenizer
 
 
 def ingest_document(file_path):
-    # Keep native PDF text, but do not turn decorative images and logos into
-    # searchable OCR noise. Other formats continue to use their normal parser.
+    # Use Docling's default PDF-aware OCR: preserve native text and recognize
+    # image regions as needed, without forcing full-page OCR.
     pdf_options = PdfPipelineOptions()
-    pdf_options.do_ocr = False
+    pdf_options.do_ocr = True
     converter = DocumentConverter(
         format_options={
             InputFormat.PDF: PdfFormatOption(pipeline_options=pdf_options),
         }
     )
-    result = converter.convert(file_path)
-    document = result.document
-    return document
+    return converter.convert(file_path).document
 
 
 def count_pages(document) -> int | None:
