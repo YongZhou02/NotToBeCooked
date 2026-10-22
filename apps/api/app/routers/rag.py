@@ -17,7 +17,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import settings
 from app.db.database import get_session
-from app.db.vector_ops import SearchConfig, hybrid_search
+from app.db.vector_ops import SearchConfig, _vector_similarity_search, hybrid_search
 from app.dependencies.auth import get_current_user
 from app.schemas.chat import ChatRole, Message
 from app.schemas.chunk import Chunk
@@ -100,7 +100,10 @@ async def _scope_file_ids(
 
 
 async def _retrieve(
-    request: RagQueryRequest, session: AsyncSession, user_id: UUID
+    request: RagQueryRequest,
+    session: AsyncSession,
+    user_id: UUID,
+    query_vector: list[float] | None = None,
 ) -> list[RetrievedChunk]:
     """Retrieval for one turn -- Gantt r48, the caller `hybrid_search` never had.
 
@@ -116,6 +119,10 @@ async def _retrieve(
     (2 OCPU) after that fix: 331 s of ingest, 329 `/health` samples, worst
     latency 0.19 s. A query embedding is milliseconds by comparison, but it is
     the same kind of work and it belongs off the loop for the same reason.
+
+    `query_vector` is for a caller that already embedded this question and
+    needs the vector for something else too -- see `_retrieve_follow_up`. One
+    embedding took about 0.38 s on the VM, measured 22 October.
     """
     file_ids = await _scope_file_ids(request, session, user_id)
     if not file_ids:
@@ -123,7 +130,8 @@ async def _retrieve(
         # an optimisation: `hybrid_search` reads an empty list as "no filter".
         return []
 
-    query_vector = await asyncio.to_thread(embed_query, request.question)
+    if query_vector is None:
+        query_vector = await asyncio.to_thread(embed_query, request.question)
     return await hybrid_search(
         query_text=request.question,
         query_vector=query_vector,
@@ -317,6 +325,38 @@ def _interleave(
     return merged[:limit]
 
 
+# Below this, the question alone matches nothing in its scope well enough to
+# stand on its own, so the search joined to the previous question goes first.
+# Measured 22 October on the VM: 36 questions over the two NLP lectures and
+# GLOSSARY.md, each searched alone, cosine similarity of the closest chunk.
+#   English lectures   follow-ups <= 0.454, new questions >= 0.541
+#   GLOSSARY (Chinese) follow-ups <= 0.497, new questions >= 0.493
+# At 0.5 one of the 36 is misjudged: "reflog 有什么用" is read as a follow-up.
+# Chinese PDFs and scanned PDFs were not measured. A wrong call costs the
+# order, not the results: both lists are still interleaved.
+STANDS_ALONE_SIMILARITY = 0.5
+
+
+async def _best_similarity(
+    request: RagQueryRequest,
+    query_vector: list[float],
+    session: AsyncSession,
+    user_id: UUID,
+) -> float:
+    """Cosine similarity of the closest chunk in scope: 1.0 identical, 0 unrelated.
+
+    Takes the vector the search already computed rather than embedding the
+    question a second time. Same scope rule as `_retrieve`: an empty scope
+    never reaches the search, because an empty list there means "no filter".
+    """
+    file_ids = await _scope_file_ids(request, session, user_id)
+    if not file_ids:
+        return 0.0
+    rows = await _vector_similarity_search(query_vector, session, None, file_ids, top_k=1)
+    # The search orders by cosine distance, which is 1 - similarity.
+    return 1 - float(rows[0][2]) if rows else 0.0
+
+
 async def _retrieve_follow_up(
     request: RagQueryRequest,
     previous_question: str | None,
@@ -327,16 +367,31 @@ async def _retrieve_follow_up(
 
     "What are its drawbacks?" has nothing in it to search for; joined to "what
     is a lexicon?" it does. But a question that changes topic would be pulled
-    back by the old one, so both searches run and their results alternate,
-    this question's own first. No model call: two embeddings and two searches.
+    back by the old one, so both searches run and their results alternate.
+
+    Which list goes first depends on whether the question stands alone.
+    Measured 22 October, after "finite state automata": "what does it used for"
+    searched alone returned five passages on corpora and regular expressions
+    and none on FSA, while "what is corpus annotation" searched joined put the
+    FSA page first. A pronoun does not decide it -- "give me an example" has
+    none and "what does this regular expression match" has one -- so the
+    question's best similarity does, see `STANDS_ALONE_SIMILARITY`.
+
+    No model call: two embeddings, two searches, and one top-1 lookup that
+    reuses the first embedding.
     """
-    alone = await _retrieve(request, session, user_id)
     if not previous_question:
-        return alone
+        return await _retrieve(request, session, user_id)
+
+    query_vector = await asyncio.to_thread(embed_query, request.question)
+    alone = await _retrieve(request, session, user_id, query_vector=query_vector)
     joined_question = " ".join(f"{previous_question} {request.question}".split())
     joined = await _retrieve(
         request.model_copy(update={"question": joined_question}), session, user_id
     )
+    similarity = await _best_similarity(request, query_vector, session, user_id)
+    if similarity < STANDS_ALONE_SIMILARITY:
+        return _interleave(joined, alone, request.top_k)
     return _interleave(alone, joined, request.top_k)
 
 
