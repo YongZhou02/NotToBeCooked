@@ -24,7 +24,7 @@ from app.dependencies.auth import get_current_user
 from app.routers import rag as rag_module
 from app.schemas.chat import ChatRole, Conversation, Message
 from app.schemas.course import Course
-from app.schemas.rag import RetrievedChunk
+from app.schemas.rag import RagQueryRequest, RetrievedChunk
 from app.schemas.user import User
 from app.services.prompt import render_history
 
@@ -84,6 +84,67 @@ def test_interleave_alternates_without_repeats_and_respects_the_limit():
     a, b, c, d = (_chunk(x) for x in "abcd")
     assert rag_module._interleave([a, b], [c, a, d], limit=5) == [a, c, b, d]
     assert rag_module._interleave([a, b], [c, d], limit=3) == [a, c, b]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("similarity", "first"),
+    [(0.3, "joined"), (0.5, "alone"), (0.7, "alone")],
+)
+async def test_a_follow_up_leads_with_the_search_that_can_stand_alone(
+    monkeypatch, similarity, first
+):
+    # "what does it used for" after "finite state automata": searched alone it
+    # matched nothing on FSA, so the joined search has to lead.
+    vectors = []
+
+    async def fake_retrieve(request, _session, _user_id, query_vector=None):
+        vectors.append(query_vector)
+        return [_chunk("joined" if request.question.startswith("finite") else "alone")]
+
+    async def fake_best_similarity(_request, query_vector, _session, _user_id):
+        assert query_vector == [0.1]
+        return similarity
+
+    monkeypatch.setattr(rag_module, "embed_query", lambda _question: [0.1])
+    monkeypatch.setattr(rag_module, "_retrieve", fake_retrieve)
+    monkeypatch.setattr(rag_module, "_best_similarity", fake_best_similarity)
+
+    chunks = await rag_module._retrieve_follow_up(
+        RagQueryRequest(question="what does it used for", course_id=COURSE_ID),
+        "finite state automata",
+        AsyncMock(),
+        uuid4(),
+    )
+
+    assert [chunk.content for chunk in chunks][0] == first
+    # The alone search and the similarity share one embedding; the joined
+    # search embeds its own question.
+    assert vectors == [[0.1], None]
+
+
+@pytest.mark.asyncio
+async def test_a_first_question_searches_once_and_never_measures_similarity(monkeypatch):
+    searches = []
+
+    async def fake_retrieve(request, _session, _user_id, query_vector=None):
+        searches.append(request.question)
+        return []
+
+    async def no_similarity(*_args):
+        raise AssertionError("a first question has nothing to be a follow-up to")
+
+    monkeypatch.setattr(rag_module, "_retrieve", fake_retrieve)
+    monkeypatch.setattr(rag_module, "_best_similarity", no_similarity)
+
+    await rag_module._retrieve_follow_up(
+        RagQueryRequest(question="what is a lexicon", course_id=COURSE_ID),
+        None,
+        AsyncMock(),
+        uuid4(),
+    )
+
+    assert searches == ["what is a lexicon"]
 
 
 @pytest_asyncio.fixture
@@ -152,9 +213,12 @@ def follow_up(monkeypatch):
     async def fake_turns(_session, _conversation_id):
         return [("what is a lexicon", "A lexicon is the set of available words [1].")]
 
-    async def fake_retrieve(request, _session, _user_id):
+    async def fake_retrieve(request, _session, _user_id, query_vector=None):
         seen["searches"].append(request.question)
         return [source]
+
+    async def fake_best_similarity(_request, _query_vector, _session, _user_id):
+        return 0.7
 
     honest = rag_module.generate_answer
 
@@ -165,6 +229,8 @@ def follow_up(monkeypatch):
     monkeypatch.setattr(rag_module, "get_or_create_conversation", fake_conversation)
     monkeypatch.setattr(rag_module, "_recent_turns", fake_turns)
     monkeypatch.setattr(rag_module, "_retrieve", fake_retrieve)
+    monkeypatch.setattr(rag_module, "embed_query", lambda _question: [0.0])
+    monkeypatch.setattr(rag_module, "_best_similarity", fake_best_similarity)
     monkeypatch.setattr(rag_module, "generate_answer", recording_generate)
     monkeypatch.setattr(settings, "LLM_FAKE_MODE", True)
 
