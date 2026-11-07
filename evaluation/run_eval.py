@@ -77,12 +77,17 @@ def git_output(*arguments: str) -> str:
 
 def load_dataset(folder: Path) -> tuple[dict, list[dict], dict, dict]:
     manifest = {**read(folder / "dataset.json"), **read(folder / "sources.json")}
-    rows = [
+    all_rows = [
         json.loads(line)
         for line in (folder / "questions.jsonl")
         .read_text(encoding="utf-8")
         .splitlines()
         if line.strip()
+    ]
+    rows = [
+        row
+        for row in all_rows
+        if row.get("label_review", {}).get("strict_retrieval_eligible", True)
     ]
     questions = [
         {

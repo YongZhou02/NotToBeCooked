@@ -51,37 +51,11 @@ def load_run(path):
 
 
 def assemble(dataset, run_path, comparison=None):
-    rows = [
-        json.loads(line)
-        for line in (dataset / "questions.jsonl")
-        .read_text(encoding="utf-8")
-        .splitlines()
-        if line.strip()
-    ]
-    questions = [
-        {
-            key: row[key]
-            for key in ("id", "category", "split", "generation_review", "question")
-        }
-        for row in rows
-    ]
-    answers = {
-        "annotation_status": read_json(dataset / "dataset.json")["annotation_status"],
-        "answers": {
-            row["id"]: {
-                "reference_answer": row["reference_answer"],
-                "required_facts": row["required_facts"],
-            }
-            for row in rows
-        },
-    }
-    evidence = {
-        "annotation_status": read_json(dataset / "dataset.json")["annotation_status"],
-        "questions": {row["id"]: {"groups": row["evidence_groups"]} for row in rows},
-    }
     run = load_run(run_path)
     recorded_hashes = run["config"]["dataset_hashes"]
     current_names = {"dataset.json", "sources.json", "questions.jsonl"}
+    rows_path = dataset / "questions.jsonl"
+    annotation_path = dataset / "dataset.json"
     if set(recorded_hashes) == current_names:
         import hashlib
 
@@ -95,6 +69,35 @@ def assemble(dataset, run_path, comparison=None):
             raise ValueError(
                 "Run hashes match neither this dataset nor its recorded legacy migration"
             )
+        history = dataset / "history/v2"
+        rows_path = history / "questions.jsonl"
+        annotation_path = history / "dataset.json"
+    rows = [
+        json.loads(line)
+        for line in rows_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    questions = [
+        {
+            key: row[key]
+            for key in ("id", "category", "split", "generation_review", "question")
+        }
+        for row in rows
+    ]
+    answers = {
+        "annotation_status": read_json(annotation_path)["annotation_status"],
+        "answers": {
+            row["id"]: {
+                "reference_answer": row["reference_answer"],
+                "required_facts": row["required_facts"],
+            }
+            for row in rows
+        },
+    }
+    evidence = {
+        "annotation_status": read_json(annotation_path)["annotation_status"],
+        "questions": {row["id"]: {"groups": row["evidence_groups"]} for row in rows},
+    }
     seen = set()
     for row in run["retrieval"]:
         key = (row["question_id"], row["method"])

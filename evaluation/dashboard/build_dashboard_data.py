@@ -6,6 +6,7 @@ artifacts, recomputes trace metadata, and writes a UI-ready JSON document.
 
 import argparse
 import json
+import shutil
 import statistics
 import sys
 from collections import defaultdict
@@ -326,6 +327,32 @@ def trace_question(
     }
 
 
+def split_composition(questions: list[dict[str, Any]]) -> dict[str, Any]:
+    output: dict[str, dict[str, Any]] = {}
+    for split_name in ("dev", "test"):
+        split_questions = [q for q in questions if q.get("split") == split_name]
+        categories: dict[str, int] = defaultdict(int)
+        for q in split_questions:
+            categories[q.get("category", "general")] += 1
+        evidence_groups = sum(
+            len(q.get("evidence_groups", [])) for q in split_questions
+        )
+        golden_quotes = sum(
+            sum(
+                len(group.get("alternatives", []))
+                for group in q.get("evidence_groups", [])
+            )
+            for q in split_questions
+        )
+        output[split_name] = {
+            "questions": len(split_questions),
+            "evidence_groups": evidence_groups,
+            "golden_quotes": golden_quotes,
+            "categories": dict(categories),
+        }
+    return output
+
+
 def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
     dataset, questions = load_dataset(dataset_path)
     run_paths = sorted(
@@ -408,9 +435,22 @@ def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
             "name": dataset["name"],
             "scope": dataset["scope"],
             "questions": len(questions),
+            "verified_questions": sum(question.get("verified", False) for question in questions),
+            "strict_retrieval_questions": sum(
+                question.get("label_review", {}).get("strict_retrieval_eligible", True)
+                for question in questions
+            ),
             "evidence_groups": sum(
                 len(question["evidence_groups"]) for question in questions
             ),
+            "golden_quotes": sum(
+                sum(
+                    len(group.get("alternatives", []))
+                    for group in question.get("evidence_groups", [])
+                )
+                for question in questions
+            ),
+            "splits": split_composition(questions),
             "documents": dataset["documents"],
         },
         "selected_run_id": preferred,
@@ -419,8 +459,11 @@ def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
             {
                 "id": question["id"],
                 "question": question["question"],
-                "category": question["category"],
-                "split": question["split"],
+                "category": question.get("category", "general"),
+                "split": question.get("split", "dev"),
+                "origin": question.get("origin", "synthetic"),
+                "verified": question.get("verified", False),
+                "label_review": question.get("label_review"),
                 "reference_answer": question["reference_answer"],
                 "required_facts": question["required_facts"],
                 "evidence_groups": question["evidence_groups"],
@@ -445,6 +488,12 @@ def main() -> None:
     args.output.write_text(
         json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    docs_source = args.dataset.parent / "documents"
+    docs_target = args.output.parent / "documents"
+    if docs_source.exists():
+        docs_target.mkdir(parents=True, exist_ok=True)
+        for pdf_file in docs_source.glob("*.pdf"):
+            shutil.copy2(pdf_file, docs_target / pdf_file.name)
     print(
         f"Wrote {args.output.resolve()} | {len(data['runs'])} runs | "
         f"{len(data['questions'])} questions"
