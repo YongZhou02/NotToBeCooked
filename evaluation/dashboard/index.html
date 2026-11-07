@@ -155,254 +155,176 @@
         </section>
       </div>
 
-      <!-- TAB 3: VISUALIZATION & ANNOTATION -->
-      <div class="tab-panel" data-panel="visualization" hidden>
-        <section class="summary">
-          <div>
-            <p class="eyebrow">Golden dataset & Quality assurance</p>
-            <h2>Visualization & Annotation</h2>
-          </div>
-          <div class="review-actions">
-            <span class="chip status-verified" id="visVerifiedProgress">0 / 0 verified</span>
-            <span class="chip neutral" id="visReviewProgress">0 / 0 reviewed</span>
-            <button type="button" id="btnToggleAddQuestion" class="btn-primary">+ Add human question</button>
-            <button type="button" id="btnToggleAddHardCase" class="btn-subtle">+ Add hard case</button>
-            <input type="file" id="importDatasetFile" accept=".json" hidden />
-            <button type="button" id="importDatasetBtn" class="btn-subtle" title="Import previously exported JSON">Import JSON</button>
-            <button type="button" id="exportDatasetBtn" class="btn-secondary">Export data (JSON)</button>
-          </div>
-        </section>
-
-        <!-- Split breakdown on Visualization page -->
-        <section class="panel split-section" aria-labelledby="visSplitTitle">
-          <div class="section-head">
-            <div>
-              <p class="eyebrow">Corpus contents & Verification status</p>
-              <h2 id="visSplitTitle">Split composition & Golden quotes</h2>
-            </div>
-            <span class="chip neutral" id="visTotalStatsChip">50 questions · 73 golden quotes</span>
-          </div>
-          <div class="dataset-stats" id="visDatasetStats" aria-label="Dataset composition"></div>
-        </section>
-
-        <!-- Form for adding human-written question or hard case -->
-        <section class="panel add-question-panel" id="addQuestionPanel" hidden>
-          <div class="section-head">
-            <div>
-              <p class="eyebrow" id="addQuestionEyebrow">Human-authored</p>
-              <h2 id="addQuestionTitle">Add human-written question</h2>
-            </div>
-            <button type="button" id="cancelHumanQuestion" class="btn-subtle">Cancel</button>
-          </div>
-          <form id="addQuestionForm" class="add-question-form" onsubmit="return false;">
-            <div class="form-row form-meta-row">
-              <label>
-                <span>Split</span>
-                <select id="newSplit">
-                  <option value="test">Test split</option>
-                  <option value="dev">Dev split</option>
-                </select>
-              </label>
-              <label>
-                <span>Category</span>
-                <select id="newCategory">
-                  <option value="definition">definition</option>
-                  <option value="exact">exact</option>
-                  <option value="paraphrase">paraphrase</option>
-                  <option value="relationship">relationship</option>
-                  <option value="multi_evidence">multi_evidence</option>
-                  <option value="hard_case">hard_case / edge_case</option>
-                </select>
-              </label>
-              <label>
-                <span>Document ID</span>
-                <input id="newDocId" type="text" value="topic1" placeholder="topic1" />
-              </label>
-              <label>
-                <span>PDF page</span>
-                <input id="newPage" type="number" min="1" max="100" value="1" />
-              </label>
-            </div>
-
-            <div class="form-row">
-              <label>
-                <span>Question</span>
-                <textarea id="newQuestion" rows="2" placeholder="Write question prompt..."></textarea>
-              </label>
-            </div>
-
-            <div class="form-row">
-              <label>
-                <span>Answer key (reference answer)</span>
-                <textarea id="newAnswer" rows="2" placeholder="Write the exact expected answer key..."></textarea>
-              </label>
-            </div>
-
-            <div class="form-row">
-              <label>
-                <span>Gold quote (supporting evidence from PDF)</span>
-                <textarea id="newEvidence" rows="2" placeholder="Paste supporting excerpt directly from the PDF document..."></textarea>
-              </label>
-            </div>
-
-            <div class="form-row">
-              <label>
-                <span>Required facts / key scoring criteria (comma-separated or lines)</span>
-                <input id="newFacts" type="text" placeholder="e.g. (1) Fact A, (2) Fact B" />
-              </label>
-            </div>
-
-            <div class="form-row form-checkbox-row">
-              <label class="checkbox-label">
-                <input type="checkbox" id="newIsHardCase" />
-                <span><strong>Very hard case</strong> (challenging question for models)</span>
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" id="newIsVerified" checked />
-                <span>Mark answer key as verified immediately</span>
-              </label>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" id="saveHumanQuestion" class="btn-primary">Save question</button>
-              <button type="button" id="cancelHumanQuestionBtn" class="btn-subtle">Cancel</button>
-            </div>
-          </form>
-        </section>
-
-        <!-- Filter Toolbar -->
-        <section class="filter-bar" aria-label="Filter questions">
+      <!-- TAB 3: VISUALIZATION & ANNOTATION
+           A fixed-height workbench: the page itself never scrolls here. Only the
+           inner panes do, so moving between questions cannot shift the layout. -->
+      <div class="tab-panel vis-shell" data-panel="visualization" hidden>
+        <!-- Row 1: filters and progress -->
+        <section class="vis-toolbar" aria-label="Filter questions">
           <div class="filter-search-wrap">
             <span class="search-icon" aria-hidden="true">🔍</span>
-            <input type="search" id="filterSearch" placeholder="Search questions, answer keys, or IDs..." aria-label="Search questions" />
+            <input type="search" id="filterSearch" placeholder="Search questions, answers, IDs..." aria-label="Search questions" />
           </div>
 
-          <div class="filter-controls">
-            <label class="filter-control">
-              <span>Split</span>
-              <select id="filterSplit" aria-label="Filter by split">
-                <option value="all">All splits</option>
-                <option value="dev">Dev split</option>
-                <option value="test">Test split</option>
-              </select>
-            </label>
+          <div class="filter-control">
+            <span>Author</span>
+            <div class="segmented" role="group" aria-label="Filter by author" data-filter="origin">
+              <button type="button" data-value="all">All</button>
+              <button type="button" data-value="human">Human</button>
+              <button type="button" data-value="synthetic">AI</button>
+            </div>
+          </div>
 
-            <label class="filter-control">
-              <span>Origin</span>
-              <select id="filterOrigin" aria-label="Filter by origin">
-                <option value="all">All origins</option>
-                <option value="synthetic">Synthetic (AI-written)</option>
-                <option value="human">Human-written</option>
-              </select>
-            </label>
+          <label class="filter-control">
+            <span>Source</span>
+            <select id="filterSource" aria-label="Filter by source document"></select>
+          </label>
 
-            <label class="filter-control">
-              <span>Answer key status</span>
-              <select id="filterVerification" aria-label="Filter by verification">
-                <option value="all" selected>All answer keys (Verified & Unverified)</option>
-                <option value="unverified">Unverified only (Needs review)</option>
-                <option value="verified">Verified only (Done)</option>
-              </select>
-            </label>
+          <div class="filter-control">
+            <span>Answer key</span>
+            <div class="segmented" id="filterVerification" role="group" aria-label="Filter by verification" data-filter="verification">
+              <button type="button" data-value="all">All</button>
+              <button type="button" data-value="unverified">Unverified</button>
+              <button type="button" data-value="verified">Verified</button>
+            </div>
+          </div>
+
+          <div class="filter-control">
+            <span>Type</span>
+            <div class="segmented" role="group" aria-label="Filter by difficulty" data-filter="difficulty">
+              <button type="button" data-value="all">All</button>
+              <button type="button" data-value="hard">Hard</button>
+            </div>
+          </div>
+
+          <label class="filter-control">
+            <span>Split</span>
+            <select id="filterSplit" aria-label="Filter by split">
+              <option value="all">All</option>
+              <option value="dev">Dev</option>
+              <option value="test">Test</option>
+            </select>
+          </label>
+
+          <button type="button" id="clearFilters" class="btn-subtle btn-sm">Clear</button>
+
+          <div class="vis-progress">
+            <span class="chip status-verified" id="visVerifiedProgress">0 / 0 verified</span>
+            <span class="chip neutral" id="visReviewProgress">0 / 0 reviewed</span>
           </div>
         </section>
 
-        <!-- Question View & Annotation Workspace (Left side) + PDF Viewer (Right side) -->
-        <section class="panel review-panel">
-          <!-- Next and Previous Buttons TOGETHER -->
-          <div class="review-nav">
-            <div class="nav-button-group">
-              <button type="button" id="previousVisQuestion" class="nav-btn" title="Previous question">← Previous</button>
-              <button type="button" id="nextVisQuestion" class="nav-btn" title="Next question">Next →</button>
-            </div>
-            <div class="picker-container">
-              <label class="question-picker">
-                <span id="pickerLabel">Questions (All shown)</span>
-                <select id="visQuestionSelect" aria-label="Select question to view and annotate"></select>
-              </label>
-            </div>
+        <!-- Row 2: navigation and authoring -->
+        <section class="vis-nav" aria-label="Question navigation">
+          <div class="vis-stepper">
+            <button type="button" id="previousVisQuestion" class="nav-btn" title="Previous question (Left arrow)">← Prev</button>
+            <span class="vis-position" id="visPosition" aria-live="polite">0 / 0</span>
+            <button type="button" id="nextVisQuestion" class="nav-btn" title="Next question (Right arrow)">Next →</button>
           </div>
 
-          <div id="visQuestionBadges" class="question-badge-strip"></div>
+          <select id="visQuestionSelect" aria-label="Select question to view and annotate"></select>
 
-          <!-- 2-COLUMN SPLIT: LEFT = EVAL & ANNOTATION, RIGHT = PDF VIEWER -->
-          <div class="vis-workspace-split">
-            <!-- LEFT COLUMN: All evaluation and annotation items -->
-            <div class="vis-left-column" id="visContent"></div>
-
-            <!-- RIGHT COLUMN: PDF and the exact page it is on -->
-            <div class="vis-right-column" id="visPdfColumn">
-              <div class="pdf-panel">
-                <div class="pdf-panel-header">
-                  <div class="pdf-title-group">
-                    <p class="eyebrow">Source Document</p>
-                    <div class="pdf-doc-selector-wrap">
-                      <select id="pdfDocSelect" class="pdf-doc-select" aria-label="Select source document">
-                        <option value="CPT316_Topic1_Semantic_Text_Only.pdf">CPT316 Topic 1 (Semantic Text)</option>
-                        <option value="CPT316_Topic2_Lexical_Semantic_Text.pdf">CPT316 Topic 2 (Lexical & Semantic)</option>
-                        <option value="CPT316_Topic3_Updated_Semantic_Text.pdf">CPT316 Topic 3 (Updated)</option>
-                        <option value="CPT316_Topic3_Student_Semantic_Text.pdf">CPT316 Topic 3 (Student)</option>
-                      </select>
-                      <h3 id="pdfDocName" class="pdf-doc-filename-display" title="Active PDF filename">CPT316_Topic1_Semantic_Text_Only.pdf</h3>
-                    </div>
+          <div class="vis-actions">
+            <button type="button" id="btnToggleAddQuestion" class="btn-primary btn-sm">+ Question</button>
+            <button type="button" id="btnToggleAddHardCase" class="btn-secondary btn-sm">+ Hard case</button>
+            <button type="button" id="exportDatasetBtn" class="btn-secondary btn-sm" title="Choose questions to export">Export</button>
+            <details class="vis-menu" id="visMenu">
+              <summary class="btn-subtle btn-sm">More ▾</summary>
+              <div class="vis-menu-panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Corpus contents</p>
+                    <h3>Split composition</h3>
                   </div>
-                  <div class="pdf-actions">
-                    <span class="chip" id="pdfPageIndicator">Page 1 / 38</span>
-                    <a id="pdfOpenTab" href="documents/CPT316_Topic1_Semantic_Text_Only.pdf#page=1&view=FitH" target="_blank" class="btn-subtle btn-sm" title="Open PDF in new tab">Open ↗</a>
+                  <span class="chip neutral" id="visTotalStatsChip">50 questions · 73 golden quotes</span>
+                </div>
+                <div class="dataset-stats" id="visDatasetStats" aria-label="Dataset composition"></div>
+                <div class="vis-menu-actions">
+                  <input type="file" id="importDatasetFile" accept=".json" hidden />
+                  <button type="button" id="importDatasetBtn" class="btn-secondary btn-sm" title="Import a file exported from this dashboard">Import JSON</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- Row 3: LEFT = evaluation and annotation, RIGHT = PDF -->
+        <div class="vis-workspace-split">
+          <div class="vis-left-column" id="visContent"></div>
+
+          <div class="vis-right-column" id="visPdfColumn">
+            <div class="pdf-panel">
+              <div class="pdf-panel-header">
+                <select id="pdfDocSelect" class="pdf-doc-select" aria-label="Select source document"></select>
+
+                <div class="pdf-page-controls">
+                  <button type="button" id="pdfPrevPage" class="btn-subtle btn-sm" title="Previous page in PDF" aria-label="Previous PDF page">‹</button>
+                  <label class="pdf-jump-label">
+                    <input type="number" id="pdfPageInput" min="1" max="38" value="1" aria-label="PDF page number" />
+                    <span id="pdfTotalPages">/ 38</span>
+                  </label>
+                  <button type="button" id="pdfNextPage" class="btn-subtle btn-sm" title="Next page in PDF" aria-label="Next PDF page">›</button>
+                </div>
+
+                <div class="pdf-zoom-controls">
+                  <button type="button" id="pdfZoomOut" class="btn-subtle btn-sm" title="Zoom out" aria-label="Zoom out">−</button>
+                  <button type="button" id="pdfZoomReset" class="btn-subtle btn-sm" title="Fit width / Reset zoom"><span id="pdfZoomLevel">Fit</span></button>
+                  <button type="button" id="pdfZoomIn" class="btn-subtle btn-sm" title="Zoom in" aria-label="Zoom in">+</button>
+                </div>
+
+                <div class="pdf-actions">
+                  <button type="button" id="pdfHighlightBtn" class="btn-secondary btn-sm" title="Go back to the highlighted gold evidence">Locate quote</button>
+                  <a id="pdfOpenTab" href="../datasets/cpt316/documents/CPT316_Topic1_Semantic_Text_Only.pdf#page=1&view=FitH" target="_blank" class="btn-subtle btn-sm" title="Open PDF in new tab">Open ↗</a>
+                </div>
+              </div>
+
+              <div class="pdf-viewer-wrap" id="pdfViewerWrap">
+                <div class="pdf-viewport" id="pdfViewport">
+                  <div id="pdfPageWrapper" class="ntbc-pdf-page">
+                    <canvas id="pdfCanvas" class="pdf-canvas"></canvas>
+                    <div id="pdfTextLayer" class="textLayer"></div>
                   </div>
                 </div>
 
-                <div class="pdf-active-quote-box" id="pdfActiveQuoteBox">
-                  <div class="quote-header-line">
-                    <span class="quote-target-tag" id="pdfQuoteTargetTag">Referenced Gold Evidence · Page 1</span>
-                    <button type="button" id="pdfHighlightBtn" class="btn-subtle btn-xs" title="Scroll to and center highlighted evidence on page">Locate quote 🎯</button>
-                  </div>
-                  <p class="quote-target-text" id="pdfQuoteTargetText">Loading evidence quote...</p>
+                <p class="pdf-quote-status" id="pdfQuoteStatus" hidden>Quote not matched in this page's text</p>
+
+                <div id="pdfLoadingOverlay" class="pdf-loading-overlay">
+                  <div class="pdf-spinner"></div>
+                  <span id="pdfLoadingText">Loading PDF...</span>
                 </div>
 
-                <div class="pdf-viewer-wrap" id="pdfViewerWrap">
-                  <div class="pdf-viewport" id="pdfViewport">
-                    <div id="pdfPageWrapper" class="ntbc-pdf-page">
-                      <canvas id="pdfCanvas" class="pdf-canvas"></canvas>
-                      <div id="pdfTextLayer" class="textLayer"></div>
-                    </div>
-                  </div>
-
-                  <div id="pdfLoadingOverlay" class="pdf-loading-overlay">
-                    <div class="pdf-spinner"></div>
-                    <span id="pdfLoadingText">Loading PDF...</span>
-                  </div>
-
-                  <div id="pdfErrorOverlay" class="pdf-error-overlay" hidden>
-                    <p id="pdfErrorText">Failed to load PDF</p>
-                    <button type="button" id="pdfRetryBtn" class="btn-secondary btn-sm">Retry</button>
-                  </div>
-
-                  <!-- Fallback iframe for legacy browsers -->
-                  <iframe id="pdfFrame" class="pdf-frame" style="display: none;" src="documents/CPT316_Topic1_Semantic_Text_Only.pdf#page=1&view=FitH" title="PDF Document Viewer"></iframe>
+                <div id="pdfErrorOverlay" class="pdf-error-overlay" hidden>
+                  <p id="pdfErrorText">Failed to load PDF</p>
+                  <button type="button" id="pdfRetryBtn" class="btn-secondary btn-sm">Retry</button>
                 </div>
 
-                <div class="pdf-controls-bar">
-                  <div class="pdf-page-controls">
-                    <button type="button" id="pdfPrevPage" class="btn-secondary btn-sm" title="Previous page in PDF">← Page</button>
-                    <label class="pdf-jump-label">
-                      <span>Page</span>
-                      <input type="number" id="pdfPageInput" min="1" max="38" value="1" />
-                      <span id="pdfTotalPages">/ 38</span>
-                    </label>
-                    <button type="button" id="pdfNextPage" class="btn-secondary btn-sm" title="Next page in PDF">Page →</button>
-                  </div>
-
-                  <div class="pdf-zoom-controls">
-                    <button type="button" id="pdfZoomOut" class="btn-subtle btn-sm" title="Zoom out">−</button>
-                    <button type="button" id="pdfZoomReset" class="btn-subtle btn-sm" title="Fit width / Reset zoom"><span id="pdfZoomLevel">Fit</span></button>
-                    <button type="button" id="pdfZoomIn" class="btn-subtle btn-sm" title="Zoom in">+</button>
-                  </div>
-                </div>
+                <!-- Fallback for browsers where PDF.js fails. src is set only on failure. -->
+                <iframe id="pdfFrame" class="pdf-frame" style="display: none;" title="PDF Document Viewer"></iframe>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+
+        <!-- Choose which questions to share. -->
+        <dialog class="export-dialog" id="exportDialog" aria-labelledby="exportTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Share with a teammate</p>
+              <h2 id="exportTitle">Export questions</h2>
+            </div>
+            <button type="button" id="exportCancelBtn" class="btn-subtle btn-sm">Close</button>
+          </div>
+          <p class="export-hint">Listing the questions your filters show. Untick anything you do not want to share.</p>
+          <div class="export-tools">
+            <button type="button" id="exportSelectAll" class="btn-subtle btn-sm">Select all</button>
+            <button type="button" id="exportSelectNone" class="btn-subtle btn-sm">Select none</button>
+            <span class="chip neutral" id="exportSelectionCount">0 selected</span>
+          </div>
+          <ul class="export-list" id="exportList"></ul>
+          <div class="export-actions">
+            <button type="button" id="exportConfirmBtn" class="btn-primary">Export 0 questions</button>
+          </div>
+        </dialog>
       </div>
     </main>
 
