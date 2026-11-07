@@ -270,6 +270,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/chat/messages/{message_id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Answer Feedback */
+        get: operations["get_answer_feedback_chat_messages__message_id__feedback_get"];
+        /** Upsert Answer Feedback */
+        put: operations["upsert_answer_feedback_chat_messages__message_id__feedback_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ingestion-runs/{ingestion_run_id}": {
         parameters: {
             query?: never;
@@ -452,6 +470,40 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AnswerFeedbackRead */
+        AnswerFeedbackRead: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Message Id
+             * Format: uuid
+             */
+            message_id: string;
+            rating: components["schemas"]["FeedbackRating"];
+            reason: components["schemas"]["FeedbackReason"] | null;
+            /** Comment */
+            comment: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** AnswerFeedbackUpsert */
+        AnswerFeedbackUpsert: {
+            rating: components["schemas"]["FeedbackRating"];
+            reason?: components["schemas"]["FeedbackReason"] | null;
+            /** Comment */
+            comment?: string | null;
+        };
         /** ApiError */
         ApiError: {
             /** Code */
@@ -638,6 +690,16 @@ export interface components {
              */
             status: string;
         };
+        /**
+         * FeedbackRating
+         * @enum {string}
+         */
+        FeedbackRating: "positive" | "negative";
+        /**
+         * FeedbackReason
+         * @enum {string}
+         */
+        FeedbackReason: "answer_incorrect" | "retrieval_missed" | "citation_unsupported" | "answer_incomplete" | "document_missing_answer";
         /**
          * FileRead
          * @description Outbound shape for a file.
@@ -865,6 +927,7 @@ export interface components {
             }[] | null;
             /** Mentioned File Ids */
             mentioned_file_ids: string[] | null;
+            feedback?: components["schemas"]["AnswerFeedbackRead"] | null;
             /**
              * Created At
              * Format: date-time
@@ -1658,6 +1721,108 @@ export interface operations {
                 };
             };
             /** @description Session not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_answer_feedback_chat_messages__message_id__feedback_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerFeedbackRead"];
+                };
+            };
+            /** @description Missing, invalid or expired access token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Message or feedback not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upsert_answer_feedback_chat_messages__message_id__feedback_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnswerFeedbackUpsert"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerFeedbackRead"];
+                };
+            };
+            /** @description Missing, invalid or expired access token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Assistant message not found */
             404: {
                 headers: {
                     [name: string]: unknown;

@@ -4,6 +4,7 @@ import {
   type ConversationDetail,
   type MessageRead,
   type RagAnswer,
+  type AnswerFeedbackUpsert,
 } from "@workspace/contracts"
 import { useWorkspace, selectActiveCourse, ragScope } from "../store/workspace"
 import {
@@ -254,6 +255,23 @@ export const useChatSession = (courseId: string | null, files?: FilesInput) => {
     },
   })
 
+  const feedbackMutation = useMutation({
+    mutationFn: ({
+      messageId,
+      payload,
+    }: {
+      messageId: string
+      payload: AnswerFeedbackUpsert
+    }) => api.chat.feedback(messageId, payload),
+    onSuccess: () => {
+      if (activeConversationId) {
+        queryClient.invalidateQueries({
+          queryKey: ["chat", "session", activeConversationId],
+        })
+      }
+    },
+  })
+
   // Map server messages to ChatMessage format with filename lookup
   const messages: ChatMessage[] = (activeSessionQuery.data?.messages ?? []).map(
     (msgRead) => ({
@@ -263,6 +281,7 @@ export const useChatSession = (courseId: string | null, files?: FilesInput) => {
       isOptimistic: msgRead.id.startsWith("temp-"),
       status: msgRead.id.startsWith("temp-") ? "pending" : "sent",
       grounded: msgRead.grounded,
+      feedback: msgRead.feedback ?? null,
       mentionedFileIds: msgRead.mentioned_file_ids,
       scopeLabel:
         msgRead.role === "assistant"
@@ -291,6 +310,7 @@ export const useChatSession = (courseId: string | null, files?: FilesInput) => {
     isLoadingSessions: sessionsQuery.isLoading,
     isLoadingMessages: activeSessionQuery.isLoading,
     isSending: sendMessageMutation.isPending,
+    isSubmittingFeedback: feedbackMutation.isPending,
 
     // Actions
     sendMessage: (text: string, options?: Omit<SendMessageInput, "text">) =>
@@ -300,6 +320,8 @@ export const useChatSession = (courseId: string | null, files?: FilesInput) => {
       }),
     deleteSession: (sessionId: string) =>
       deleteSessionMutation.mutateAsync(sessionId),
+    submitFeedback: (messageId: string, payload: AnswerFeedbackUpsert) =>
+      feedbackMutation.mutateAsync({ messageId, payload }),
     selectSession: (sessionId: string | null) => {
       if (courseId) setActiveConversation(courseId, sessionId)
     },

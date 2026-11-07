@@ -8,6 +8,7 @@ from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
+from app.schemas.feedback import AnswerFeedbackRead
 from app.schemas.file import _enum_values
 
 
@@ -101,6 +102,7 @@ class MessageRead(SQLModel):
     uncovered: str | None
     citations: list[dict[str, Any]] | None
     mentioned_file_ids: list[UUID] | None
+    feedback: AnswerFeedbackRead | None = None
     created_at: datetime
 
 

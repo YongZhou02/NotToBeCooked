@@ -3,6 +3,7 @@ import {
   ChatMessageItem,
   type ChatMessage,
   type CitationItem,
+  type FeedbackReason,
 } from "./ChatMessage"
 import { ChatInput, type ChatFile } from "./ChatInput"
 import { QUICK_PROMPTS, type QuickPrompt } from "../../lib/chatRequest"
@@ -36,6 +37,12 @@ export interface ChatProps {
   // Callbacks
   /** Resend a question with the files it named (US-11 "Ask again"). */
   onRetryMessage?: (text: string, fileIds: string[] | null) => Promise<void>
+  onFeedback?: (
+    messageId: string,
+    rating: "positive" | "negative",
+    reason?: FeedbackReason | null,
+    comment?: string | null
+  ) => Promise<void> | void
   onSendMessage?: (
     text: string
   ) =>
@@ -82,6 +89,7 @@ export const Chat: React.FC<ChatProps> = ({
   isTyping: controlledIsTyping,
   onSendMessage,
   onRetryMessage,
+  onFeedback,
   onCiteClick,
   onSelectSession,
   onDeleteSession,
@@ -442,6 +450,7 @@ export const Chat: React.FC<ChatProps> = ({
                   key={m.id || idx}
                   message={m}
                   onCiteClick={handleCitationClick}
+                  onFeedback={onFeedback}
                   onRetry={
                     retry &&
                     onRetryMessage &&
