@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>NTBC Evals</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">NTBC</p>
+        <h1>Evals</h1>
+      </div>
+      <div class="top-actions">
+        <label>
+          <span>Run</span>
+          <select id="runSelect" aria-label="Select evaluation run"></select>
+        </label>
+        <button type="button" disabled title="UI prototype: live execution is not connected">
+          Run evaluation
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="summary" aria-labelledby="summaryTitle">
+        <div>
+          <p class="eyebrow" id="datasetName">Dataset</p>
+          <h2 id="summaryTitle">Pipeline scorecard</h2>
+        </div>
+        <div class="summary-meta" id="summaryMeta"></div>
+      </section>
+
+      <section class="phase-grid" id="phaseGrid" aria-label="Pipeline phase scores"></section>
+
+      <section class="panel" aria-labelledby="retrievalTitle">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Phase 3</p>
+            <h2 id="retrievalTitle">Retrieval</h2>
+          </div>
+          <span class="chip">test split</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Recall@5</th>
+                <th>MRR@5</th>
+                <th>Hit@1</th>
+                <th>Complete@5</th>
+                <th>Median</th>
+              </tr>
+            </thead>
+            <tbody id="retrievalBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="historyTitle">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Runs</p>
+            <h2 id="historyTitle">History</h2>
+          </div>
+          <span class="chip" id="runCount"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Run</th>
+                <th>Mode</th>
+                <th>Source count</th>
+                <th>Extraction</th>
+                <th>Retrieval</th>
+                <th>Answers</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel trace-panel" aria-labelledby="traceTitle">
+        <div class="section-head trace-head">
+          <div>
+            <p class="eyebrow">Evidence</p>
+            <h2 id="traceTitle">Drill-down</h2>
+          </div>
+          <label class="question-picker">
+            <span>Question</span>
+            <select id="questionSelect" aria-label="Select evidence question"></select>
+          </label>
+        </div>
+        <div id="questionSummary" class="question-summary"></div>
+        <div id="traceContent"></div>
+      </section>
+    </main>
+
+    <template id="emptyRowTemplate">
+      <tr><td colspan="6" class="empty">Not available for this run.</td></tr>
+    </template>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
