@@ -44,6 +44,15 @@ venv
 # uploaded files (local object store stand-in)
 apps/api/storage/
 
+# Local interview backups contain private database and uploaded-file data.
+/output/backups/
+
+# Local diagnostics, browser captures, and exported user feedback.
+/output/
+/tmp/
+/.playwright-cli/
+/apps/api/negative-feedback.json
+
 # personal type-checker / editor configs. pyrefly.toml is not a project
 # dependency -- it appears in no pyproject.toml, package.json or uv.lock -- and
 # the one it replaced hard-coded `apps/api/.venv/bin/python`, which does not
