@@ -1,0 +1,935 @@
+{
+  "annotation_status": "draft: assistant source-checked; owner review pending",
+  "questions": {
+    "t1-001": {
+      "groups": [
+        {
+          "id": "t1-001-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 4,
+              "quote": "(1) Compiler, (2) Interpreter, (3) Assembler."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-002": {
+      "groups": [
+        {
+          "id": "t1-002-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 34,
+              "quote": "Definition: a \"pass\" is one complete scan through the program."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-003": {
+      "groups": [
+        {
+          "id": "t1-003-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 35,
+              "quote": "A forward reference means a use appears BEFORE a later definition in the source order."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-004": {
+      "groups": [
+        {
+          "id": "t1-004-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 9,
+              "quote": "The intermediate representation is a bridge: analysis extracts/structures meaning; synthesis constructs output."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-005": {
+      "groups": [
+        {
+          "id": "t1-005-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 10,
+              "quote": "Analysis Phase comprises: 1. Lexical analysis 2. Syntax analysis 3. Semantic analysis"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-006": {
+      "groups": [
+        {
+          "id": "t1-006-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 10,
+              "quote": "Synthesis Phase comprises: 1. Code optimization 2. Code generation"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-007": {
+      "groups": [
+        {
+          "id": "t1-007-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 38,
+              "quote": "Native code compiler -> target platform is the same kind as the host platform."
+            }
+          ]
+        },
+        {
+          "id": "t1-007-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 38,
+              "quote": "Cross compiler -> target platform differs from the host platform."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-008": {
+      "groups": [
+        {
+          "id": "t1-008-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 38,
+              "quote": "Incremental compiler -> recompiles changed source lines / code; updates object code."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-009": {
+      "groups": [
+        {
+          "id": "t1-009-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 24,
+              "quote": "Variable Name | Type | Address"
+            }
+          ]
+        },
+        {
+          "id": "t1-009-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 24,
+              "quote": "Rate | Float | 0009"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-010": {
+      "groups": [
+        {
+          "id": "t1-010-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 38,
+              "quote": "One pass compiler -> compiles the process in one pass."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-011": {
+      "groups": [
+        {
+          "id": "t1-011-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 13,
+              "quote": "Position -> id1; initial -> id2; rate -> id3."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-012": {
+      "groups": [
+        {
+          "id": "t1-012-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 13,
+              "quote": "identifier | assignment symbol | identifier | plus symbol | identifier | multiplication symbol | number."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-013": {
+      "groups": [
+        {
+          "id": "t1-013-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 17,
+              "quote": "Given: id1, id2, and id3 are REAL-valued identifiers."
+            }
+          ]
+        },
+        {
+          "id": "t1-013-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 17,
+              "quote": "Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-014": {
+      "groups": [
+        {
+          "id": "t1-014-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 13,
+              "quote": "Position = initial + rate * 60"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-015": {
+      "groups": [
+        {
+          "id": "t1-015-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 21,
+              "quote": "t1 = id3 * 60.0 id1 = id2 + t1"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-016": {
+      "groups": [
+        {
+          "id": "t1-016-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 23,
+              "quote": "id3 -> R2; id2 -> R1."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-017": {
+      "groups": [
+        {
+          "id": "t1-017-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 31,
+              "quote": "Input edge: Target Assembly Program."
+            }
+          ]
+        },
+        {
+          "id": "t1-017-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 31,
+              "quote": "Output edge: Relocatable Object Code."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-018": {
+      "groups": [
+        {
+          "id": "t1-018-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 23,
+              "quote": "MOV R1, id1 # id1 <- R1"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-019": {
+      "groups": [
+        {
+          "id": "t1-019-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 29,
+              "quote": "File inclusion (e.g., #include<stdio.h>)"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-020": {
+      "groups": [
+        {
+          "id": "t1-020-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 29,
+              "quote": "Macro processing (e.g., #define PI ...)"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-021": {
+      "groups": [
+        {
+          "id": "t1-021-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 10,
+              "quote": "Output of analysis = Intermediate Representation."
+            }
+          ]
+        },
+        {
+          "id": "t1-021-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 10,
+              "quote": "Input to synthesis = Intermediate Representation."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-022": {
+      "groups": [
+        {
+          "id": "t1-022-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 34,
+              "quote": "A forward reference can make immediate one-pass code generation difficult, because a referenced definition may not be known yet."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-023": {
+      "groups": [
+        {
+          "id": "t1-023-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 6,
+              "quote": "This is the slide's conceptual drawing, not a universal claim that all interpreters generate a separate binary target file."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-024": {
+      "groups": [
+        {
+          "id": "t1-024-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 38,
+              "quote": "Cross compiler -> target platform differs from the host platform."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-025": {
+      "groups": [
+        {
+          "id": "t1-025-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 22,
+              "quote": "It follows code optimization and produces target instructions."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-026": {
+      "groups": [
+        {
+          "id": "t1-026-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 19,
+              "quote": "The colored boxes t1, t2, t3 denote names for intermediate results, not extra source-language variables."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-027": {
+      "groups": [
+        {
+          "id": "t1-027-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 1,
+              "quote": "These shapes are decorative, not a data-flow or syntax diagram."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-028": {
+      "groups": [
+        {
+          "id": "t1-028-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 14,
+              "quote": "Pink highlighted node: Syntax analysis. All other phase nodes remain present."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-029": {
+      "groups": [
+        {
+          "id": "t1-029-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 36,
+              "quote": "+ reduces reading/writing of intermediate files"
+            }
+          ]
+        },
+        {
+          "id": "t1-029-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 36,
+              "quote": "- may need more memory when several compiler phases are grouped"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-030": {
+      "groups": [
+        {
+          "id": "t1-030-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 24,
+              "quote": "Error detection and recovery is ALSO connected to those stages."
+            }
+          ]
+        },
+        {
+          "id": "t1-030-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 24,
+              "quote": "Do not interpret symbol table or error handling as just one additional step after the compiler pipeline."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-031": {
+      "groups": [
+        {
+          "id": "t1-031-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 15,
+              "quote": "multiplication (*) groups id3 with 60 BEFORE addition (+)."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-032": {
+      "groups": [
+        {
+          "id": "t1-032-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 17,
+              "quote": "conversion node above the literal in the multiplication branch:"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-033": {
+      "groups": [
+        {
+          "id": "t1-033-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 28,
+              "quote": "The Libraries & Object Files box feeds INTO the Linker / Loader FROM THE LEFT (it is not produced by it)."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-034": {
+      "groups": [
+        {
+          "id": "t1-034-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 12,
+              "quote": "Lexical -> Syntax -> Semantic -> Intermediate code -> Code optimization -> Code generation."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-035": {
+      "groups": [
+        {
+          "id": "t1-035-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 24,
+              "quote": "Symbol table is connected by drawn edges to EVERY central stage: lexical, syntax, semantic, intermediate, optimization, generation."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-036": {
+      "groups": [
+        {
+          "id": "t1-036-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 21,
+              "quote": "The arrows mean transformed code, NOT additional program execution."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-037": {
+      "groups": [
+        {
+          "id": "t1-037-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 35,
+              "quote": "The two horizontal bars \"Pass I\" and \"Pass II\" introduce SEPARATE operations; they are not branches run in parallel."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-038": {
+      "groups": [
+        {
+          "id": "t1-038-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 38,
+              "quote": "The rows do NOT form a top-to-bottom flow or causal chain."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-039": {
+      "groups": [
+        {
+          "id": "t1-039-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 15,
+              "quote": "The RHS is id2 + (id3 * 60), then assigned to id1."
+            }
+          ]
+        },
+        {
+          "id": "t1-039-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 15,
+              "quote": "This is NOT the linear order of tokens; it is a tree."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-040": {
+      "groups": [
+        {
+          "id": "t1-040-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 19,
+              "quote": "60 -> inttoreal -> t1"
+            }
+          ]
+        },
+        {
+          "id": "t1-040-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 19,
+              "quote": "(id3, t1) -> multiply -> t2"
+            }
+          ]
+        },
+        {
+          "id": "t1-040-e3",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 19,
+              "quote": "(t2, id2) -> add -> t3"
+            }
+          ]
+        },
+        {
+          "id": "t1-040-e4",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 19,
+              "quote": "t3 -> assign -> id1"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-041": {
+      "groups": [
+        {
+          "id": "t1-041-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 9,
+              "quote": "analysis extracts/structures meaning; synthesis constructs output."
+            }
+          ]
+        },
+        {
+          "id": "t1-041-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 10,
+              "quote": "Input to synthesis = Intermediate Representation."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-042": {
+      "groups": [
+        {
+          "id": "t1-042-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 13,
+              "quote": "Position -> id1; initial -> id2; rate -> id3."
+            }
+          ]
+        },
+        {
+          "id": "t1-042-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 15,
+              "quote": "The RHS is id2 + (id3 * 60), then assigned to id1."
+            }
+          ]
+        },
+        {
+          "id": "t1-042-e3",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 17,
+              "quote": "Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-043": {
+      "groups": [
+        {
+          "id": "t1-043-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 13,
+              "quote": "Position = initial + rate * 60"
+            }
+          ]
+        },
+        {
+          "id": "t1-043-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 21,
+              "quote": "Optimization replaces integer-to-real conversion with the real literal 60.0"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-044": {
+      "groups": [
+        {
+          "id": "t1-044-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 30,
+              "quote": "Input edge carries Source Program; output edge carries Target Assembly Program in THIS pictured example."
+            }
+          ]
+        },
+        {
+          "id": "t1-044-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 31,
+              "quote": "Output edge: Relocatable Object Code."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-045": {
+      "groups": [
+        {
+          "id": "t1-045-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 34,
+              "quote": "A forward reference can make immediate one-pass code generation difficult"
+            }
+          ]
+        },
+        {
+          "id": "t1-045-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 35,
+              "quote": "Source program + recorded information -> generate target code"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-046": {
+      "groups": [
+        {
+          "id": "t1-046-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 25,
+              "quote": "FRONT END (primarily source-language-dependent):"
+            }
+          ]
+        },
+        {
+          "id": "t1-046-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 25,
+              "quote": "BACK END (primarily target-machine-dependent): - Code optimization - Code generation phase"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-047": {
+      "groups": [
+        {
+          "id": "t1-047-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 32,
+              "quote": "Linker combines code from several relocatable object files and libraries into one program."
+            }
+          ]
+        },
+        {
+          "id": "t1-047-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 32,
+              "quote": "Loader relocates addresses and places instructions/data at appropriate memory locations."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-048": {
+      "groups": [
+        {
+          "id": "t1-048-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 26,
+              "quote": "Interpreter: does not generate intermediate code."
+            }
+          ]
+        },
+        {
+          "id": "t1-048-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 26,
+              "quote": "Interpreters may internally compile to intermediate code / bytecode"
+            }
+          ]
+        }
+      ]
+    },
+    "t1-049": {
+      "groups": [
+        {
+          "id": "t1-049-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 7,
+              "quote": "Assembly Code --> [Assembler] --> Machine Code"
+            }
+          ]
+        },
+        {
+          "id": "t1-049-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 31,
+              "quote": "Output edge: Relocatable Object Code."
+            }
+          ]
+        }
+      ]
+    },
+    "t1-050": {
+      "groups": [
+        {
+          "id": "t1-050-e1",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 21,
+              "quote": "t1 = id3 * 60.0"
+            }
+          ]
+        },
+        {
+          "id": "t1-050-e2",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 23,
+              "quote": "MOV id3, R2 # R2 <- id3"
+            }
+          ]
+        },
+        {
+          "id": "t1-050-e3",
+          "alternatives": [
+            {
+              "document_id": "topic1",
+              "pdf_page": 23,
+              "quote": "MUL #60.0, R2 # R2 <- R2 * 60.0"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

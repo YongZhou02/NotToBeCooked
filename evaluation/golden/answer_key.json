@@ -1,0 +1,328 @@
+{
+  "annotation_status": "draft: assistant source-checked; owner review pending",
+  "answers": {
+    "t1-001": {
+      "reference_answer": "Compiler, interpreter, and assembler.",
+      "required_facts": [
+        "(1) Compiler, (2) Interpreter, (3) Assembler."
+      ]
+    },
+    "t1-002": {
+      "reference_answer": "One complete scan through the program.",
+      "required_facts": [
+        "Definition: a \"pass\" is one complete scan through the program."
+      ]
+    },
+    "t1-003": {
+      "reference_answer": "A use before a later definition in source order.",
+      "required_facts": [
+        "A forward reference means a use appears BEFORE a later definition in the source order."
+      ]
+    },
+    "t1-004": {
+      "reference_answer": "Analysis outputs to synthesis inputs.",
+      "required_facts": [
+        "The intermediate representation is a bridge: analysis extracts/structures meaning; synthesis constructs output."
+      ]
+    },
+    "t1-005": {
+      "reference_answer": "Lexical, syntax, and semantic analysis.",
+      "required_facts": [
+        "Analysis Phase comprises: 1. Lexical analysis 2. Syntax analysis 3. Semantic analysis"
+      ]
+    },
+    "t1-006": {
+      "reference_answer": "Code optimization and code generation.",
+      "required_facts": [
+        "Synthesis Phase comprises: 1. Code optimization 2. Code generation"
+      ]
+    },
+    "t1-007": {
+      "reference_answer": "Native targets the same kind of platform as its host; cross targets a different platform.",
+      "required_facts": [
+        "Native code compiler -> target platform is the same kind as the host platform.",
+        "Cross compiler -> target platform differs from the host platform."
+      ]
+    },
+    "t1-008": {
+      "reference_answer": "Changed source lines or code, updating object code.",
+      "required_facts": [
+        "Incremental compiler -> recompiles changed source lines / code; updates object code."
+      ]
+    },
+    "t1-009": {
+      "reference_answer": "Variable Name, Type, Address; Rate is Float at 0009.",
+      "required_facts": [
+        "Variable Name | Type | Address",
+        "Rate | Float | 0009"
+      ]
+    },
+    "t1-010": {
+      "reference_answer": "It compiles the process in one pass.",
+      "required_facts": [
+        "One pass compiler -> compiles the process in one pass."
+      ]
+    },
+    "t1-011": {
+      "reference_answer": "rate maps to id3.",
+      "required_facts": [
+        "Position -> id1; initial -> id2; rate -> id3."
+      ]
+    },
+    "t1-012": {
+      "reference_answer": "Identifier, assignment, identifier, plus, identifier, multiplication, number.",
+      "required_facts": [
+        "identifier | assignment symbol | identifier | plus symbol | identifier | multiplication symbol | number."
+      ]
+    },
+    "t1-013": {
+      "reference_answer": "id1, id2 and id3 are real; 60 is integer and is converted before multiplying by id3.",
+      "required_facts": [
+        "Given: id1, id2, and id3 are REAL-valued identifiers.",
+        "Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+      ]
+    },
+    "t1-014": {
+      "reference_answer": "Position = initial + rate * 60.",
+      "required_facts": [
+        "Position = initial + rate * 60"
+      ]
+    },
+    "t1-015": {
+      "reference_answer": "t1 = id3 * 60.0; id1 = id2 + t1.",
+      "required_facts": [
+        "t1 = id3 * 60.0 id1 = id2 + t1"
+      ]
+    },
+    "t1-016": {
+      "reference_answer": "id3 maps to R2; id2 maps to R1.",
+      "required_facts": [
+        "id3 -> R2; id2 -> R1."
+      ]
+    },
+    "t1-017": {
+      "reference_answer": "Target Assembly Program enters; Relocatable Object Code leaves.",
+      "required_facts": [
+        "Input edge: Target Assembly Program.",
+        "Output edge: Relocatable Object Code."
+      ]
+    },
+    "t1-018": {
+      "reference_answer": "MOV R1, id1.",
+      "required_facts": [
+        "MOV R1, id1 # id1 <- R1"
+      ]
+    },
+    "t1-019": {
+      "reference_answer": "File inclusion.",
+      "required_facts": [
+        "File inclusion (e.g., #include<stdio.h>)"
+      ]
+    },
+    "t1-020": {
+      "reference_answer": "Macro processing.",
+      "required_facts": [
+        "Macro processing (e.g., #define PI ...)"
+      ]
+    },
+    "t1-021": {
+      "reference_answer": "Intermediate representation connects analysis to synthesis.",
+      "required_facts": [
+        "Output of analysis = Intermediate Representation.",
+        "Input to synthesis = Intermediate Representation."
+      ]
+    },
+    "t1-022": {
+      "reference_answer": "A forward reference means the referenced definition may not yet be known.",
+      "required_facts": [
+        "A forward reference can make immediate one-pass code generation difficult, because a referenced definition may not be known yet."
+      ]
+    },
+    "t1-023": {
+      "reference_answer": "No; it explicitly calls the diagram conceptual, not a universal binary-file claim.",
+      "required_facts": [
+        "This is the slide's conceptual drawing, not a universal claim that all interpreters generate a separate binary target file."
+      ]
+    },
+    "t1-024": {
+      "reference_answer": "Cross compiler.",
+      "required_facts": [
+        "Cross compiler -> target platform differs from the host platform."
+      ]
+    },
+    "t1-025": {
+      "reference_answer": "Code generation.",
+      "required_facts": [
+        "It follows code optimization and produces target instructions."
+      ]
+    },
+    "t1-026": {
+      "reference_answer": "No; they name intermediate results.",
+      "required_facts": [
+        "The colored boxes t1, t2, t3 denote names for intermediate results, not extra source-language variables."
+      ]
+    },
+    "t1-027": {
+      "reference_answer": "No; they are decorative.",
+      "required_facts": [
+        "These shapes are decorative, not a data-flow or syntax diagram."
+      ]
+    },
+    "t1-028": {
+      "reference_answer": "No; it changes the focused node while the others remain.",
+      "required_facts": [
+        "Pink highlighted node: Syntax analysis. All other phase nodes remain present."
+      ]
+    },
+    "t1-029": {
+      "reference_answer": "Less intermediate-file I/O but potentially more memory.",
+      "required_facts": [
+        "+ reduces reading/writing of intermediate files",
+        "- may need more memory when several compiler phases are grouped"
+      ]
+    },
+    "t1-030": {
+      "reference_answer": "No; they connect across stages rather than being extra sequential steps.",
+      "required_facts": [
+        "Error detection and recovery is ALSO connected to those stages.",
+        "Do not interpret symbol table or error handling as just one additional step after the compiler pipeline."
+      ]
+    },
+    "t1-031": {
+      "reference_answer": "id3 and 60, before addition with id2.",
+      "required_facts": [
+        "multiplication (*) groups id3 with 60 BEFORE addition (+)."
+      ]
+    },
+    "t1-032": {
+      "reference_answer": "Above literal 60 in the multiplication branch.",
+      "required_facts": [
+        "conversion node above the literal in the multiplication branch:"
+      ]
+    },
+    "t1-033": {
+      "reference_answer": "It feeds into Linker / Loader from the left.",
+      "required_facts": [
+        "The Libraries & Object Files box feeds INTO the Linker / Loader FROM THE LEFT (it is not produced by it)."
+      ]
+    },
+    "t1-034": {
+      "reference_answer": "Lexical, syntax, semantic, intermediate code, optimization, generation.",
+      "required_facts": [
+        "Lexical -> Syntax -> Semantic -> Intermediate code -> Code optimization -> Code generation."
+      ]
+    },
+    "t1-035": {
+      "reference_answer": "All six central stages.",
+      "required_facts": [
+        "Symbol table is connected by drawn edges to EVERY central stage: lexical, syntax, semantic, intermediate, optimization, generation."
+      ]
+    },
+    "t1-036": {
+      "reference_answer": "Code transformation, not additional program execution.",
+      "required_facts": [
+        "The arrows mean transformed code, NOT additional program execution."
+      ]
+    },
+    "t1-037": {
+      "reference_answer": "No; they are separate first and second scans.",
+      "required_facts": [
+        "The two horizontal bars \"Pass I\" and \"Pass II\" introduce SEPARATE operations; they are not branches run in parallel."
+      ]
+    },
+    "t1-038": {
+      "reference_answer": "No; each row pairs a type with its definition.",
+      "required_facts": [
+        "The rows do NOT form a top-to-bottom flow or causal chain."
+      ]
+    },
+    "t1-039": {
+      "reference_answer": "The tree groups id3 * 60 under addition; it is id2 + (id3 * 60).",
+      "required_facts": [
+        "The RHS is id2 + (id3 * 60), then assigned to id1.",
+        "This is NOT the linear order of tokens; it is a tree."
+      ]
+    },
+    "t1-040": {
+      "reference_answer": "60 converts to t1; multiplication gives t2; adding id2 gives t3; t3 assigns to id1.",
+      "required_facts": [
+        "60 -> inttoreal -> t1",
+        "(id3, t1) -> multiply -> t2",
+        "(t2, id2) -> add -> t3",
+        "t3 -> assign -> id1"
+      ]
+    },
+    "t1-041": {
+      "reference_answer": "Analysis outputs IR; synthesis takes it as input and constructs output.",
+      "required_facts": [
+        "analysis extracts/structures meaning; synthesis constructs output.",
+        "Input to synthesis = Intermediate Representation."
+      ]
+    },
+    "t1-042": {
+      "reference_answer": "Identifiers become id1/id2/id3; syntax groups multiplication; semantic analysis converts 60 to real.",
+      "required_facts": [
+        "Position -> id1; initial -> id2; rate -> id3.",
+        "The RHS is id2 + (id3 * 60), then assigned to id1.",
+        "Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+      ]
+    },
+    "t1-043": {
+      "reference_answer": "Source uses integer 60; semantic analysis requires real conversion and optimization uses 60.0.",
+      "required_facts": [
+        "Position = initial + rate * 60",
+        "Optimization replaces integer-to-real conversion with the real literal 60.0"
+      ]
+    },
+    "t1-044": {
+      "reference_answer": "Compiler outputs target assembly; assembler outputs relocatable object code.",
+      "required_facts": [
+        "Input edge carries Source Program; output edge carries Target Assembly Program in THIS pictured example.",
+        "Output edge: Relocatable Object Code."
+      ]
+    },
+    "t1-045": {
+      "reference_answer": "First scan records information; second scan generates output using it, resolving later definitions.",
+      "required_facts": [
+        "A forward reference can make immediate one-pass code generation difficult",
+        "Source program + recorded information -> generate target code"
+      ]
+    },
+    "t1-046": {
+      "reference_answer": "Front end mainly depends on source language; back end on target machine, and includes code generation.",
+      "required_facts": [
+        "FRONT END (primarily source-language-dependent):",
+        "BACK END (primarily target-machine-dependent): - Code optimization - Code generation phase"
+      ]
+    },
+    "t1-047": {
+      "reference_answer": "Linker combines relocatable files and libraries; loader relocates and places instructions/data in memory.",
+      "required_facts": [
+        "Linker combines code from several relocatable object files and libraries into one program.",
+        "Loader relocates addresses and places instructions/data at appropriate memory locations."
+      ]
+    },
+    "t1-048": {
+      "reference_answer": "Slide says interpreters do not generate IR, but cautions that implementations may compile to IR or bytecode.",
+      "required_facts": [
+        "Interpreter: does not generate intermediate code.",
+        "Interpreters may internally compile to intermediate code / bytecode"
+      ]
+    },
+    "t1-049": {
+      "reference_answer": "Generic: assembly to machine code; toolchain specifically: target assembly to relocatable object code.",
+      "required_facts": [
+        "Assembly Code --> [Assembler] --> Machine Code",
+        "Output edge: Relocatable Object Code."
+      ]
+    },
+    "t1-050": {
+      "reference_answer": "t1=id3*60.0 is realized by loading id3 into R2 and multiplying R2 by 60.0.",
+      "required_facts": [
+        "t1 = id3 * 60.0",
+        "MOV id3, R2 # R2 <- id3",
+        "MUL #60.0, R2 # R2 <- R2 * 60.0"
+      ]
+    }
+  }
+}

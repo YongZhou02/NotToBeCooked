@@ -48,7 +48,7 @@ def test_extract_text_keeps_text_without_page_provenance():
     ]
 
 
-def test_extract_text_keeps_body_text_and_list_items_only():
+def test_extract_text_keeps_body_text_and_list_items_and_excludes_furniture():
     heading = SimpleNamespace(
         label=SimpleNamespace(value="section_header"),
         content_layer=SimpleNamespace(value="body"),
@@ -105,6 +105,31 @@ def test_extract_text_keeps_body_text_and_list_items_only():
             "page_end": 4,
             "content": "Interaction is required for conflict.",
         },
+    ]
+
+
+def test_extract_text_keeps_code_diagrams_verbatim_and_excludes_code_furniture():
+    text = "Source Program\n    |\n    v\nTranslator --> Target Program"
+    code = SimpleNamespace(
+        label=SimpleNamespace(value="code"),
+        content_layer=SimpleNamespace(value="body"),
+        text=text,
+        prov=[SimpleNamespace(page_no=4)],
+    )
+    furniture = SimpleNamespace(
+        label=SimpleNamespace(value="code"),
+        content_layer=SimpleNamespace(value="furniture"),
+        text="Repeated decoration",
+    )
+    document = SimpleNamespace(iterate_items=lambda: [(code, 0), (furniture, 0)])
+    assert extract_text(document) == [
+        {
+            "heading": None,
+            "page_start": 4,
+            "page_end": 4,
+            "content": text,
+            "content_type": "code",
+        }
     ]
 
 

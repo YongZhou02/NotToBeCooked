@@ -53,6 +53,9 @@ apps/api/storage/
 /.playwright-cli/
 /apps/api/negative-feedback.json
 
+# Reproducible benchmark outputs (golden inputs stay versioned).
+/evaluation/runs/
+
 # personal type-checker / editor configs. pyrefly.toml is not a project
 # dependency -- it appears in no pyproject.toml, package.json or uv.lock -- and
 # the one it replaced hard-coded `apps/api/.venv/bin/python`, which does not

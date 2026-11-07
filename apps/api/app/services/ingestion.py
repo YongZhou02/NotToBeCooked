@@ -88,7 +88,9 @@ def extract_text(document):
             content = f"Chart data (model-extracted; verify values against the original chart){title}\n{chart_text}"
         elif label == "table":
             content = document_item.export_to_markdown(doc=document)
-        elif label in {"text", "list_item"} or is_bullet_heading:
+        elif label in {"text", "list_item", "code"} or is_bullet_heading:
+            # Docling can classify text diagrams / arrow explanations as code.
+            # Keep the supplied text verbatim rather than losing the whole block.
             content = text
         else:
             continue
@@ -108,6 +110,8 @@ def extract_text(document):
             "page_end": page_end,
             "content": content,
         }
+        if label == "code":
+            item["content_type"] = "code"
 
         extracted_items.append(item)
     return extracted_items
@@ -152,6 +156,7 @@ def create_chunk(extracted_items, file_id, max_token=350) -> list[ChunkCreate]:
     page: list[int] = []
     content: list[str] = []
     total_token = 0
+    previous_was_code = False
 
     def flush() -> None:
         body = " ".join(content)
@@ -170,6 +175,7 @@ def create_chunk(extracted_items, file_id, max_token=350) -> list[ChunkCreate]:
 
     for item in extracted_items:
         current_heading = item["heading"]
+        preserve_formatting = item.get("content_type") == "code"
         pieces = split_long_text(item["content"], max_token)
 
         for piece in pieces:
@@ -179,6 +185,8 @@ def create_chunk(extracted_items, file_id, max_token=350) -> list[ChunkCreate]:
                 total_token + token_count > max_token
                 or current_heading != heading
                 or item["page_start"] > max(page)
+                or preserve_formatting
+                or previous_was_code
             ):
                 flush()
                 heading = None
@@ -195,6 +203,7 @@ def create_chunk(extracted_items, file_id, max_token=350) -> list[ChunkCreate]:
             page.append(item["page_start"])
             page.append(item["page_end"])
             total_token += token_count
+            previous_was_code = preserve_formatting
 
     if content:
         flush()
