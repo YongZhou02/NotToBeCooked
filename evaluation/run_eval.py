@@ -15,6 +15,7 @@ import random
 import statistics
 import subprocess
 import sys
+from contextlib import ExitStack
 from datetime import UTC, datetime
 from pathlib import Path
 from time import perf_counter
@@ -46,17 +47,43 @@ from app.schemas.rag import RagQueryRequest, RetrievedChunk
 from app.schemas.user import User
 from app.services.embeddings import embed_query, embed_text
 from app.services.ingestion import create_chunk, extract_text, ingest_document
-from scorers.pipeline import token_fidelity, vector_valid
-from scorers.retrieval import covered_groups, normalize, retrieval_metrics
 from sqlmodel import col, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-DATASET = EVALUATION / "datasets/cpt316/topic1"
+from scorers.pipeline import token_fidelity, vector_valid
+from scorers.retrieval import covered_groups, normalize, retrieval_metrics
+
+DATASET = EVALUATION / "datasets/cpt316/all"
 METHODS = ("vector", "keyword", "hybrid_rrf")
 
 
 def read(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def traced_generation(trace: dict) -> ExitStack:
+    """Record what the route only logs: the model's draft and why it was rejected."""
+    real_generate, real_check = rag_route.generate_answer, rag_route.check_grounding
+
+    async def generate(**kwargs: Any) -> Any:
+        try:
+            draft = await real_generate(**kwargs)
+        except Exception as error:
+            trace["generation_error"] = repr(error)[:500]
+            raise
+        trace["draft"] = draft.model_dump(mode="json")
+        return draft
+
+    def check(*args: Any, **kwargs: Any) -> Any:
+        report = real_check(*args, **kwargs)
+        trace["grounding_ok"] = report.ok
+        trace["grounding_problems"] = report.problems
+        return report
+
+    stack = ExitStack()
+    stack.enter_context(patch.object(rag_route, "generate_answer", generate))
+    stack.enter_context(patch.object(rag_route, "check_grounding", check))
+    return stack
 
 
 def write(path: Path, value: Any) -> None:
@@ -91,8 +118,12 @@ def load_dataset(folder: Path) -> tuple[dict, list[dict], dict, dict]:
     ]
     questions = [
         {
-            key: row[key]
-            for key in ("id", "category", "split", "generation_review", "question")
+            **{
+                key: row[key]
+                for key in ("id", "category", "split", "generation_review", "question")
+            },
+            "origin": row.get("origin", "synthetic"),
+            "answerable": row.get("answerable", True),
         }
         for row in rows
     ]
@@ -121,10 +152,12 @@ def load_dataset(folder: Path) -> tuple[dict, list[dict], dict, dict]:
         raise ValueError(
             "Question/answer/evidence IDs must match exactly and be unique"
         )
-    if any(q["split"] not in ("dev", "test") for q in questions):
+    if any(q["split"] not in ("dev", "test", "stress") for q in questions):
         raise ValueError("Invalid development/test split")
     for question in questions:
         groups = evidence[question["id"]]["groups"]
+        if not groups and not question["answerable"]:
+            continue
         if not groups or len({g["id"] for g in groups}) != len(groups):
             raise ValueError(f"Missing/duplicate evidence groups: {question['id']}")
         if any(not g["alternatives"] for g in groups):
@@ -371,7 +404,8 @@ async def search(
 
 def summary(rows: list[dict], checks: dict, out: Path) -> None:
     aggregates = []
-    for split in ("dev", "test"):
+    rows = [r for r in rows if r["metrics"]]
+    for split in ("dev", "test", "stress"):
         for category in ("all", *sorted({r["category"] for r in rows})):
             for method in METHODS:
                 selected = [
@@ -413,8 +447,8 @@ def summary(rows: list[dict], checks: dict, out: Path) -> None:
             },
             "retrieval": aggregates,
             "limitations": [
-                "Draft assistant-authored labels; owner review pending",
-                "Single text-transcribed PDF; not original-image understanding",
+                "Review status varies by question; see origin and verified on each row",
+                "Text-transcribed PDFs; not original-image understanding",
                 "DB retrieval latency excludes embedding, generation, HTTP, and UI",
             ],
         },
@@ -422,7 +456,7 @@ def summary(rows: list[dict], checks: dict, out: Path) -> None:
     lines = [
         "# NTBC pipeline evaluation",
         "",
-        "Draft source-labelled benchmark; owner review pending. One transcribed PDF, not a general RAG accuracy claim.",
+        "Source-labelled benchmark on text-transcribed PDFs, not a general RAG accuracy claim. Check each question's origin and review status.",
         "",
         "## Extraction and storage",
         "",
@@ -452,9 +486,7 @@ def summary(rows: list[dict], checks: dict, out: Path) -> None:
 async def main(args: argparse.Namespace) -> None:
     folder = args.dataset.resolve()
     manifest, questions, answers, evidence = load_dataset(folder)
-    if args.generate and (
-        settings.LLM_FAKE_MODE or settings.llm_provider is None
-    ):
+    if args.generate and (settings.LLM_FAKE_MODE or settings.llm_provider is None):
         raise ValueError(
             "Real generation requires LLM_FAKE_MODE=false and a GEMINI_API_KEY "
             "or GROQ_API_KEY"
@@ -643,20 +675,30 @@ async def main(args: argparse.Namespace) -> None:
                             "query_embedding_ms": q["embedding_ms"],
                             "retrieval_ms": timings,
                             "sources": trace,
+                            "origin": q["origin"],
+                            "answerable": q["answerable"],
                             "metrics": retrieval_metrics(
                                 trace, evidence[q["id"]]["groups"]
-                            ),
+                            )
+                            if q["answerable"]
+                            else None,
                         }
                         if (
                             args.generate
-                            and q["generation_review"]
+                            and (args.generate_all or q["generation_review"])
                             and method == args.generation_method
                         ):
                             started = perf_counter()
                             # Standalone adapter swaps ONLY retrieval results. The production
                             # route assembles context, calls Gemini, verifies citations and stores messages.
-                            with patch.object(
-                                rag_route, "_retrieve", AsyncMock(return_value=sources)
+                            trace_record: dict[str, Any] = {}
+                            with (
+                                patch.object(
+                                    rag_route,
+                                    "_retrieve",
+                                    AsyncMock(return_value=sources),
+                                ),
+                                traced_generation(trace_record),
                             ):
                                 result = await rag_route.query(
                                     RagQueryRequest(
@@ -669,6 +711,7 @@ async def main(args: argparse.Namespace) -> None:
                                 )
                             row["generation_ms"] = (perf_counter() - started) * 1000
                             row["response"] = result.model_dump(mode="json")
+                            row["generation_trace"] = trace_record
                             messages = (
                                 await session.exec(
                                     select(Message).where(
@@ -685,9 +728,15 @@ async def main(args: argparse.Namespace) -> None:
                                 {
                                     "question_id": q["id"],
                                     "method": method,
+                                    "category": q["category"],
+                                    "split": q["split"],
+                                    "origin": q["origin"],
+                                    "answerable": q["answerable"],
+                                    "sources": trace,
                                     "response": row["response"],
                                     "generation_ms": row["generation_ms"],
                                     "scope_snapshots": row["scope_snapshots"],
+                                    "generation_trace": trace_record,
                                 }
                             )
                             write(out / "generation_answers.json", generated_answers)
@@ -746,6 +795,11 @@ if __name__ == "__main__":
         "--generate",
         action="store_true",
         help="Call the configured real model for the 15 review questions",
+    )
+    parser.add_argument(
+        "--generate-all",
+        action="store_true",
+        help="With --generate, answer every question, not only the review set",
     )
     parser.add_argument("--generation-method", choices=METHODS, default="hybrid_rrf")
     parser.add_argument("--repeats", type=int, default=3)

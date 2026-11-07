@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "legacy_dataset_hashes": {
+    "answer_key.json": "2f6abc0c448f0f8f2c6aeb60f240d74a5b3376a771010170f41740a03624ae64",
+    "evidence_key.json": "ffcc059997ed71204d14ad588351e9eb490d83866bfb69f4675378343f1f3791",
+    "questions.json": "7ee7985c46a07da2df53d8b02ce963df22375f63c5bf59a3b1af6a2e37cafda7"
+  },
+  "documents": [
+    {
+      "id": "topic1",
+      "path": "../documents/CPT316_Topic1_Semantic_Text_Only.pdf",
+      "sha256": "d4da975c7bbef3a21ee9fcc2db2433b0d100f60150d8dc9c0f0bec711c90e62d",
+      "pages": 38,
+      "coverage": "PDF pages 1-38"
+    }
+  ],
+  "legacy_dataset_hashes": {
+    "answer_key.json": "2f6abc0c448f0f8f2c6aeb60f240d74a5b3376a771010170f41740a03624ae64",
+    "evidence_key.json": "ffcc059997ed71204d14ad588351e9eb490d83866bfb69f4675378343f1f3791",
+    "questions.json": "7ee7985c46a07da2df53d8b02ce963df22375f63c5bf59a3b1af6a2e37cafda7"
+  }
+}
