@@ -182,6 +182,14 @@ function currentQuestion() {
   );
 }
 
+// dashboard_data.json keeps each question's gold evidence inside its per-run
+// traces (traces[runId].groups), not at the top level. Gold evidence is the same
+// in every run of a dataset, so the first trace is enough.
+function evidenceGroupsFromTraces(q) {
+  const trace = Object.values(q.traces || {})[0];
+  return (trace?.groups || []).map((g) => ({ id: g.id, alternatives: g.alternatives || [] }));
+}
+
 function getAllQuestions() {
   const baselineQuestions = (state.data?.questions || []).map((q) => {
     const isEdited = Object.prototype.hasOwnProperty.call(state.answerEdits, q.id);
@@ -193,7 +201,7 @@ function getAllQuestions() {
       reference_answer: isEdited ? state.answerEdits[q.id] : q.reference_answer,
       is_edited: isEdited,
       verified: hasVerification ? Boolean(state.verifications[q.id]) : Boolean(q.verified),
-      evidence_groups: q.evidence_groups || [],
+      evidence_groups: q.evidence_groups || evidenceGroupsFromTraces(q),
       required_facts: q.required_facts || [],
       traces: q.traces || {},
     };

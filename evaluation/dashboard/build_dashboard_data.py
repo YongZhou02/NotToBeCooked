@@ -423,6 +423,7 @@ def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
                 "split": question["split"],
                 "reference_answer": question["reference_answer"],
                 "required_facts": question["required_facts"],
+                "evidence_groups": question["evidence_groups"],
                 "traces": trace_by_question[question["id"]],
             }
             for question in questions
