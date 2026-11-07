@@ -22,6 +22,8 @@ const state = {
   filters: defaultFilters(),
   editor: null, // { mode: "new" | "edit", id, draft, message } while the editor is open
   exportSelection: new Set(),
+  exportHumanOnly: false,
+  exportSelectionBeforeHumanOnly: null, // restored when "Human-written only" is turned off
   activeEvidenceIndex: 0,
   pdfSyncKey: null, // which question+evidence the PDF was last pointed at
   currentPdfState: {
@@ -1663,6 +1665,7 @@ function renderExportList() {
       const input = document.createElement("input");
       input.type = "checkbox";
       input.checked = state.exportSelection.has(q.id);
+      input.disabled = state.exportHumanOnly && q.origin !== "human";
       input.addEventListener("change", () => {
         if (input.checked) state.exportSelection.add(q.id);
         else state.exportSelection.delete(q.id);
@@ -1690,18 +1693,40 @@ function updateExportCount() {
 // quick way to share new hard cases; anything can still be unticked.
 function openExportDialog() {
   state.exportSelection = new Set(getFilteredQuestions().map((q) => q.id));
+  state.exportHumanOnly = false;
+  state.exportSelectionBeforeHumanOnly = null;
+  $("exportHumanOnly").checked = false;
   $("visMenu").open = false;
   renderExportList();
   $("exportDialog").showModal();
 }
 
 function setExportSelection(selectAll) {
-  state.exportSelection = new Set(selectAll ? getFilteredQuestions().map((q) => q.id) : []);
+  const eligible = getFilteredQuestions().filter((q) => !state.exportHumanOnly || q.origin === "human");
+  state.exportSelection = new Set(selectAll ? eligible.map((q) => q.id) : []);
+  renderExportList();
+}
+
+// Turning this on unticks every question that is not human-written and keeps them
+// unticked; turning it off puts back the ticks it took away.
+function setExportHumanOnly(on) {
+  state.exportHumanOnly = on;
+  $("exportHumanOnly").checked = on;
+  if (on) {
+    state.exportSelectionBeforeHumanOnly = new Set(state.exportSelection);
+    const human = new Set(getAllQuestions().filter((q) => q.origin === "human").map((q) => q.id));
+    state.exportSelection = new Set([...state.exportSelection].filter((id) => human.has(id)));
+  } else if (state.exportSelectionBeforeHumanOnly) {
+    state.exportSelection = state.exportSelectionBeforeHumanOnly;
+    state.exportSelectionBeforeHumanOnly = null;
+  }
   renderExportList();
 }
 
 function exportDataset() {
-  const allQs = getAllQuestions().filter((q) => state.exportSelection.has(q.id));
+  const allQs = getAllQuestions().filter(
+    (q) => state.exportSelection.has(q.id) && (!state.exportHumanOnly || q.origin === "human"),
+  );
   const metrics = computeSplitMetrics();
   const payload = {
     dataset: state.data.dataset.name,
@@ -2359,6 +2384,7 @@ function initialize(data) {
   $("exportCancelBtn").addEventListener("click", () => $("exportDialog").close());
   $("exportSelectAll").addEventListener("click", () => setExportSelection(true));
   $("exportSelectNone").addEventListener("click", () => setExportSelection(false));
+  $("exportHumanOnly").addEventListener("change", (e) => setExportHumanOnly(e.target.checked));
 
   render();
 }
