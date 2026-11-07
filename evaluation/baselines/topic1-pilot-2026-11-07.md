@@ -1,8 +1,9 @@
 # Topic 1 baseline: 2026-11-07
 
 Local run: `evaluation/runs/20261107T113258086748Z/`.
-Command: `uv run python scripts/evaluate_pipeline.py --generate` (from `apps/api`).
-Corpus: the supplied 38-page `CPT316_Topic1_Semantic_Text_Only.pdf`.
+Historical command: `uv run python scripts/evaluate_pipeline.py --generate` (before harness reorganisation).
+Current entry point: `uv run --project apps/api python evaluation/run_eval.py --generate`.
+Corpus: the supplied 38-page `datasets/cpt316/documents/CPT316_Topic1_Semantic_Text_Only.pdf`.
 50 questions, including 35 provisional test questions. This is a pilot dataset
 authored and source-checked by the assistant, awaiting Bao Sheng's review. Related
 questions occur across splits; do not present these as independent unseen-topic results.

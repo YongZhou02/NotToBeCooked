@@ -92,10 +92,10 @@ database fixtures. It does not test the entire deployed application: HTTP/auth,
 UI, conversation memory, file replacement, and original-image understanding are outside this run.
 
 Evidence: [methodology](../../evaluation/README.md),
-[runner](../../apps/api/scripts/evaluate_pipeline.py),
-[golden questions](../../evaluation/golden/questions.json),
-[evidence key](../../evaluation/golden/evidence_key.json),
-[answer key](../../evaluation/golden/answer_key.json),
+[runner](../../evaluation/run_eval.py),
+[question, answer and evidence rows](../../evaluation/datasets/cpt316/topic1/questions.jsonl),
+[dataset configuration](../../evaluation/datasets/cpt316/topic1/dataset.json),
+[source manifest](../../evaluation/datasets/cpt316/topic1/sources.json),
 [recorded run configuration](../../evaluation/runs/20261107T113258086748Z/config.json).
 
 ### C. Traceable, human-auditable evaluation
@@ -117,11 +117,11 @@ Verification at delivery: 9 tests passed across the compiler and metric suites;
 browser checks confirmed report loading, question switching, and review controls.
 The test count is a snapshot, not a coverage percentage or a production-quality guarantee.
 
-Evidence: [compiler](../../apps/api/scripts/compile_evaluation_review.py),
-[report template](../../apps/api/app/evaluation/review_template.html),
-[compiler tests](../../apps/api/tests/test_evaluation_review.py),
-[metric tests](../../apps/api/tests/test_pipeline_evaluation.py),
-[local compiled report](../../evaluation/runs/20261107T113258086748Z/review.html).
+Evidence: [compiler](../../evaluation/reports/build_review.py),
+[report template](../../evaluation/reports/review_template.html),
+[compiler tests](../../evaluation/tests/test_review.py),
+[metric tests](../../evaluation/tests/test_scorers.py),
+[compiled report](../../evaluation/reports/generated/topic1-baseline-review.html).
 
 ### D. Retrieval trade-off — an analysis result, not an implemented retrieval invention
 
@@ -174,7 +174,7 @@ The numbering below is this document's conversation index, not a fabricated chat
 | C16 | Asked whether Docling/OCR preserves content into chunks and pgvector | Systems thinking; stage-level observability | Harness checks extraction, chunk retention, and database round-trip rather than retrieval alone |
 | C17 | Asked why independent evidence labels are needed when citations already exist | Methodological scrutiny | Made the distinction explicit: generated citations are outputs; independent expected evidence is the reference |
 | C18 | Explicitly requested correctness, completeness, faithfulness, and citation support on about 15 questions | Quality specification | 15 generated answers and four-dimension rubric; assistant reviews are not independent owner ratings |
-| C19 | Required evaluation data in an evaluation folder, with test questions, evidence, and answer key separated | Reproducibility; information architecture | `evaluation/golden/` contains separate files; this separation is directly user-required |
+| C19 | Required evaluation data in an evaluation folder, with question, answer, and evidence traceable per item | Reproducibility; information architecture | `evaluation/datasets/cpt316/topic1/questions.jsonl` keeps the three together per row after the later harness reorganisation |
 | C20 | Required a new Bao Sheng branch from main, not the old branch; wanted interpretation before implementation | Change control; scope governance | Current branch `baosheng-feat-evaluation-harness`; branch history not re-audited in this document |
 | C21 | Asked to clean up/namescope earlier committed files before proceeding | Maintainability; review hygiene | Organised follow-up commits listed below; no claim of eliminating all technical debt |
 | C22 | Asked for simple explanations and challenged unclear results | Learning discipline; communication feedback | Required results to be understandable, not merely machine-generated artifacts |
@@ -249,13 +249,13 @@ Prefer “drove the evaluation requirements” to “led a team” unless there 
 | Answer feedback / replacement workflows | `af7e413` | Existing local commit; no measured quality/business uplift |
 | PDF preview resize-loop fix | `5563485` | Existing local commit; no quantified rendering improvement |
 | Development tooling organisation | `bc206d7` | Existing local commit |
-| Pipeline runner / metrics | [runner](../../apps/api/scripts/evaluate_pipeline.py), [scorer](../../apps/api/app/evaluation/metrics.py) | Local working-tree implementation |
-| Golden corpus definition | [manifest](../../evaluation/corpus_manifest.json), [golden data](../../evaluation/golden/questions.json) | Assistant-authored labels require owner review |
+| Pipeline runner / metrics | [runner](../../evaluation/run_eval.py), [retrieval scorer](../../evaluation/scorers/retrieval.py) | Local working-tree implementation |
+| Golden corpus definition | [source manifest](../../evaluation/datasets/cpt316/topic1/sources.json), [question rows](../../evaluation/datasets/cpt316/topic1/questions.jsonl) | Assistant-authored labels require owner review |
 | Complete baseline | `evaluation/runs/20261107T113258086748Z/` | Local ignored experiment outputs |
 | Diagnostic Docling parse | `evaluation/runs/20261107T113635350705Z/` | Diagnostic reparse, not additional benchmark questions |
 | Extraction-only after fix | `evaluation/runs/20261107T115210823381Z/` | No new retrieval/generation scores |
-| Single-file review compiler | [script](../../apps/api/scripts/compile_evaluation_review.py), [template](../../apps/api/app/evaluation/review_template.html) | Local; does not call models or database |
-| Owner-review aggregation | [script](../../apps/api/scripts/summarize_pipeline_reviews.py) | Pending fields are excluded, not treated as successes |
+| Single-file review compiler | [script](../../evaluation/reports/build_review.py), [template](../../evaluation/reports/review_template.html) | Local; does not call models or database |
+| Owner-review aggregation | [script](../../evaluation/scorers/summarize_reviews.py) | Pending fields are excluded, not treated as successes |
 
 For durable resume traceability: review these changes, commit selected work after
 approval, archive the run configuration/results with the same dataset hashes, and

@@ -53,7 +53,7 @@ apps/api/storage/
 /.playwright-cli/
 /apps/api/negative-feedback.json
 
-# Reproducible benchmark outputs (golden inputs stay versioned).
+# Environment-specific run outputs (datasets and the curated HTML report stay versioned).
 /evaluation/runs/
 
 # personal type-checker / editor configs. pyrefly.toml is not a project

@@ -1,17 +1,17 @@
 """Compile existing evaluation artifacts into one offline, auditable HTML file.
 
 No database connections, model calls, or changes to golden labels are made.
-Run from apps/api: uv run python scripts/compile_evaluation_review.py --help
+Run from the repository root with `uv run --project apps/api python evaluation/reports/build_review.py`.
 """
 
 import argparse
-import hashlib
 import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from app.evaluation.metrics import covered_groups, retrieval_metrics  # noqa: E402
+EVALUATION = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(EVALUATION))
+from scorers.retrieval import covered_groups, retrieval_metrics
 
 
 def read_json(path):
@@ -29,31 +29,72 @@ def load_run(path):
         "assistant_reviews",
     )
     data = {
-        name: read_json(path / f"{name}.json") for name in names if (path / f"{name}.json").exists()
+        name: read_json(path / f"{name}.json")
+        for name in names
+        if (path / f"{name}.json").exists()
     }
     data["id"] = path.name
     data["path"] = str(path.resolve())
+    result_file = path / "results.jsonl"
+    if not result_file.exists():
+        result_file = path / "retrieval.jsonl"
     data["retrieval"] = (
         [
             json.loads(line)
-            for line in (path / "retrieval.jsonl").read_text(encoding="utf-8").splitlines()
+            for line in result_file.read_text(encoding="utf-8").splitlines()
             if line.strip()
         ]
-        if (path / "retrieval.jsonl").exists()
+        if result_file.exists()
         else []
     )
     return data
 
 
 def assemble(dataset, run_path, comparison=None):
-    questions = read_json(dataset / "golden/questions.json")
-    answers = read_json(dataset / "golden/answer_key.json")
-    evidence = read_json(dataset / "golden/evidence_key.json")
+    rows = [
+        json.loads(line)
+        for line in (dataset / "questions.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line.strip()
+    ]
+    questions = [
+        {
+            key: row[key]
+            for key in ("id", "category", "split", "generation_review", "question")
+        }
+        for row in rows
+    ]
+    answers = {
+        "annotation_status": read_json(dataset / "dataset.json")["annotation_status"],
+        "answers": {
+            row["id"]: {
+                "reference_answer": row["reference_answer"],
+                "required_facts": row["required_facts"],
+            }
+            for row in rows
+        },
+    }
+    evidence = {
+        "annotation_status": read_json(dataset / "dataset.json")["annotation_status"],
+        "questions": {row["id"]: {"groups": row["evidence_groups"]} for row in rows},
+    }
     run = load_run(run_path)
-    for name, expected in run["config"]["dataset_hashes"].items():
-        actual = hashlib.sha256((dataset / "golden" / name).read_bytes()).hexdigest()
-        if actual != expected:
-            raise ValueError(f"Golden dataset changed since run: {name}")
+    recorded_hashes = run["config"]["dataset_hashes"]
+    current_names = {"dataset.json", "sources.json", "questions.jsonl"}
+    if set(recorded_hashes) == current_names:
+        import hashlib
+
+        for name, expected in recorded_hashes.items():
+            actual = hashlib.sha256((dataset / name).read_bytes()).hexdigest()
+            if actual != expected:
+                raise ValueError(f"Dataset changed since run: {name}")
+    else:
+        legacy = read_json(dataset / "sources.json").get("legacy_dataset_hashes")
+        if legacy != recorded_hashes:
+            raise ValueError(
+                "Run hashes match neither this dataset nor its recorded legacy migration"
+            )
     seen = set()
     for row in run["retrieval"]:
         key = (row["question_id"], row["method"])
@@ -62,7 +103,10 @@ def assemble(dataset, run_path, comparison=None):
         seen.add(key)
         groups = evidence["questions"][row["question_id"]]["groups"]
         recomputed = retrieval_metrics(row["sources"], groups)
-        if any(abs(value - row["metrics"][name]) > 1e-9 for name, value in recomputed.items()):
+        if any(
+            abs(value - row["metrics"][name]) > 1e-9
+            for name, value in recomputed.items()
+        ):
             raise ValueError(f"Saved metric disagrees with recomputation: {key}")
         row["recomputed_metrics"] = recomputed
         row["rank_evidence"] = [
@@ -96,9 +140,14 @@ def assemble(dataset, run_path, comparison=None):
         "answers": answers,
         "evidence": evidence,
         "runs": runs,
-        "metrics_source": (
-            Path(__file__).resolve().parents[1] / "app/evaluation/metrics.py"
-        ).read_text(encoding="utf-8"),
+        "metrics_source": "\n\n".join(
+            (EVALUATION / path).read_text(encoding="utf-8")
+            for path in (
+                "scorers/retrieval.py",
+                "scorers/pipeline.py",
+                "scorers/answer_quality.py",
+            )
+        ),
     }
 
 
@@ -110,26 +159,31 @@ def render(data):
         .replace("<", "\\u003c")
         .replace(">", "\\u003e")
     )
-    template = (
-        Path(__file__).resolve().parents[1] / "app/evaluation/review_template.html"
-    ).read_text(encoding="utf-8")
+    template = (Path(__file__).resolve().parent / "review_template.html").read_text(
+        encoding="utf-8"
+    )
     return template.replace("__EVALUATION_DATA__", payload)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    root = Path(__file__).resolve().parents[3] / "evaluation"
-    parser.add_argument("--dataset", type=Path, default=root)
+    parser.add_argument(
+        "--dataset", type=Path, default=EVALUATION / "datasets/cpt316/topic1"
+    )
     parser.add_argument("--run", type=Path, required=True)
     parser.add_argument("--compare-extraction", type=Path)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     data = assemble(args.dataset, args.run, args.compare_extraction)
-    output = args.output or args.run / "review.html"
+    output = (
+        args.output or EVALUATION / "reports/generated" / f"{args.run.name}-review.html"
+    )
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(render(data), encoding="utf-8")
     print(f"Saved {output.resolve()}")
-    print(f"Verified {len(data['runs'][0]['retrieval'])} saved retrieval metric records.")
+    print(
+        f"Verified {len(data['runs'][0]['retrieval'])} saved retrieval metric records."
+    )
 
 
 if __name__ == "__main__":

@@ -1,4 +1,8 @@
-"""Run from apps/api: uv run python scripts/evaluate_pipeline.py [--generate]."""
+"""Single entry point for the NTBC evaluation harness.
+
+Run from the repository root:
+uv run --project apps/api python evaluation/run_eval.py [--generate]
+"""
 
 import argparse
 import asyncio
@@ -10,6 +14,7 @@ import platform
 import random
 import statistics
 import subprocess
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from time import perf_counter
@@ -17,22 +22,18 @@ from typing import Any
 from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
+ROOT = Path(__file__).resolve().parents[1]
+EVALUATION = Path(__file__).resolve().parent
+API = ROOT / "apps/api"
+sys.path.insert(0, str(API))
+sys.path.insert(0, str(EVALUATION))
+
 import numpy as np
 import pypdfium2 as pdfium
-from sqlmodel import col, select
-from sqlmodel.ext.asyncio.session import AsyncSession
-
 from app.core.config import settings
 from app.core.logging import configure_logging
 from app.db.database import engine
 from app.db.vector_ops import SearchConfig, hybrid_search, keyword_search, vector_search
-from app.evaluation.metrics import (
-    covered_groups,
-    normalize,
-    retrieval_metrics,
-    token_fidelity,
-    vector_valid,
-)
 from app.routers import rag as rag_route
 from app.schemas.chat import ChatRole, Message
 from app.schemas.chunk import Chunk
@@ -45,9 +46,12 @@ from app.schemas.rag import RagQueryRequest, RetrievedChunk
 from app.schemas.user import User
 from app.services.embeddings import embed_query, embed_text
 from app.services.ingestion import create_chunk, extract_text, ingest_document
+from scorers.pipeline import token_fidelity, vector_valid
+from scorers.retrieval import covered_groups, normalize, retrieval_metrics
+from sqlmodel import col, select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-ROOT = Path(__file__).resolve().parents[3]
-EVALUATION = ROOT / "evaluation"
+DATASET = EVALUATION / "datasets/cpt316/topic1"
 METHODS = ("vector", "keyword", "hybrid_rrf")
 
 
@@ -58,7 +62,8 @@ def read(path: Path) -> Any:
 def write(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        json.dumps(value, ensure_ascii=False, indent=2, default=str) + "\n", encoding="utf-8"
+        json.dumps(value, ensure_ascii=False, indent=2, default=str) + "\n",
+        encoding="utf-8",
     )
 
 
@@ -66,18 +71,51 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def git_output(*arguments: str) -> str:
+    return subprocess.check_output(["git", *arguments], cwd=ROOT, text=True).strip()
+
+
 def load_dataset(folder: Path) -> tuple[dict, list[dict], dict, dict]:
-    manifest = read(folder / "corpus_manifest.json")
-    questions = read(folder / "golden/questions.json")
-    answers = read(folder / "golden/answer_key.json")["answers"]
-    evidence = read(folder / "golden/evidence_key.json")["questions"]
+    manifest = {**read(folder / "dataset.json"), **read(folder / "sources.json")}
+    rows = [
+        json.loads(line)
+        for line in (folder / "questions.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line.strip()
+    ]
+    questions = [
+        {
+            key: row[key]
+            for key in ("id", "category", "split", "generation_review", "question")
+        }
+        for row in rows
+    ]
+    answers = {
+        row["id"]: {
+            "reference_answer": row["reference_answer"],
+            "required_facts": row["required_facts"],
+        }
+        for row in rows
+    }
+    evidence = {row["id"]: {"groups": row["evidence_groups"]} for row in rows}
     if manifest["top_k"] != 5 or manifest["chunk_max_tokens"] < 1:
-        raise ValueError("This version scores top-5 and requires a positive chunk budget")
+        raise ValueError(
+            "This version scores top-5 and requires a positive chunk budget"
+        )
     if manifest["ocr"] is not True or manifest["chart_extraction"] is not False:
-        raise ValueError("This text-only benchmark requires OCR on and chart extraction off")
+        raise ValueError(
+            "This text-only benchmark requires OCR on and chart extraction off"
+        )
     ids = [q["id"] for q in questions]
-    if len(set(ids)) != len(ids) or set(ids) != set(answers) or set(ids) != set(evidence):
-        raise ValueError("Question/answer/evidence IDs must match exactly and be unique")
+    if (
+        len(set(ids)) != len(ids)
+        or set(ids) != set(answers)
+        or set(ids) != set(evidence)
+    ):
+        raise ValueError(
+            "Question/answer/evidence IDs must match exactly and be unique"
+        )
     if any(q["split"] not in ("dev", "test") for q in questions):
         raise ValueError("Invalid development/test split")
     for question in questions:
@@ -85,15 +123,21 @@ def load_dataset(folder: Path) -> tuple[dict, list[dict], dict, dict]:
         if not groups or len({g["id"] for g in groups}) != len(groups):
             raise ValueError(f"Missing/duplicate evidence groups: {question['id']}")
         if any(not g["alternatives"] for g in groups):
-            raise ValueError("Every evidence group needs at least one acceptable source")
+            raise ValueError(
+                "Every evidence group needs at least one acceptable source"
+            )
         for group in groups:
             for alternative in group["alternatives"]:
                 if not normalize(alternative["quote"]) or alternative["pdf_page"] < 1:
-                    raise ValueError("Evidence quotes must be nonblank and pages positive")
+                    raise ValueError(
+                        "Evidence quotes must be nonblank and pages positive"
+                    )
     return manifest, questions, answers, evidence
 
 
-def parse_corpus(folder: Path, manifest: dict, out: Path) -> tuple[list[dict], list[dict]]:
+def parse_corpus(
+    folder: Path, manifest: dict, out: Path
+) -> tuple[list[dict], list[dict]]:
     """Independent PDFium text is a fidelity reference, not Docling's own output."""
     reference, items = [], []
     for source in manifest["documents"]:
@@ -124,7 +168,9 @@ def parse_corpus(folder: Path, manifest: dict, out: Path) -> tuple[list[dict], l
             [
                 {
                     "label": getattr(getattr(item, "label", None), "value", "unknown"),
-                    "content_layer": getattr(getattr(item, "content_layer", None), "value", "body"),
+                    "content_layer": getattr(
+                        getattr(item, "content_layer", None), "value", "body"
+                    ),
                     "pages": [prov.page_no for prov in getattr(item, "prov", [])],
                     "text": getattr(item, "text", ""),
                 }
@@ -190,19 +236,30 @@ def fidelity_checks(
 
 
 async def seed(
-    session: AsyncSession, manifest: dict, chunk_records: list[dict], vectors: list[list[float]]
+    session: AsyncSession,
+    manifest: dict,
+    chunk_records: list[dict],
+    vectors: list[list[float]],
 ) -> tuple[Any, Any, dict]:
-    owner = User(email=f"pipeline-eval-{uuid4()}@example.invalid", hashed_password="not-a-login")
+    owner = User(
+        email=f"pipeline-eval-{uuid4()}@example.invalid", hashed_password="not-a-login"
+    )
     session.add(owner)
     await session.flush()
     assert owner.id is not None
     course = Course(
-        user_id=owner.id, code="EVAL", name="Temporary pipeline evaluation", year=2026, sem=1
+        user_id=owner.id,
+        code="EVAL",
+        name="Temporary pipeline evaluation",
+        year=2026,
+        sem=1,
     )
     session.add(course)
     await session.flush()
     assert course.id is not None
-    folder = Folder(course_id=course.id, name="Temporary evaluation", is_root=True, sort_order=0)
+    folder = Folder(
+        course_id=course.id, name="Temporary evaluation", is_root=True, sort_order=0
+    )
     session.add(folder)
     await session.flush()
     assert folder.id is not None
@@ -271,9 +328,13 @@ async def search(
     if not file_ids:
         raise ValueError("Evaluation scope must never be empty")
     if method == "vector":
-        return await vector_search(vector, session, course_id, file_ids, top_k=manifest["top_k"])
+        return await vector_search(
+            vector, session, course_id, file_ids, top_k=manifest["top_k"]
+        )
     if method == "keyword":
-        rows = await keyword_search(text, session, course_id, file_ids, top_k=manifest["top_k"])
+        rows = await keyword_search(
+            text, session, course_id, file_ids, top_k=manifest["top_k"]
+        )
         return [
             RetrievedChunk(
                 chunk_id=c.id,
@@ -337,6 +398,22 @@ def summary(rows: list[dict], checks: dict, out: Path) -> None:
         writer = csv.DictWriter(handle, fieldnames=list(aggregates[0]))
         writer.writeheader()
         writer.writerows(aggregates)
+    write(
+        out / "summary.json",
+        {
+            "extraction": {
+                "evidence_coverage": checks["extraction_evidence_coverage"],
+                "chunk_evidence_coverage": checks["chunk_evidence_coverage"],
+                "database_roundtrip": checks.get("database_roundtrip"),
+            },
+            "retrieval": aggregates,
+            "limitations": [
+                "Draft assistant-authored labels; owner review pending",
+                "Single text-transcribed PDF; not original-image understanding",
+                "DB retrieval latency excludes embedding, generation, HTTP, and UI",
+            ],
+        },
+    )
     lines = [
         "# NTBC pipeline evaluation",
         "",
@@ -370,33 +447,48 @@ def summary(rows: list[dict], checks: dict, out: Path) -> None:
 async def main(args: argparse.Namespace) -> None:
     folder = args.dataset.resolve()
     manifest, questions, answers, evidence = load_dataset(folder)
-    if args.generate and (settings.LLM_FAKE_MODE or not settings.GEMINI_API_KEY.get_secret_value()):
-        raise ValueError("Real generation requires LLM_FAKE_MODE=false and a configured Gemini key")
+    if args.generate and (
+        settings.LLM_FAKE_MODE or not settings.GEMINI_API_KEY.get_secret_value()
+    ):
+        raise ValueError(
+            "Real generation requires LLM_FAKE_MODE=false and a configured Gemini key"
+        )
     if args.repeats < 1:
         raise ValueError("--repeats must be positive")
     if args.extract_only and args.generate:
         raise ValueError("Choose --extract-only or --generate, not both")
-    out = folder / "runs" / datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
+    out = EVALUATION / "runs" / datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
     out.mkdir(parents=True)
     versions = {
         name: importlib.metadata.version(name)
-        for name in ("docling", "docling-core", "torch", "sentence-transformers", "pypdfium2")
+        for name in (
+            "docling",
+            "docling-core",
+            "torch",
+            "sentence-transformers",
+            "pypdfium2",
+        )
     }
+    git_commit, git_status = await asyncio.gather(
+        asyncio.to_thread(git_output, "rev-parse", "HEAD"),
+        asyncio.to_thread(git_output, "status", "--porcelain"),
+    )
     run_config = {
         "created_at": datetime.now(UTC),
         "corpus": manifest,
-        "git_commit": subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
-        ).strip(),
-        "git_dirty": bool(
-            subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip()
-        ),
-        "dataset_hashes": {p.name: sha(p) for p in (folder / "golden").glob("*.json")},
+        "git_commit": git_commit,
+        "git_dirty": bool(git_status),
+        "dataset_hashes": {
+            name: sha(folder / name)
+            for name in ("dataset.json", "sources.json", "questions.jsonl")
+        },
         "source_hashes": {
             str(p.relative_to(ROOT)): sha(p)
             for p in [
                 Path(__file__),
-                ROOT / "apps/api/app/evaluation/metrics.py",
+                EVALUATION / "scorers/retrieval.py",
+                EVALUATION / "scorers/pipeline.py",
+                EVALUATION / "scorers/answer_quality.py",
                 ROOT / "apps/api/app/services/ingestion.py",
                 ROOT / "apps/api/app/services/embeddings.py",
                 ROOT / "apps/api/app/db/vector_ops.py",
@@ -419,7 +511,9 @@ async def main(args: argparse.Namespace) -> None:
     write(out / "config.json", run_config)
     print(f"Run directory: {out}", flush=True)
     # Scoped in this standalone process; production configuration is not edited.
-    with patch.object(settings, "CHART_EXTRACTION_ENABLED", manifest["chart_extraction"]):
+    with patch.object(
+        settings, "CHART_EXTRACTION_ENABLED", manifest["chart_extraction"]
+    ):
         reference, items = await asyncio.to_thread(parse_corpus, folder, manifest, out)
     chunks = []
     for source in manifest["documents"]:
@@ -428,7 +522,11 @@ async def main(args: argparse.Namespace) -> None:
             create_chunk, own_items, uuid4(), manifest["chunk_max_tokens"]
         )
         chunks.extend(
-            {"id": uuid4(), "document_id": source["id"], **c.model_dump(exclude={"file_id"})}
+            {
+                "id": uuid4(),
+                "document_id": source["id"],
+                **c.model_dump(exclude={"file_id"}),
+            }
             for c in produced
         )
     write(out / "chunks.json", chunks)
@@ -438,7 +536,10 @@ async def main(args: argparse.Namespace) -> None:
     ]
     write(out / "checks.json", checks)
     if args.extract_only:
-        print(f"Extraction checks saved: {checks['extraction_evidence_coverage']:.1%}", flush=True)
+        print(
+            f"Extraction checks saved: {checks['extraction_evidence_coverage']:.1%}",
+            flush=True,
+        )
         return
     started = perf_counter()
     vectors = await asyncio.to_thread(embed_text, [c["content"] for c in chunks])
@@ -461,15 +562,21 @@ async def main(args: argparse.Namespace) -> None:
         outer = await connection.begin()
         try:
             async with AsyncSession(
-                bind=connection, expire_on_commit=False, join_transaction_mode="create_savepoint"
+                bind=connection,
+                expire_on_commit=False,
+                join_transaction_mode="create_savepoint",
             ) as session:
                 owner, course, files = await seed(session, manifest, chunks, vectors)
                 file_ids = [f.id for f in files.values()]
                 reverse_files = {f.id: key for key, f in files.items()}
                 stored = (
-                    await session.exec(select(Chunk).where(col(Chunk.file_id).in_(file_ids)))
+                    await session.exec(
+                        select(Chunk).where(col(Chunk.file_id).in_(file_ids))
+                    )
                 ).all()
-                expected = {c["id"]: (c, v) for c, v in zip(chunks, vectors, strict=True)}
+                expected = {
+                    c["id"]: (c, v) for c, v in zip(chunks, vectors, strict=True)
+                }
                 checks["database_roundtrip"] = len(stored) == len(expected) and all(
                     c.content == expected[c.id][0]["content"]
                     and c.page_start == expected[c.id][0]["page_start"]
@@ -530,7 +637,9 @@ async def main(args: argparse.Namespace) -> None:
                             "query_embedding_ms": q["embedding_ms"],
                             "retrieval_ms": timings,
                             "sources": trace,
-                            "metrics": retrieval_metrics(trace, evidence[q["id"]]["groups"]),
+                            "metrics": retrieval_metrics(
+                                trace, evidence[q["id"]]["groups"]
+                            ),
                         }
                         if (
                             args.generate
@@ -557,12 +666,15 @@ async def main(args: argparse.Namespace) -> None:
                             messages = (
                                 await session.exec(
                                     select(Message).where(
-                                        col(Message.conversation_id) == result.conversation_id,
+                                        col(Message.conversation_id)
+                                        == result.conversation_id,
                                         col(Message.role) == ChatRole.ASSISTANT,
                                     )
                                 )
                             ).all()
-                            row["scope_snapshots"] = [m.scope_snapshot for m in messages]
+                            row["scope_snapshots"] = [
+                                m.scope_snapshot for m in messages
+                            ]
                             generated_answers.append(
                                 {
                                     "question_id": q["id"],
@@ -579,8 +691,12 @@ async def main(args: argparse.Namespace) -> None:
                                     "method": method,
                                     "question": q["question"],
                                     "answer": result.answer,
-                                    "reference_answer": answers[q["id"]]["reference_answer"],
-                                    "required_facts": answers[q["id"]]["required_facts"],
+                                    "reference_answer": answers[q["id"]][
+                                        "reference_answer"
+                                    ],
+                                    "required_facts": answers[q["id"]][
+                                        "required_facts"
+                                    ],
                                     "sources": trace,
                                     "citations": row["response"]["citations"],
                                     "reviewer": None,
@@ -594,8 +710,12 @@ async def main(args: argparse.Namespace) -> None:
                             write(out / "generation_reviews.json", reviews)
                         rows.append(row)
                         # Incremental files survive a later model/network failure.
-                        with (out / "retrieval.jsonl").open("a", encoding="utf-8") as handle:
-                            handle.write(json.dumps(row, ensure_ascii=False, default=str) + "\n")
+                        with (out / "results.jsonl").open(
+                            "a", encoding="utf-8"
+                        ) as handle:
+                            handle.write(
+                                json.dumps(row, ensure_ascii=False, default=str) + "\n"
+                            )
                     print(f"Evaluated {q['id']} ({q['split']})", flush=True)
         finally:
             await outer.rollback()
@@ -614,7 +734,7 @@ async def main(args: argparse.Namespace) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dataset", type=Path, default=EVALUATION)
+    parser.add_argument("--dataset", type=Path, default=DATASET)
     parser.add_argument("--extract-only", action="store_true")
     parser.add_argument(
         "--generate",

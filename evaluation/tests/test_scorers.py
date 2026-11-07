@@ -1,20 +1,23 @@
 import math
 
 import pytest
-
-from app.evaluation.metrics import (
+from scorers.answer_quality import review_summary
+from scorers.pipeline import token_fidelity, vector_valid
+from scorers.retrieval import (
     covered_groups,
     evidence_matches,
     normalize,
     retrieval_metrics,
-    review_summary,
-    token_fidelity,
-    vector_valid,
 )
 
 
 def chunk(text, page=2, document="topic1"):
-    return {"content": text, "page_start": page, "page_end": page, "document_id": document}
+    return {
+        "content": text,
+        "page_start": page,
+        "page_end": page,
+        "document_id": document,
+    }
 
 
 def group(name, quote, page=2):
@@ -47,11 +50,16 @@ def test_acceptable_alternatives_do_not_inflate_recall_denominator():
         {"document_id": "topic1", "pdf_page": 5, "quote": "other source"}
     )
     assert covered_groups([chunk("other source", 5)], [evidence]) == {"a"}
-    assert retrieval_metrics([chunk("other source", 5)], [evidence])["evidence_recall@5"] == 1
+    assert (
+        retrieval_metrics([chunk("other source", 5)], [evidence])["evidence_recall@5"]
+        == 1
+    )
 
 
 def test_only_top_five_count_and_empty_evidence_is_invalid():
-    scores = retrieval_metrics([chunk("noise")] * 5 + [chunk("answer")], [group("a", "answer")])
+    scores = retrieval_metrics(
+        [chunk("noise")] * 5 + [chunk("answer")], [group("a", "answer")]
+    )
     assert scores["hit@5"] == scores["mrr@5"] == 0
     with pytest.raises(ValueError):
         retrieval_metrics([], [])
@@ -72,10 +80,17 @@ def test_bad_embeddings_are_rejected():
 
 
 def test_pending_human_reviews_have_no_quality_score():
-    assert review_summary([{"faithfulness": None}])["mean_scores_0_to_2"]["faithfulness"] is None
-    review = dict(
-        reviewer="Bao Sheng", faithfulness=2, correctness=1, completeness=0, citation_support=2
+    assert (
+        review_summary([{"faithfulness": None}])["mean_scores_0_to_2"]["faithfulness"]
+        is None
     )
+    review = {
+        "reviewer": "Bao Sheng",
+        "faithfulness": 2,
+        "correctness": 1,
+        "completeness": 0,
+        "citation_support": 2,
+    }
     scores = review_summary([review, {"faithfulness": None}])
     assert scores["completed"] == 1
     assert scores["mean_scores_0_to_2"]["completeness"] == 0
