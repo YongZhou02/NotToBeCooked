@@ -4,107 +4,412 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link rel="icon" href="data:," />
-    <title>NTBC Evals</title>
+    <title>NTBC Evaluation Hub</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="topbar">
-      <div>
+      <div class="brand">
         <p class="eyebrow">NTBC</p>
-        <h1>Evals</h1>
+        <h1>Evaluation Hub</h1>
       </div>
-      <div class="top-actions">
-        <label>
-          <span>Run</span>
-          <select id="runSelect" aria-label="Select evaluation run"></select>
-        </label>
-        <button type="button" disabled title="UI prototype: live execution is not connected">
-          Run evaluation
-        </button>
-      </div>
+      <nav class="tabs" aria-label="Evaluation sections">
+        <button class="tab-button active" type="button" data-tab="dashboard">Dashboard</button>
+        <button class="tab-button" type="button" data-tab="runs">Run evaluations</button>
+        <button class="tab-button" type="button" data-tab="visualization">Visualization & Annotation</button>
+      </nav>
     </header>
 
     <main>
-      <section class="summary" aria-labelledby="summaryTitle">
-        <div>
-          <p class="eyebrow" id="datasetName">Dataset</p>
-          <h2 id="summaryTitle">Pipeline scorecard</h2>
-        </div>
-        <div class="summary-meta" id="summaryMeta"></div>
-      </section>
-
-      <section class="phase-grid" id="phaseGrid" aria-label="Pipeline phase scores"></section>
-
-      <section class="panel" aria-labelledby="retrievalTitle">
-        <div class="section-head">
+      <!-- TAB 1: DASHBOARD -->
+      <div class="tab-panel active" data-panel="dashboard">
+        <section class="summary" aria-labelledby="summaryTitle">
           <div>
-            <p class="eyebrow">Phase 3</p>
-            <h2 id="retrievalTitle">Retrieval</h2>
+            <p class="eyebrow" id="datasetName">Dataset</p>
+            <h2 id="summaryTitle">Pipeline scorecard & Ongoing overview</h2>
           </div>
-          <span class="chip">test split</span>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Method</th>
-                <th>Recall@5</th>
-                <th>MRR@5</th>
-                <th>Hit@1</th>
-                <th>Complete@5</th>
-                <th>Median</th>
-              </tr>
-            </thead>
-            <tbody id="retrievalBody"></tbody>
-          </table>
-        </div>
-      </section>
+          <div class="summary-meta" id="summaryMeta"></div>
+        </section>
 
-      <section class="panel" aria-labelledby="historyTitle">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Runs</p>
-            <h2 id="historyTitle">History</h2>
-          </div>
-          <span class="chip" id="runCount"></span>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Run</th>
-                <th>Mode</th>
-                <th>Source count</th>
-                <th>Extraction</th>
-                <th>Retrieval</th>
-                <th>Answers</th>
-              </tr>
-            </thead>
-            <tbody id="historyBody"></tbody>
-          </table>
-        </div>
-      </section>
+        <section class="phase-grid" id="phaseGrid" aria-label="Pipeline phase scores"></section>
 
-      <section class="panel trace-panel" aria-labelledby="traceTitle">
-        <div class="section-head trace-head">
-          <div>
-            <p class="eyebrow">Evidence</p>
-            <h2 id="traceTitle">Drill-down</h2>
-          </div>
-          <label class="question-picker">
-            <span>Question</span>
-            <select id="questionSelect" aria-label="Select evidence question"></select>
-          </label>
+        <div class="dashboard-grid">
+          <section class="panel active-run-panel" aria-labelledby="activeRunTitle">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Execution</p>
+                <h2 id="activeRunTitle">Active run overview</h2>
+              </div>
+              <span class="chip" id="dashRunChip">Latest run</span>
+            </div>
+            <div class="active-run-body" id="dashRunDetails"></div>
+          </section>
+
+          <section class="panel corpus-summary-panel" aria-labelledby="corpusSummaryTitle">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Corpus & Splits</p>
+                <h2 id="corpusSummaryTitle">Dataset composition</h2>
+              </div>
+              <span class="chip neutral" id="dashSplitChip">Dev + Test</span>
+            </div>
+            <div class="split-overview-grid" id="dashSplitOverview"></div>
+          </section>
         </div>
-        <div id="questionSummary" class="question-summary"></div>
-        <div id="traceContent"></div>
-      </section>
+
+        <section class="panel" aria-labelledby="retrievalTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Phase 3</p>
+              <h2 id="retrievalTitle">Retrieval benchmark</h2>
+            </div>
+            <span class="chip">test split</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Recall@5</th>
+                  <th>MRR@5</th>
+                  <th>Hit@1</th>
+                  <th>Complete@5</th>
+                  <th>Median latency</th>
+                </tr>
+              </thead>
+              <tbody id="retrievalBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 2: RUN EVALUATIONS -->
+      <div class="tab-panel" data-panel="runs" hidden>
+        <section class="summary">
+          <div>
+            <p class="eyebrow">Execution & Benchmarking</p>
+            <h2>Run evaluations</h2>
+          </div>
+          <div class="top-actions">
+            <label><span>Selected run</span><select id="runSelect" aria-label="Select evaluation run"></select></label>
+            <button type="button" disabled title="UI prototype: live execution is managed via 'uv run --project apps/api python evaluation/run_eval.py'">Run evaluation</button>
+          </div>
+        </section>
+
+        <!-- Split breakdown on Run page -->
+        <section class="panel split-section" aria-labelledby="runSplitTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Dataset split composition</p>
+              <h2 id="runSplitTitle">Dev and test split metrics</h2>
+            </div>
+            <span class="chip">Corpus: Topic 1 (38 pages)</span>
+          </div>
+          <div class="dataset-stats" id="runDatasetStats" aria-label="Dataset composition"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="historyTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Runs</p>
+              <h2 id="historyTitle">Run history & comparison</h2>
+            </div>
+            <span class="chip" id="runCount"></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Run ID</th>
+                  <th>Mode</th>
+                  <th>Source count</th>
+                  <th>Extraction exact</th>
+                  <th>Retrieval recall</th>
+                  <th>Generated answers</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel trace-panel" aria-labelledby="traceTitle">
+          <div class="section-head trace-head">
+            <div>
+              <p class="eyebrow">Evidence & Trace</p>
+              <h2 id="traceTitle">Run drill-down</h2>
+            </div>
+            <div class="trace-nav-wrap">
+              <div class="nav-button-group">
+                <button type="button" id="prevTraceQuestion" class="nav-btn" title="Previous question">← Previous</button>
+                <button type="button" id="nextTraceQuestion" class="nav-btn" title="Next question">Next →</button>
+              </div>
+              <label class="question-picker">
+                <span>Question</span>
+                <select id="questionSelect" aria-label="Select evidence question"></select>
+              </label>
+            </div>
+          </div>
+          <div id="questionSummary" class="question-summary"></div>
+          <div id="traceContent"></div>
+        </section>
+      </div>
+
+      <!-- TAB 3: VISUALIZATION & ANNOTATION -->
+      <div class="tab-panel" data-panel="visualization" hidden>
+        <section class="summary">
+          <div>
+            <p class="eyebrow">Golden dataset & Quality assurance</p>
+            <h2>Visualization & Annotation</h2>
+          </div>
+          <div class="review-actions">
+            <span class="chip status-verified" id="visVerifiedProgress">0 / 0 verified</span>
+            <span class="chip neutral" id="visReviewProgress">0 / 0 reviewed</span>
+            <button type="button" id="btnToggleAddQuestion" class="btn-primary">+ Add human question</button>
+            <button type="button" id="btnToggleAddHardCase" class="btn-subtle">+ Add hard case</button>
+            <input type="file" id="importDatasetFile" accept=".json" hidden />
+            <button type="button" id="importDatasetBtn" class="btn-subtle" title="Import previously exported JSON">Import JSON</button>
+            <button type="button" id="exportDatasetBtn" class="btn-secondary">Export data (JSON)</button>
+          </div>
+        </section>
+
+        <!-- Split breakdown on Visualization page -->
+        <section class="panel split-section" aria-labelledby="visSplitTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Corpus contents & Verification status</p>
+              <h2 id="visSplitTitle">Split composition & Golden quotes</h2>
+            </div>
+            <span class="chip neutral" id="visTotalStatsChip">50 questions · 73 golden quotes</span>
+          </div>
+          <div class="dataset-stats" id="visDatasetStats" aria-label="Dataset composition"></div>
+        </section>
+
+        <!-- Form for adding human-written question or hard case -->
+        <section class="panel add-question-panel" id="addQuestionPanel" hidden>
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" id="addQuestionEyebrow">Human-authored</p>
+              <h2 id="addQuestionTitle">Add human-written question</h2>
+            </div>
+            <button type="button" id="cancelHumanQuestion" class="btn-subtle">Cancel</button>
+          </div>
+          <form id="addQuestionForm" class="add-question-form" onsubmit="return false;">
+            <div class="form-row form-meta-row">
+              <label>
+                <span>Split</span>
+                <select id="newSplit">
+                  <option value="test">Test split</option>
+                  <option value="dev">Dev split</option>
+                </select>
+              </label>
+              <label>
+                <span>Category</span>
+                <select id="newCategory">
+                  <option value="definition">definition</option>
+                  <option value="exact">exact</option>
+                  <option value="paraphrase">paraphrase</option>
+                  <option value="relationship">relationship</option>
+                  <option value="multi_evidence">multi_evidence</option>
+                  <option value="hard_case">hard_case / edge_case</option>
+                </select>
+              </label>
+              <label>
+                <span>Document ID</span>
+                <input id="newDocId" type="text" value="topic1" placeholder="topic1" />
+              </label>
+              <label>
+                <span>PDF page</span>
+                <input id="newPage" type="number" min="1" max="100" value="1" />
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label>
+                <span>Question</span>
+                <textarea id="newQuestion" rows="2" placeholder="Write question prompt..."></textarea>
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label>
+                <span>Answer key (reference answer)</span>
+                <textarea id="newAnswer" rows="2" placeholder="Write the exact expected answer key..."></textarea>
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label>
+                <span>Gold quote (supporting evidence from PDF)</span>
+                <textarea id="newEvidence" rows="2" placeholder="Paste supporting excerpt directly from the PDF document..."></textarea>
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label>
+                <span>Required facts / key scoring criteria (comma-separated or lines)</span>
+                <input id="newFacts" type="text" placeholder="e.g. (1) Fact A, (2) Fact B" />
+              </label>
+            </div>
+
+            <div class="form-row form-checkbox-row">
+              <label class="checkbox-label">
+                <input type="checkbox" id="newIsHardCase" />
+                <span><strong>Very hard case</strong> (challenging question for models)</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="newIsVerified" checked />
+                <span>Mark answer key as verified immediately</span>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" id="saveHumanQuestion" class="btn-primary">Save question</button>
+              <button type="button" id="cancelHumanQuestionBtn" class="btn-subtle">Cancel</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Filter Toolbar -->
+        <section class="filter-bar" aria-label="Filter questions">
+          <div class="filter-search-wrap">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input type="search" id="filterSearch" placeholder="Search questions, answer keys, or IDs..." aria-label="Search questions" />
+          </div>
+
+          <div class="filter-controls">
+            <label class="filter-control">
+              <span>Split</span>
+              <select id="filterSplit" aria-label="Filter by split">
+                <option value="all">All splits</option>
+                <option value="dev">Dev split</option>
+                <option value="test">Test split</option>
+              </select>
+            </label>
+
+            <label class="filter-control">
+              <span>Origin</span>
+              <select id="filterOrigin" aria-label="Filter by origin">
+                <option value="all">All origins</option>
+                <option value="synthetic">Synthetic (AI-written)</option>
+                <option value="human">Human-written</option>
+              </select>
+            </label>
+
+            <label class="filter-control">
+              <span>Answer key status</span>
+              <select id="filterVerification" aria-label="Filter by verification">
+                <option value="all" selected>All answer keys (Verified & Unverified)</option>
+                <option value="unverified">Unverified only (Needs review)</option>
+                <option value="verified">Verified only (Done)</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <!-- Question View & Annotation Workspace (Left side) + PDF Viewer (Right side) -->
+        <section class="panel review-panel">
+          <!-- Next and Previous Buttons TOGETHER -->
+          <div class="review-nav">
+            <div class="nav-button-group">
+              <button type="button" id="previousVisQuestion" class="nav-btn" title="Previous question">← Previous</button>
+              <button type="button" id="nextVisQuestion" class="nav-btn" title="Next question">Next →</button>
+            </div>
+            <div class="picker-container">
+              <label class="question-picker">
+                <span id="pickerLabel">Questions (All shown)</span>
+                <select id="visQuestionSelect" aria-label="Select question to view and annotate"></select>
+              </label>
+            </div>
+          </div>
+
+          <div id="visQuestionBadges" class="question-badge-strip"></div>
+
+          <!-- 2-COLUMN SPLIT: LEFT = EVAL & ANNOTATION, RIGHT = PDF VIEWER -->
+          <div class="vis-workspace-split">
+            <!-- LEFT COLUMN: All evaluation and annotation items -->
+            <div class="vis-left-column" id="visContent"></div>
+
+            <!-- RIGHT COLUMN: PDF and the exact page it is on -->
+            <div class="vis-right-column" id="visPdfColumn">
+              <div class="pdf-panel">
+                <div class="pdf-panel-header">
+                  <div class="pdf-title-group">
+                    <p class="eyebrow">Source Document</p>
+                    <div class="pdf-doc-selector-wrap">
+                      <select id="pdfDocSelect" class="pdf-doc-select" aria-label="Select source document">
+                        <option value="CPT316_Topic1_Semantic_Text_Only.pdf">CPT316 Topic 1 (Semantic Text)</option>
+                        <option value="CPT316_Topic2_Lexical_Semantic_Text.pdf">CPT316 Topic 2 (Lexical & Semantic)</option>
+                        <option value="CPT316_Topic3_Updated_Semantic_Text.pdf">CPT316 Topic 3 (Updated)</option>
+                        <option value="CPT316_Topic3_Student_Semantic_Text.pdf">CPT316 Topic 3 (Student)</option>
+                      </select>
+                      <h3 id="pdfDocName" class="pdf-doc-filename-display" title="Active PDF filename">CPT316_Topic1_Semantic_Text_Only.pdf</h3>
+                    </div>
+                  </div>
+                  <div class="pdf-actions">
+                    <span class="chip" id="pdfPageIndicator">Page 1 / 38</span>
+                    <a id="pdfOpenTab" href="documents/CPT316_Topic1_Semantic_Text_Only.pdf#page=1&view=FitH" target="_blank" class="btn-subtle btn-sm" title="Open PDF in new tab">Open ↗</a>
+                  </div>
+                </div>
+
+                <div class="pdf-active-quote-box" id="pdfActiveQuoteBox">
+                  <div class="quote-header-line">
+                    <span class="quote-target-tag" id="pdfQuoteTargetTag">Referenced Gold Evidence · Page 1</span>
+                    <button type="button" id="pdfHighlightBtn" class="btn-subtle btn-xs" title="Scroll to and center highlighted evidence on page">Locate quote 🎯</button>
+                  </div>
+                  <p class="quote-target-text" id="pdfQuoteTargetText">Loading evidence quote...</p>
+                </div>
+
+                <div class="pdf-viewer-wrap" id="pdfViewerWrap">
+                  <div class="pdf-viewport" id="pdfViewport">
+                    <div id="pdfPageWrapper" class="ntbc-pdf-page">
+                      <canvas id="pdfCanvas" class="pdf-canvas"></canvas>
+                      <div id="pdfTextLayer" class="textLayer"></div>
+                    </div>
+                  </div>
+
+                  <div id="pdfLoadingOverlay" class="pdf-loading-overlay">
+                    <div class="pdf-spinner"></div>
+                    <span id="pdfLoadingText">Loading PDF...</span>
+                  </div>
+
+                  <div id="pdfErrorOverlay" class="pdf-error-overlay" hidden>
+                    <p id="pdfErrorText">Failed to load PDF</p>
+                    <button type="button" id="pdfRetryBtn" class="btn-secondary btn-sm">Retry</button>
+                  </div>
+
+                  <!-- Fallback iframe for legacy browsers -->
+                  <iframe id="pdfFrame" class="pdf-frame" style="display: none;" src="documents/CPT316_Topic1_Semantic_Text_Only.pdf#page=1&view=FitH" title="PDF Document Viewer"></iframe>
+                </div>
+
+                <div class="pdf-controls-bar">
+                  <div class="pdf-page-controls">
+                    <button type="button" id="pdfPrevPage" class="btn-secondary btn-sm" title="Previous page in PDF">← Page</button>
+                    <label class="pdf-jump-label">
+                      <span>Page</span>
+                      <input type="number" id="pdfPageInput" min="1" max="38" value="1" />
+                      <span id="pdfTotalPages">/ 38</span>
+                    </label>
+                    <button type="button" id="pdfNextPage" class="btn-secondary btn-sm" title="Next page in PDF">Page →</button>
+                  </div>
+
+                  <div class="pdf-zoom-controls">
+                    <button type="button" id="pdfZoomOut" class="btn-subtle btn-sm" title="Zoom out">−</button>
+                    <button type="button" id="pdfZoomReset" class="btn-subtle btn-sm" title="Fit width / Reset zoom"><span id="pdfZoomLevel">Fit</span></button>
+                    <button type="button" id="pdfZoomIn" class="btn-subtle btn-sm" title="Zoom in">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
 
     <template id="emptyRowTemplate">
       <tr><td colspan="6" class="empty">Not available for this run.</td></tr>
     </template>
 
-    <script src="app.js" defer></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>
