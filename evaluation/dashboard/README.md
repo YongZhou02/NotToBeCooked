@@ -25,10 +25,10 @@ uv run --project apps/api python evaluation/dashboard/build_dashboard_data.py
 Preview locally:
 
 ```powershell
-python -m http.server 8765 --directory evaluation/dashboard
+python -m http.server 8766 --directory evaluation
 ```
 
-Then open `http://127.0.0.1:8765/`.
+Then open `http://127.0.0.1:8766/dashboard/` (served from `evaluation/` so the PDFs in `datasets/cpt316/documents/` resolve).
 
 The phase scores use different, explicitly labelled measurements:
 

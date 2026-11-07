@@ -731,7 +731,7 @@ async function loadPdfDocument(filename) {
   showPdfLoading(`Opening ${filename}...`);
   const lib = await getPdfLib();
   const loadingTask = lib.getDocument({
-    url: `documents/${filename}`,
+    url: `../datasets/cpt316/documents/${filename}`,
   });
 
   const doc = await loadingTask.promise;
@@ -867,7 +867,7 @@ function locateCurrentQuote() {
 async function updatePdfViewer(docId, pageNumber, quoteText) {
   const filename = getDocumentPdf(docId);
   const page = Math.max(1, parseInt(pageNumber, 10) || 1);
-  const pdfUrl = `documents/${filename}#page=${page}&view=FitH`;
+  const pdfUrl = `../datasets/cpt316/documents/${filename}#page=${page}&view=FitH`;
 
   // Synchronize UI labels
   if ($("pdfDocSelect")) $("pdfDocSelect").value = filename;
