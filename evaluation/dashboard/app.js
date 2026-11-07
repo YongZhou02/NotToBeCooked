@@ -6,11 +6,37 @@ const scoreValue = (value) => (value == null ? "—" : `${value.toFixed(1)}`);
 const methodLabel = (method) => ({ vector: "Vector", keyword: "Keyword", hybrid_rrf: "Hybrid + RRF" })[method] || method;
 const runShort = (id) => `${id.slice(0, 8)} · ${id.slice(9, 15)}`;
 
+const phaseHelp = {
+  extraction: ["Extraction · parser output from the PDF", "Score: gold evidence preserved, out of 100.", "Fuzzy ≥ 0.88: similar text match; diagnostic only.", "Bar: the score percentage."],
+  chunking: ["Chunking · splitting extracted text for search", "Score: evidence kept intact in a chunk, out of 100.", "Over budget: chunks above the token limit.", "Bar: the intact-evidence percentage."],
+  retrieval: ["Embedding + retrieval · finding relevant chunks", "Score: hybrid evidence Recall@5, out of 100.", "Recall@5: required evidence found in the top five.", "MRR: how early the first relevant result appears.", "Bar: the hybrid recall percentage."],
+  context: ["Context assembly · selecting chunks for the answer", "Score: complete evidence in the top five, out of 100.", "Retrieval proxy: not yet a dedicated context scorer.", "Bar: the complete-evidence percentage."],
+  citation: ["Citation · linking claims to sources", "Score: citation support review, normalized from 0–2 to 0–100.", "2/2: citation supports the claim; pending reviews are not verified.", "Bar: the reviewed support percentage."],
+  generation: ["Generation · producing the final answer", "Score: faithfulness + correctness + completeness, out of 100.", "Assistant review: only reviewed answers are included.", "Bar: the reviewed answer-quality percentage."],
+};
+
+const traceHelp = {
+  "Gold evidence": ["Gold evidence · expected benchmark facts", "document_id: source PDF.", "pdf_page: source page.", "quote: expected text."],
+  Extraction: ["Extraction · what the parser retained", "exact/fuzzy_pass: match result.", "fuzzy_score: similarity score.", "matches: extracted locations."],
+  Chunking: ["Chunking · whether evidence stays together", "intact: pass/fail.", "matches: matching chunk locations."],
+  "Retrieval ranks": ["Retrieval ranks · where each search method found evidence", "vector/keyword/hybrid_rrf: ranked methods.", "found: evidence appears or not.", "ranks: result positions."],
+  Context: ["Context · chunks assembled for the answer", "filename: source file.", "page_start/page_end: source pages.", "score: retrieval score; rank: order; content: chunk text."],
+  "Citation + generation": ["Citation + generation · answer and source links", "citations: cited sources.", "answer: generated response.", "review: assistant review scores."],
+};
+
 function node(tag, className, text) {
   const element = document.createElement(tag);
   if (className) element.className = className;
   if (text != null) element.textContent = text;
   return element;
+}
+
+function tooltip(lines) {
+  const tip = node("span", "tooltip");
+  const list = document.createElement("ul");
+  lines.forEach((line) => list.append(node("li", "", line)));
+  tip.append(list);
+  return tip;
 }
 
 function currentRun() {
@@ -34,10 +60,18 @@ function renderPhases() {
   const fragment = document.createDocumentFragment();
   currentRun().phases.forEach((phase) => {
     const card = node("article", "phase-card");
-    card.append(node("span", "phase-number", phase.number), node("h3", "", phase.label));
+    const cardTop = node("div", "phase-card-top");
+    cardTop.append(node("span", "phase-number", phase.number));
+    const help = node("button", "help-button", "?");
+    help.type = "button";
+    help.append(tooltip(phaseHelp[phase.id]));
+    help.setAttribute("aria-label", `${phase.label}: what does this score mean?`);
+    cardTop.append(help);
+    card.append(cardTop, node("h3", "", phase.label));
     const score = node("p", "score", scoreValue(phase.value));
     if (phase.value != null) score.append(node("small", "", " / 100"));
     card.append(score, node("p", "metric", phase.metric));
+    card.append(node("p", `score-source ${phase.status}`, phase.status === "measured" ? "from run artifacts" : "not available for this run"));
     const bar = node("div", "bar");
     const fill = node("span");
     fill.style.width = `${Math.max(0, Math.min(100, phase.value || 0))}%`;
@@ -122,7 +156,18 @@ function traceSummary(trace) {
 
 function evidenceBlock(title, content) {
   const block = node("div", "evidence-block");
-  block.append(node("h3", "", title));
+  const heading = node("div", "evidence-heading");
+  heading.append(node("h3", "", title));
+  const help = node("button", "help-button", "?");
+  help.type = "button";
+  help.append(tooltip(traceHelp[title] || ["Trace data for this stage."]));
+  help.setAttribute("aria-label", `${title}: what does this section mean?`);
+  heading.append(help);
+  block.append(heading);
+  const description = traceHelp[title]?.[0];
+  if (description) block.append(node("p", "evidence-description", description));
+  const fields = traceHelp[title]?.[1];
+  if (fields) block.append(node("p", "evidence-fields", fields));
   const pre = node("pre");
   pre.textContent = typeof content === "string" ? content : JSON.stringify(content, null, 2);
   block.append(pre);
