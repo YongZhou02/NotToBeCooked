@@ -13,6 +13,7 @@ sent, which `check_grounding` then catches. It can never invent a file that does
 not exist or a page that was never retrieved.
 """
 
+import asyncio
 import json
 from typing import Any
 
@@ -75,6 +76,28 @@ _RESPONSE_SCHEMA: dict[str, Any] = {
                 "properties": {
                     "marker": {"type": "INTEGER"},
                     "quote": {"type": "STRING"},
+                },
+                "required": ["marker", "quote"],
+            },
+        },
+    },
+    "required": ["answer", "grounded", "citations"],
+}
+
+# The same constraint in standard JSON Schema, for OpenAI-compatible providers.
+_JSON_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "answer": {"type": "string"},
+        "grounded": {"type": "boolean"},
+        "uncovered": {"type": ["string", "null"]},
+        "citations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "marker": {"type": "integer"},
+                    "quote": {"type": "string"},
                 },
                 "required": ["marker", "quote"],
             },
@@ -189,8 +212,6 @@ async def generate_answer(
     if settings.LLM_FAKE_MODE:
         return _fake_answer(question, sources)
 
-    url = f"{settings.GEMINI_API_BASE_URL}/models/{settings.GEMINI_MODEL_NAME}:generateContent"
-
     # The instruction goes in system_instruction rather than being pasted on top
     # of the question. Prepending it would put the rules inside the same turn as
     # user-supplied text, where "ignore the above" is one sentence away.
@@ -198,12 +219,69 @@ async def generate_answer(
 
     if document_summary:
         system_instruction += "\n\n" + DOCUMENT_SUMMARY_INSTRUCTION
+
+    user_turn = f"{history}SOURCES\n\n{context}\n\nQUESTION\n\n{question}"
+
+    # Gemini first when both keys are set; Groq only when it is the sole key.
+    if settings.llm_provider == "groq":
+        return await _generate_groq(system_instruction, user_turn)
+    return await _generate_gemini(system_instruction, user_turn)
+
+
+async def _generate_groq(system_instruction: str, user_turn: str) -> LlmAnswer:
+    """Groq's OpenAI-compatible chat completions, JSON-schema constrained.
+
+    The free tier is token-per-minute limited, so a 429 is expected: honour
+    `retry-after` (capped at 30 s) a bounded number of times.
+    """
+    payload = {
+        "model": settings.GROQ_MODEL_NAME,
+        "temperature": 0,
+        "messages": [
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": user_turn},
+        ],
+        # Non-strict on purpose: `uncovered` must stay omittable (see
+        # _RESPONSE_SCHEMA), which strict mode forbids. LlmAnswer validates.
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {"name": "answer", "strict": False, "schema": _JSON_SCHEMA},
+        },
+        "reasoning_effort": "low",
+    }
+    headers = {"Authorization": f"Bearer {settings.GROQ_API_KEY.get_secret_value()}"}
+    url = f"{settings.GROQ_API_BASE_URL}/chat/completions"
+
+    async with httpx.AsyncClient(timeout=settings.GROQ_API_TIMEOUT_SECONDS) as client:
+        attempt = 0
+        while True:
+            response = await client.post(url, headers=headers, json=payload)
+            if response.status_code != 429 or attempt >= settings.GROQ_MAX_RETRIES:
+                break
+            attempt += 1
+            try:
+                wait = float(response.headers.get("retry-after", "5"))
+            except ValueError:
+                wait = 5.0
+            await asyncio.sleep(min(max(wait, 1.0), 30.0))
+
+    if response.status_code != 200:
+        raise RuntimeError(f"Groq {response.status_code}: {response.text}")
+
+    body = response.json()
+    try:
+        text = body["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError) as exc:
+        raise RuntimeError(f"Groq returned no choice: {body}") from exc
+    return LlmAnswer.model_validate(json.loads(text))
+
+
+async def _generate_gemini(system_instruction: str, user_turn: str) -> LlmAnswer:
+    url = f"{settings.GEMINI_API_BASE_URL}/models/{settings.GEMINI_MODEL_NAME}:generateContent"
     payload = {
         "system_instruction": {"parts": [{"text": system_instruction}]},
         # `history` is render_history's block, or "" on a first question.
-        "contents": [
-            {"parts": [{"text": f"{history}SOURCES\n\n{context}\n\nQUESTION\n\n{question}"}]}
-        ],
+        "contents": [{"parts": [{"text": user_turn}]}],
         "generationConfig": {
             "temperature": 0,
             "responseMimeType": "application/json",

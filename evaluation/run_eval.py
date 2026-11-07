@@ -448,10 +448,11 @@ async def main(args: argparse.Namespace) -> None:
     folder = args.dataset.resolve()
     manifest, questions, answers, evidence = load_dataset(folder)
     if args.generate and (
-        settings.LLM_FAKE_MODE or not settings.GEMINI_API_KEY.get_secret_value()
+        settings.LLM_FAKE_MODE or settings.llm_provider is None
     ):
         raise ValueError(
-            "Real generation requires LLM_FAKE_MODE=false and a configured Gemini key"
+            "Real generation requires LLM_FAKE_MODE=false and a GEMINI_API_KEY "
+            "or GROQ_API_KEY"
         )
     if args.repeats < 1:
         raise ValueError("--repeats must be positive")
@@ -502,7 +503,7 @@ async def main(args: argparse.Namespace) -> None:
         "platform": platform.platform(),
         "embedding_model": settings.MODEL_TYPE,
         "embedding_dimension": settings.EMBEDDINGS_DIM,
-        "generation_model": settings.GEMINI_MODEL_NAME if args.generate else None,
+        "generation_model": settings.llm_model_name if args.generate else None,
         "generation_method": args.generation_method,
         "repeats": args.repeats,
         "seed": 37,

@@ -68,8 +68,35 @@ class Settings(BaseSettings):
     GEMINI_API_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta"
     GEMINI_API_TIMEOUT_SECONDS: float = 30.0
 
+    # Groq Settings (OpenAI-compatible chat completions)
+    GROQ_API_KEY: SecretStr = SecretStr("")
+    GROQ_MODEL_NAME: str = "openai/gpt-oss-120b"
+    GROQ_API_BASE_URL: str = "https://api.groq.com/openai/v1"
+    GROQ_API_TIMEOUT_SECONDS: float = 60.0
+    # Free tier is ~8K tokens/minute, so a 429 is routine: wait the server's
+    # retry-after (capped) this many times before giving up.
+    GROQ_MAX_RETRIES: int = 3
+
     # LLM Calls Settings
     LLM_FAKE_MODE: bool = Field(default=True)
+
+    @property
+    def llm_provider(self) -> str | None:
+        """Which real provider is configured: Gemini wins when both keys exist."""
+        if self.GEMINI_API_KEY.get_secret_value():
+            return "gemini"
+        if self.GROQ_API_KEY.get_secret_value():
+            return "groq"
+        return None
+
+    @property
+    def llm_model_name(self) -> str | None:
+        provider = self.llm_provider
+        if provider == "gemini":
+            return self.GEMINI_MODEL_NAME
+        if provider == "groq":
+            return self.GROQ_MODEL_NAME
+        return None
 
     # Load from .env file automatically
     model_config = SettingsConfigDict(
