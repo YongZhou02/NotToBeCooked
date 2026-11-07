@@ -1,0 +1,34 @@
+{
+  "total_rows": 80,
+  "by_origin": {
+    "assistant_stress": 30,
+    "synthetic": 50
+  },
+  "by_split": {
+    "dev": 15,
+    "stress": 30,
+    "test": 35
+  },
+  "by_category": {
+    "cross_part": 5,
+    "definition": 10,
+    "exact": 11,
+    "explain": 5,
+    "manglish": 5,
+    "multi_evidence": 9,
+    "paraphrase": 9,
+    "relationship": 10,
+    "typo": 5,
+    "unanswerable": 5,
+    "vague": 5,
+    "visual": 1
+  },
+  "verified": 50,
+  "unanswerable": 5,
+  "team_files": [],
+  "edited_originals": [],
+  "unchanged_edits": 0,
+  "conflicts": [],
+  "skipped": [],
+  "warnings": []
+}
