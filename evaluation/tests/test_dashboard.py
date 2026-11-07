@@ -23,6 +23,8 @@ def test_dashboard_assembly_keeps_six_phases_and_history():
     )
     assert len(data["runs"]) == 3
     assert len(data["questions"]) == 50
+    assert data["dataset"]["verified_questions"] == 50
+    assert data["dataset"]["strict_retrieval_questions"] == 49
     baseline = next(run for run in data["runs"] if run["id"] == data["selected_run_id"])
     assert [phase["id"] for phase in baseline["phases"]] == [
         "extraction",
@@ -34,6 +36,14 @@ def test_dashboard_assembly_keeps_six_phases_and_history():
     ]
     assert baseline["same_source_run_count"] == 3
     assert baseline["retrieval_methods"]["hybrid_rrf"]["evidence_recall@5"] > 0
+    assert "splits" in data["dataset"]
+    assert data["dataset"]["splits"]["dev"]["questions"] == 15
+    assert data["dataset"]["splits"]["test"]["questions"] == 35
+    assert data["dataset"]["splits"]["dev"]["golden_quotes"] == 21
+    assert data["dataset"]["splits"]["test"]["golden_quotes"] == 51
+    assert "origin" in data["questions"][0]
+    assert "verified" in data["questions"][0]
+    assert "evidence_groups" in data["questions"][0]
 
 
 def test_generated_dashboard_json_is_the_ui_source():
@@ -41,3 +51,18 @@ def test_generated_dashboard_json_is_the_ui_source():
     data = json.loads(path.read_text(encoding="utf-8"))
     assert data["ui_mode"] == "prototype; no live run backend"
     assert data["fuzzy_matching"]["diagnostic_only"] is True
+
+
+def test_dashboard_ui_html_has_three_tabs_and_required_panels():
+    html_path = SCRIPT.parent / "index.html"
+    content = html_path.read_text(encoding="utf-8")
+    assert 'data-tab="dashboard"' in content
+    assert 'data-tab="runs"' in content
+    assert 'data-tab="visualization"' in content
+    assert 'data-panel="dashboard"' in content
+    assert 'data-panel="runs"' in content
+    assert 'data-panel="visualization"' in content
+    assert 'id="runDatasetStats"' in content
+    assert 'id="visDatasetStats"' in content
+    assert 'id="btnToggleAddQuestion"' in content
+    assert 'id="filterVerification"' in content
