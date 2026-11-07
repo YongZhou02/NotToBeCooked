@@ -47,6 +47,8 @@ class Settings(BaseSettings):
     EMBEDDINGS_DIM: int = 1024
     MODEL_TYPE: str = "jinaai/jina-embeddings-v5-text-small"
     CHUNKER_VERSION: str = "chunker-1"
+    # Local vision enrichment for supported charts; disable for text-only benchmarks.
+    CHART_EXTRACTION_ENABLED: bool = True
 
     # File Storage Settings
     #

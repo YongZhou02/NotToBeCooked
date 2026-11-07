@@ -1,18 +1,39 @@
+import sys
 from uuid import uuid4
 
 from docling.datamodel.base_models import InputFormat
+from docling.datamodel.chart_extraction_options import (
+    ChartExtractionModelKind,
+    ChartExtractionModelOptions,
+)
 from docling.datamodel.pipeline_options import PdfPipelineOptions
+from docling.datamodel.settings import settings as docling_settings
 from docling.document_converter import DocumentConverter, PdfFormatOption
+from docling_core.types.doc.items.table.table import TableItem
 
+from app.core.config import settings
 from app.schemas.chunk import ChunkCreate
 from app.services.embeddings import count_token, get_tokenizer
 
 
 def ingest_document(file_path):
+    # Eager inference works without the MSVC toolchain. Docling defaults to
+    # torch.compile, which otherwise fails at layout inference on Windows.
+    if sys.platform == "win32":
+        docling_settings.inference.compile_torch_models = False
     # Use Docling's default PDF-aware OCR: preserve native text and recognize
     # image regions as needed, without forcing full-page OCR.
     pdf_options = PdfPipelineOptions()
     pdf_options.do_ocr = True
+    pdf_options.do_chart_extraction = settings.CHART_EXTRACTION_ENABLED
+    # Use the smaller chart-specific 2B model on the local CPU setup.
+    # Extraction implicitly enables Docling's picture classifier.
+    pdf_options.chart_extraction_options = ChartExtractionModelOptions(
+        model=ChartExtractionModelKind.GRANITE_VISION,
+        chart2csv=True,
+        chart2code=False,
+        chart2summary=False,
+    )
     converter = DocumentConverter(
         format_options={
             InputFormat.PDF: PdfFormatOption(pipeline_options=pdf_options),
@@ -54,7 +75,18 @@ def extract_text(document):
             current_heading = text
             continue
 
-        if label == "table":
+        if label == "picture":
+            meta = getattr(document_item, "meta", None)
+            chart = getattr(meta, "tabular_chart", None)
+            if chart is None:
+                continue
+            table = TableItem(self_ref="#/tables/0", data=chart.chart_data)
+            chart_text = table.export_to_markdown(doc=document)
+            if not chart_text.strip():
+                continue
+            title = f"\n{chart.title}" if chart.title else ""
+            content = f"Chart data (model-extracted; verify values against the original chart){title}\n{chart_text}"
+        elif label == "table":
             content = document_item.export_to_markdown(doc=document)
         elif label in {"text", "list_item"} or is_bullet_heading:
             content = text

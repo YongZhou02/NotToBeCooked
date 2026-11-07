@@ -62,7 +62,9 @@ def test_embed_text_returns_one_list_per_input_in_the_same_order():
 
     fake_model.encode.assert_called_once_with(
         texts,
-        batch_size=settings.BATCH_SIZE,
+        batch_size=settings.BATCH_SIZE
+        if torch.cuda.is_available()
+        else min(settings.BATCH_SIZE, 4),
         show_progress_bar=True,
         normalize_embeddings=True,
         task="retrieval",
