@@ -35,7 +35,11 @@ async def test_groq_call_retries_on_429(monkeypatch):
 
     monkeypatch.setattr(llm.asyncio, "sleep", fake_sleep)
 
-    answer = {"answer": "a", "grounded": True, "citations": [{"marker": 1, "quote": "q"}]}
+    answer = {
+        "claims": [{"text": "a", "markers": [1]}],
+        "grounded": True,
+        "citations": [{"marker": 1, "quote": "q"}],
+    }
     calls = {"n": 0}
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -54,5 +58,43 @@ async def test_groq_call_retries_on_429(monkeypatch):
     )
 
     result = await llm.generate_answer(question="?", context="c", sources=[])
-    assert result.answer == "a" and result.grounded
+    assert result.answer == "a [1]" and result.grounded
     assert calls["n"] == 2 and sleeps == [2.0]
+
+
+def test_groq_claims_are_rendered_by_the_server():
+    answer = llm.GroqAnswer.model_validate(
+        {
+            "claims": [
+                {"text": "First fact.", "markers": [2, 1, 2]},
+                {"text": "Second fact.", "markers": [3]},
+            ],
+            "grounded": True,
+            "citations": [
+                {"marker": 1, "quote": "one"},
+                {"marker": 2, "quote": "two"},
+                {"marker": 3, "quote": "three"},
+            ],
+        }
+    ).render()
+
+    assert answer.answer == "First fact. [2] [1]\n\nSecond fact. [3]"
+
+
+def test_visual_marker_brackets_are_canonicalised_but_numbers_are_unchanged():
+    answer = llm.LlmAnswer(
+        answer="First 【5】 and second ［12］.", grounded=True, citations=[]
+    )
+    assert answer.answer == "First [5] and second [12]."
+
+
+def test_grounded_groq_claim_without_a_marker_is_rejected():
+    answer = llm.GroqAnswer.model_validate(
+        {
+            "claims": [{"text": "Unsupported claim.", "markers": []}],
+            "grounded": True,
+            "citations": [],
+        }
+    )
+    with pytest.raises(ValueError, match="needs a source marker"):
+        answer.render()

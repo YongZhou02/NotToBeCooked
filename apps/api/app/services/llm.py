@@ -15,10 +15,11 @@ not exist or a page that was never retrieved.
 
 import asyncio
 import json
-from typing import Any
+import re
+from typing import Annotated, Any
 
 import httpx
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.core.config import settings
 from app.schemas.rag import RetrievedChunk
@@ -54,6 +55,56 @@ class LlmAnswer(BaseModel):
     # rejects the second.
     uncovered: str | None = None
 
+    @field_validator("answer", mode="before")
+    @classmethod
+    def canonicalise_marker_brackets(cls, value: Any) -> Any:
+        """Accept visual bracket variants without changing marker numbers.
+
+        Some providers render ``[5]`` as ``【5】`` or ``［5］``. These are the
+        same source reference to a reader, so normalise only those exact numeric
+        forms. Missing markers, unknown numbers and prose remain untouched and
+        still have to pass the grounding gate.
+        """
+        if not isinstance(value, str):
+            return value
+        return re.sub(r"[【［]\s*(\d+)\s*[】］]", r"[\1]", value)
+
+
+class LlmClaim(BaseModel):
+    """One Groq answer claim with source numbers, before server rendering."""
+
+    text: str = Field(..., min_length=1)
+    markers: list[Annotated[int, Field(ge=1)]] = Field(default_factory=list)
+
+
+class GroqAnswer(BaseModel):
+    """Structured Groq output: the server, not the model, prints ``[n]``."""
+
+    claims: list[LlmClaim]
+    grounded: bool
+    citations: list[LlmCitation] = Field(default_factory=list)
+    uncovered: str | None = None
+
+    def render(self) -> LlmAnswer:
+        parts: list[str] = []
+        for claim in self.claims:
+            text = claim.text.strip()
+            if re.search(r"(?:\[|【|［)\s*\d+\s*(?:\]|】|］)", text):
+                raise ValueError("Groq claim text must not contain handwritten markers")
+            markers = list(dict.fromkeys(claim.markers))
+            if self.grounded and not markers:
+                raise ValueError("Every grounded Groq claim needs a source marker")
+            suffix = " ".join(f"[{marker}]" for marker in markers)
+            parts.append(f"{text} {suffix}".rstrip())
+        if not parts:
+            raise ValueError("Groq returned no answer claims")
+        return LlmAnswer(
+            answer="\n\n".join(parts),
+            grounded=self.grounded,
+            citations=self.citations,
+            uncovered=self.uncovered,
+        )
+
 
 # Gemini's responseSchema is an OpenAPI subset with upper-case type names. It is
 # written out rather than derived from LlmAnswer because the two are not the
@@ -88,7 +139,24 @@ _RESPONSE_SCHEMA: dict[str, Any] = {
 _JSON_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {
-        "answer": {"type": "string"},
+        "claims": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "description": "One answer claim without citation brackets.",
+                    },
+                    "markers": {
+                        "type": "array",
+                        "items": {"type": "integer"},
+                        "description": "Source numbers supporting this claim.",
+                    },
+                },
+                "required": ["text", "markers"],
+            },
+        },
         "grounded": {"type": "boolean"},
         "uncovered": {"type": ["string", "null"]},
         "citations": {
@@ -103,8 +171,18 @@ _JSON_SCHEMA: dict[str, Any] = {
             },
         },
     },
-    "required": ["answer", "grounded", "citations"],
+    "required": ["claims", "grounded", "citations"],
 }
+
+_GROQ_CLAIM_INSTRUCTION = """
+OUTPUT FORMAT OVERRIDE FOR THIS PROVIDER
+
+Return the answer as `claims`, not as one `answer` string. Each claim has plain
+`text` with no handwritten citation brackets and a `markers` array containing
+the source numbers that support that claim. The server renders those numbers as
+`[n]`. For a refusal, return one plain claim with an empty markers array, set
+grounded to false, and leave citations empty.
+""".strip()
 
 REFUSAL = "The supplied material does not cover this question."
 
@@ -238,7 +316,10 @@ async def _generate_groq(system_instruction: str, user_turn: str) -> LlmAnswer:
         "model": settings.GROQ_MODEL_NAME,
         "temperature": 0,
         "messages": [
-            {"role": "system", "content": system_instruction},
+            {
+                "role": "system",
+                "content": system_instruction + "\n\n" + _GROQ_CLAIM_INSTRUCTION,
+            },
             {"role": "user", "content": user_turn},
         ],
         # Non-strict on purpose: `uncovered` must stay omittable (see
@@ -273,7 +354,7 @@ async def _generate_groq(system_instruction: str, user_turn: str) -> LlmAnswer:
         text = body["choices"][0]["message"]["content"]
     except (KeyError, IndexError, TypeError) as exc:
         raise RuntimeError(f"Groq returned no choice: {body}") from exc
-    return LlmAnswer.model_validate(json.loads(text))
+    return GroqAnswer.model_validate(json.loads(text)).render()
 
 
 async def _generate_gemini(system_instruction: str, user_turn: str) -> LlmAnswer:
