@@ -131,6 +131,33 @@ def test_dashboard_carries_concerns_from_newest_run_that_has_them(tmp_path):
     assert data["concerns"]["run_id"] == "new"
 
 
+def test_question_scores_keep_unmeasured_as_none_not_zero():
+    question = {"id": "q1", "evidence_groups": []}
+    scores = builder.question_scores(question, [], [], None, None)
+    assert scores["in_run"] is False
+    assert scores["extraction"] is None and scores["chunking"] is None
+    assert scores["answer_state"] is None and scores["judge"] is None
+
+    row = {
+        "question_id": "q1",
+        "method": "hybrid_rrf",
+        "metrics": {"hit@5": 1.0},
+    }
+    group = {"extraction": {"exact": True}, "chunking": {"intact": False}}
+    answer = {
+        "response": {"answer": "An answer was written, but its citations..."},
+        "generation_trace": {"grounding_ok": False, "grounding_problems": ["x"]},
+    }
+    judgement = {"correct": 2, "supported": 1, "useful": 0, "refused": False}
+    scores = builder.question_scores(question, [group], [row], answer, judgement)
+    assert scores["in_run"] is True
+    assert scores["extraction"] == 1.0 and scores["chunking"] == 0.0
+    assert scores["retrieval"] == {"hybrid_rrf": {"hit@5": 1.0}}
+    assert scores["answer_state"] == "blocked"
+    assert scores["grounding_problems"] == ["x"]
+    assert scores["judge"]["correct"] == 2
+
+
 def test_generated_dashboard_json_is_the_ui_source():
     path = SCRIPT.parent / "dashboard_data.json"
     data = json.loads(path.read_text(encoding="utf-8"))

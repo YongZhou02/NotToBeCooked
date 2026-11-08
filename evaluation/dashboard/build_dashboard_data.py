@@ -19,6 +19,7 @@ EVALUATION = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(EVALUATION))
 
 from scorers.answer_quality import review_summary
+from scorers.concerns import answer_state
 from scorers.retrieval import covered_groups, evidence_matches, normalize
 
 FUZZY_THRESHOLD = 0.88
@@ -235,6 +236,50 @@ def compact_match(block: dict[str, Any], index: int) -> dict[str, Any]:
     }
 
 
+def question_scores(
+    question: dict[str, Any],
+    per_group: list[dict[str, Any]],
+    rows: list[dict[str, Any]],
+    answer: dict[str, Any] | None,
+    judgement: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """One question's numbers for the results matrix, each on a 0-1 scale or None.
+
+    None means "not measured for this question in this run", never zero: an
+    unanswerable question has no evidence to retrieve, and a run without
+    generation has no answer to judge.
+    """
+    in_run = [row for row in rows if row["question_id"] == question["id"]]
+    groups = len(per_group)
+    state = answer_state(answer) if answer else None
+    return {
+        "in_run": bool(in_run),
+        "extraction": (
+            sum(group["extraction"]["exact"] for group in per_group) / groups
+            if groups and in_run
+            else None
+        ),
+        "chunking": (
+            sum(group["chunking"]["intact"] for group in per_group) / groups
+            if groups and in_run
+            else None
+        ),
+        "retrieval": {row["method"]: row["metrics"] for row in in_run if row.get("metrics")},
+        "answer_state": state,
+        "grounding_problems": (
+            (answer or {}).get("generation_trace", {}).get("grounding_problems") or []
+        ),
+        "judge": (
+            {
+                key: judgement.get(key)
+                for key in ("correct", "supported", "useful", "refused", "note")
+            }
+            if judgement
+            else None
+        ),
+    }
+
+
 def trace_question(
     question: dict[str, Any],
     run: Path,
@@ -243,7 +288,9 @@ def trace_question(
     rows: list[dict[str, Any]],
     generation: list[dict[str, Any]],
     reviews: list[dict[str, Any]],
+    judgements: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    judgement = (judgements or {}).get(question["id"])
     groups = question["evidence_groups"]
     pages = page_blocks(extracted)
     per_group = []
@@ -308,6 +355,7 @@ def trace_question(
     )
     return {
         "run_id": run.name,
+        "scores": question_scores(question, per_group, rows, answer, judgement),
         "groups": per_group,
         "context": {
             "chunks": hybrid["sources"] if hybrid else [],
@@ -376,6 +424,8 @@ def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
         rows = result_rows(run)
         generation = read_json(run / "generation_answers.json", [])
         assistant_reviews = read_json(run / "assistant_reviews.json", [])
+        judge_file = read_json(run / "judgements.json", {}) or {}
+        judgements = judge_file.get("answers", {})
         methods = method_summary(rows)
         pages = page_blocks(extracted)
         all_groups = [
@@ -412,11 +462,24 @@ def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
                 "retrieval_methods": methods,
                 "questions_evaluated": len({row["question_id"] for row in rows}),
                 "generation_answers": len(generation),
+                "generation_model": config.get("generation_model"),
+                "judge": (
+                    {"model": judge_file.get("model"), "label": judge_file.get("label")}
+                    if judgements
+                    else None
+                ),
             }
         )
         for question in questions:
             trace_by_question[question["id"]][run.name] = trace_question(
-                question, run, extracted, chunks, rows, generation, assistant_reviews
+                question,
+                run,
+                extracted,
+                chunks,
+                rows,
+                generation,
+                assistant_reviews,
+                judgements,
             )
     fingerprint_counts: dict[str, int] = defaultdict(int)
     for run in runs:
