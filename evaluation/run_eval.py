@@ -47,11 +47,10 @@ from app.schemas.rag import RagQueryRequest, RetrievedChunk
 from app.schemas.user import User
 from app.services.embeddings import embed_query, embed_text
 from app.services.ingestion import create_chunk, extract_text, ingest_document
-from sqlmodel import col, select
-from sqlmodel.ext.asyncio.session import AsyncSession
-
 from scorers.pipeline import token_fidelity, vector_valid
 from scorers.retrieval import covered_groups, normalize, retrieval_metrics
+from sqlmodel import col, select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 DATASET = EVALUATION / "datasets/cpt316/all"
 METHODS = ("vector", "keyword", "hybrid_rrf")

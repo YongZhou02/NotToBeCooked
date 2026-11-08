@@ -57,6 +57,7 @@ apps/api/storage/
 /evaluation/runs/
 /evaluation/reports/results_flat.csv
 /evaluation/dashboard/documents/
+C:\Users\calvi\Documents\GitHub\NotToBeCooked\evaluation\reports\generated\groq-review.html
 
 # personal type-checker / editor configs. pyrefly.toml is not a project
 # dependency -- it appears in no pyproject.toml, package.json or uv.lock -- and
