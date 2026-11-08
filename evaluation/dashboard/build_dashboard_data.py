@@ -32,11 +32,13 @@ def read_json(path: Path, default: Any = None) -> Any:
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
-    return [
-        json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line
-    ]
+    rows = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            rows.append(json.loads(line))
+        except ValueError:
+            continue  # a run still being written can end on a half line
+    return rows
 
 
 def load_dataset(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -104,7 +106,10 @@ def result_rows(run: Path) -> list[dict[str, Any]]:
 
 def method_summary(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     output = {}
-    test_rows = [row for row in rows if row.get("split") == "test"]
+    # Unanswerable questions carry no retrieval metrics.
+    test_rows = [
+        row for row in rows if row.get("split") == "test" and row.get("metrics")
+    ]
     for method in METHODS:
         selected = [row for row in test_rows if row.get("method") == method]
         if not selected:
@@ -329,7 +334,7 @@ def trace_question(
 
 def split_composition(questions: list[dict[str, Any]]) -> dict[str, Any]:
     output: dict[str, dict[str, Any]] = {}
-    for split_name in ("dev", "test"):
+    for split_name in ("dev", "test", "stress"):
         split_questions = [q for q in questions if q.get("split") == split_name]
         categories: dict[str, int] = defaultdict(int)
         for q in split_questions:
@@ -358,7 +363,7 @@ def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
     run_paths = sorted(
         [
             path
-            for path in runs_path.iterdir()
+            for path in (runs_path.iterdir() if runs_path.exists() else [])
             if path.is_dir() and (path / "config.json").exists()
         ]
     )
@@ -420,9 +425,18 @@ def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
         run["same_source_run_count"] = fingerprint_counts[run["source_fingerprint"]]
     preferred = next(
         (run["id"] for run in reversed(runs) if run["mode"] == "Full + generation"),
-        runs[-1]["id"],
+        runs[-1]["id"] if runs else None,
     )
-    return {
+    # Concerns come from the newest run that has a concerns.json, not the selected one.
+    concerns = next(
+        (
+            read_json(path / "concerns.json")
+            for path in reversed(run_paths)
+            if (path / "concerns.json").exists()
+        ),
+        None,
+    )
+    data = {
         "schema_version": 1,
         "generated_at": datetime.now(UTC).isoformat(),
         "ui_mode": "prototype; no live run backend",
@@ -435,7 +449,9 @@ def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
             "name": dataset["name"],
             "scope": dataset["scope"],
             "questions": len(questions),
-            "verified_questions": sum(question.get("verified", False) for question in questions),
+            "verified_questions": sum(
+                question.get("verified", False) for question in questions
+            ),
             "strict_retrieval_questions": sum(
                 question.get("label_review", {}).get("strict_retrieval_eligible", True)
                 for question in questions
@@ -463,6 +479,8 @@ def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
                 "split": question.get("split", "dev"),
                 "origin": question.get("origin", "synthetic"),
                 "verified": question.get("verified", False),
+                "answerable": question.get("answerable", True),
+                "author": question.get("author"),
                 "label_review": question.get("label_review"),
                 "reference_answer": question["reference_answer"],
                 "required_facts": question["required_facts"],
@@ -472,12 +490,15 @@ def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
             for question in questions
         ],
     }
+    if concerns:
+        data["concerns"] = concerns
+    return data
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--dataset", type=Path, default=EVALUATION / "datasets/cpt316/topic1"
+        "--dataset", type=Path, default=EVALUATION / "datasets/cpt316/all"
     )
     parser.add_argument("--runs", type=Path, default=EVALUATION / "runs")
     parser.add_argument(
