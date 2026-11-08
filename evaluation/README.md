@@ -61,6 +61,15 @@ python -m http.server 8765 --directory evaluation/dashboard
 
 Open <http://127.0.0.1:8765/>. The dashboard is read-only; stop it with `Ctrl+C`.
 
+## Concerns report
+
+```powershell
+# Judge a finished run with a second AI model and write concerns.json beside it
+uv run --project apps/api python evaluation/run_concerns.py [--run RUN_DIR] [--no-judge] [--max-judge-calls 120] [--controls 20]
+```
+
+Each concern is defined in plain words in [`concerns.md`](concerns.md). Judge numbers are labelled "AI judge, not yet checked by a human".
+
 ## References
 
 - Dashboard data contract and six phase scores: [`dashboard/README.md`](dashboard/README.md)
