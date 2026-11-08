@@ -77,7 +77,17 @@ message. Clicking an example opens that question in the Visualization tab.
    retrieval benchmark.
 2. **Run evaluations**: run selector, split composition, run history, and a
    per-question drill-down with the six-stage trace.
-3. **Visualization & Annotation**: a fixed-height workbench (the page does not
+3. **Results matrix**: every scored question (or a group of them) against every
+   score, coloured from red (0) through grey to teal (1), with the number printed
+   in each cell. Rows can be grouped by split, category, origin, source PDF,
+   answerable or answer outcome, and filtered by the same tags. Columns: extraction
+   and chunking, five retrieval metrics for the chosen method, whether the answer
+   was shown, and the AI judge's three grades (shown as 0-1, labelled as not yet
+   checked by a human). A striped cell was not measured for that question and is
+   left out of every mean, never counted as 0. Click a column to sort, hover a cell
+   for what it means (and why an answer was blocked), click a question to open it
+   beside its PDF.
+4. **Visualization & Annotation**: a fixed-height workbench (the page does not
    scroll) with the question beside its source PDF. Below 1000px wide it becomes
    a normal scrolling page.
 
@@ -113,6 +123,9 @@ original `questions.jsonl` is never changed.
 
 - `src/lib/questions.ts`: laying edits over originals, filters, split metrics,
   export and import (plain functions, no React).
+- `src/lib/results.ts`: the results matrix columns, grouping, means and colour
+  scale (plain functions, no React). Its numbers come from each question's
+  `traces[run].scores`, which `build_dashboard_data.py` writes.
 - `src/lib/documents.ts`: the list of source PDFs and how a `document_id` finds one.
 - `src/lib/editor.ts`: the editor's draft and how a draft is saved.
 - `src/components/`: one file per tab or panel. The PDF page itself is drawn by

@@ -1,7 +1,7 @@
 /** Shapes of evaluation/dashboard/dashboard_data.json and of the saved edits. */
 
 export type Origin = "human" | "synthetic"
-export type Split = "dev" | "test"
+export type Split = "dev" | "test" | "stress"
 export type Decision = "approve" | "needs_revision" | "reject"
 
 export interface EvidenceAlternative {
@@ -33,8 +33,27 @@ export interface AssistantReview {
   citation_support?: number | null
 }
 
+/** One question's numbers in one run, built by build_dashboard_data.py. */
+export interface QuestionScores {
+  /** False when the run did not score this question at all. */
+  in_run: boolean
+  extraction?: number | null
+  chunking?: number | null
+  retrieval?: Record<string, Record<string, number> | undefined>
+  answer_state?: "shown" | "blocked" | "failed" | null
+  grounding_problems?: string[]
+  judge?: {
+    correct?: number | null
+    supported?: number | null
+    useful?: number | null
+    refused?: boolean | null
+    note?: string | null
+  } | null
+}
+
 export interface RunTrace {
   run_id?: string
+  scores?: QuestionScores
   groups?: TraceGroup[]
   context?: {
     chunks: unknown[]
@@ -59,6 +78,9 @@ export interface Question {
   required_facts?: string[]
   evidence_groups?: EvidenceGroup[]
   label_review?: Record<string, unknown>
+  /** False for questions the notes cannot answer (the app should refuse). */
+  answerable?: boolean
+  author?: string | null
   traces?: Record<string, RunTrace>
 }
 
@@ -99,6 +121,8 @@ export interface Run {
   generation_answers: number
   phases: PhaseScore[]
   retrieval_methods?: Record<string, RetrievalMethodScores>
+  generation_model?: string | null
+  judge?: { model?: string | null; label?: string | null } | null
 }
 
 export interface DatasetDocument {

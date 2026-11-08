@@ -6,14 +6,16 @@ import { computeSplitMetrics, getAllQuestions } from "@/lib/questions"
 import { useEvalStore } from "@/lib/use-eval-store"
 import { cn } from "@workspace/ui/lib/utils"
 import { DashboardTab } from "@/components/DashboardTab"
+import { ResultsTab } from "@/components/ResultsTab"
 import { RunsTab } from "@/components/RunsTab"
 import { VisualizationTab } from "@/components/VisualizationTab"
 
-export type TabId = "dashboard" | "runs" | "visualization"
+export type TabId = "dashboard" | "runs" | "results" | "visualization"
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "dashboard", label: "Dashboard" },
   { id: "runs", label: "Run evaluations" },
+  { id: "results", label: "Results matrix" },
   { id: "visualization", label: "Visualization & Annotation" },
 ]
 
@@ -183,6 +185,23 @@ function Workbench({ loaded }: { loaded: LoadedData }) {
               onSelectTraceQuestion={setTraceQuestionId}
               metrics={metrics}
               registry={registry}
+            />
+          )}
+        </div>
+        <div
+          role="tabpanel"
+          id="panel-results"
+          aria-labelledby="tab-results"
+          hidden={tab !== "results"}
+          data-panel="results"
+        >
+          {tab === "results" && (
+            <ResultsTab
+              data={data}
+              registry={registry}
+              runId={run.id}
+              onSelectRun={setRunId}
+              onOpenQuestion={openQuestion}
             />
           )}
         </div>

@@ -104,11 +104,16 @@ function ConcernCard({
         <div className="grid gap-1">
           <Eyebrow>Examples</Eyebrow>
           <ul className="grid gap-1">
-            {examples.map((example) => {
+            {examples.map((example, index) => {
               const known = knownQuestions.has(example.question_id)
+              // Some examples are chunks, not questions, and carry no id.
+              const hasId = Boolean(example.question_id)
               return (
-                <li key={example.question_id} className="flex flex-col gap-0.5">
-                  {known ? (
+                <li
+                  key={example.question_id || `example-${index}`}
+                  className="flex flex-col gap-0.5"
+                >
+                  {!hasId ? null : known ? (
                     <Button
                       type="button"
                       variant="outline"

@@ -47,8 +47,8 @@ export function DashboardTab({
         </div>
         <p className="text-sm text-muted-foreground">
           {metrics.total.questions} questions ({metrics.dev.questions} dev ·{" "}
-          {metrics.test.questions} test) · {metrics.total.golden_quotes} golden
-          quotes ·{" "}
+          {metrics.test.questions} test · {metrics.stress.questions} stress) ·{" "}
+          {metrics.total.golden_quotes} golden quotes ·{" "}
           <strong className="text-foreground">
             {run.same_source_run_count} runs on this source
           </strong>
@@ -141,9 +141,9 @@ export function DashboardTab({
             eyebrow="Corpus and splits"
             title="Dataset composition"
             titleId="corpusSummaryTitle"
-            right={<Chip>Dev + Test</Chip>}
+            right={<Chip>Dev + Test + Stress</Chip>}
           />
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-3">
             {(
               [
                 [
@@ -155,6 +155,11 @@ export function DashboardTab({
                   "Test split",
                   metrics.test,
                   "Purpose: the formal benchmark (Recall@5 and MRR)",
+                ],
+                [
+                  "Stress split",
+                  metrics.stress,
+                  "Purpose: messy student wording; reported apart, not yet human-checked",
                 ],
               ] as const
             ).map(([title, part, purpose]) => (

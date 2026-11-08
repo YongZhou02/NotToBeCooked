@@ -190,7 +190,7 @@ export function RunsTab({
             </Chip>
           }
         />
-        <div className="grid gap-3 min-[900px]:grid-cols-3">
+        <div className="grid gap-3 min-[700px]:grid-cols-2 min-[1200px]:grid-cols-4">
           {(
             [
               [
@@ -202,6 +202,11 @@ export function RunsTab({
                 "Test split (scored benchmark)",
                 metrics.test,
                 "The official split scored for Recall@5, MRR@5, Hit@1 and Complete@5.",
+              ],
+              [
+                "Stress split (hard student questions)",
+                metrics.stress,
+                "Typos, Manglish, vague and unanswerable questions. Reported apart from the benchmark.",
               ],
             ] as const
           ).map(([title, part, description]) => (

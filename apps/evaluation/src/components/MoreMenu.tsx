@@ -47,6 +47,12 @@ export function MoreMenu({
     ["Dev split", "dev", metrics.dev, `${metrics.dev.questions} questions`],
     ["Test split", "test", metrics.test, `${metrics.test.questions} questions`],
     [
+      "Stress split",
+      "stress",
+      metrics.stress,
+      `${metrics.stress.questions} questions`,
+    ],
+    [
       "Entire corpus",
       "all",
       metrics.total,
@@ -83,7 +89,7 @@ export function MoreMenu({
             </Chip>
           </div>
 
-          <div className="grid gap-2 min-[560px]:grid-cols-3">
+          <div className="grid gap-2 min-[560px]:grid-cols-2">
             {cards.map(([title, value, part, headline]) => (
               <button
                 key={value}

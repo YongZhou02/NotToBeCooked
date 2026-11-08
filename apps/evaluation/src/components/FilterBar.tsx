@@ -180,6 +180,7 @@ export function FilterBar({
         <option value="all">All</option>
         <option value="dev">Dev</option>
         <option value="test">Test</option>
+        <option value="stress">Stress</option>
       </SelectField>
 
       <Button

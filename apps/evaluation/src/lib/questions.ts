@@ -166,7 +166,7 @@ export function questionSources(
 
 export interface Filters {
   search: string
-  split: "all" | "dev" | "test"
+  split: "all" | "dev" | "test" | "stress"
   origin: "all" | "human" | "synthetic"
   /** A source document id, or "all". */
   source: string
@@ -241,6 +241,8 @@ const blankMetrics = (questions = 0): SplitMetrics => ({
 export interface AllMetrics {
   dev: SplitMetrics
   test: SplitMetrics
+  /** Hard student-style questions, reported apart from the benchmark. */
+  stress: SplitMetrics
   total: SplitMetrics
 }
 
@@ -248,10 +250,16 @@ export function computeSplitMetrics(questions: ResolvedQuestion[]): AllMetrics {
   const summary: AllMetrics = {
     dev: blankMetrics(),
     test: blankMetrics(),
+    stress: blankMetrics(),
     total: blankMetrics(questions.length),
   }
   questions.forEach((q) => {
-    const part = q.split === "dev" ? summary.dev : summary.test
+    const part =
+      q.split === "dev"
+        ? summary.dev
+        : q.split === "stress"
+          ? summary.stress
+          : summary.test
     const groupCount = (q.evidence_groups ?? []).length
     const quoteCount = (q.evidence_groups ?? []).reduce(
       (sum, group) => sum + (group.alternatives ?? []).length,
