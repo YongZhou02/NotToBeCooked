@@ -19,6 +19,8 @@ export default defineConfig({
       // served from there. Nothing is copied into this app's source tree.
       dataFile: path.join(repoRoot, "evaluation/dashboard/dashboard_data.json"),
       documentsDir: path.join(repoRoot, "evaluation/datasets/cpt316/documents"),
+      teamDir: path.join(repoRoot, "evaluation/datasets/cpt316/team"),
+      repoRoot,
     }),
   ],
   resolve: {

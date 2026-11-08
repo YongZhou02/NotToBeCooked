@@ -105,6 +105,18 @@ def test_edit_with_no_change_is_not_an_edit():
     assert report["edited_originals"] == [] and report["unchanged_edits"] == 1
 
 
+def test_human_review_and_hard_case_reach_the_merged_row():
+    review = {"decision": "accept", "notes": "checked against page 1"}
+    same = {**original(), "is_hard_case": True, "human_review": review}
+    rows, report = run([original()], [("a", [same, team(human_review=review)])])
+    assert rows[0]["human_review"] == review and rows[0]["is_hard_case"] is True
+    assert set(report["edited_originals"][0]["fields"]) == {
+        "is_hard_case",
+        "human_review",
+    }
+    assert rows[1]["human_review"] == review
+
+
 def test_two_people_editing_same_original_is_a_conflict():
     rows, report = run(
         [original()],

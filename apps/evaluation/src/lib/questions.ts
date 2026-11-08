@@ -280,10 +280,21 @@ export function computeSplitMetrics(questions: ResolvedQuestion[]): AllMetrics {
   return summary
 }
 
+let humanIdPrefix = ""
+
+/**
+ * Starts new question ids with the person's name, the same prefix the merge
+ * script gives them, so a merged question keeps its id and is never shown
+ * twice.
+ */
+export function setHumanIdPrefix(reviewer: string) {
+  humanIdPrefix = reviewer ? `${reviewer}-` : ""
+}
+
 export function newHumanId(): string {
   const stamp = Date.now().toString(36)
   const random = Math.random().toString(36).slice(2, 6)
-  return `human-${stamp}-${random}`
+  return `${humanIdPrefix}human-${stamp}-${random}`
 }
 
 /** The export file. Same shape as the old dashboard wrote, key for key. */

@@ -1,6 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import {
+  buildTeamFile,
+  FileSaver,
+  loadBacking,
+  type Backing,
+  type SaveStatus,
+} from "@/lib/annotations-file"
 import { loadData, type LoadedData } from "@/lib/load-data"
+import type { Persisted } from "@/lib/storage"
 import { buildRegistry } from "@/lib/documents"
 import { computeSplitMetrics, getAllQuestions } from "@/lib/questions"
 import { useEvalStore } from "@/lib/use-eval-store"
@@ -22,31 +30,50 @@ const TABS: { id: TabId; label: string }[] = [
 type LoadState =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "ready"; loaded: LoadedData }
+  | {
+      status: "ready"
+      loaded: LoadedData
+      backing: Backing
+      initial: Persisted
+      migrated: boolean
+    }
 
 export function App() {
   const [load, setLoad] = useState<LoadState>({ status: "loading" })
 
   useEffect(() => {
     let cancelled = false
-    loadData().then(
-      (loaded) => {
-        if (!cancelled) setLoad({ status: "ready", loaded })
-      },
-      (error: unknown) => {
-        if (!cancelled)
-          setLoad({
-            status: "error",
-            message: error instanceof Error ? error.message : String(error),
-          })
-      }
-    )
+    loadData()
+      .then(async (loaded) => ({
+        loaded,
+        ...(await loadBacking(loaded.data)),
+      }))
+      .then(
+        (ready) => {
+          if (!cancelled) setLoad({ status: "ready", ...ready })
+        },
+        (error: unknown) => {
+          if (!cancelled)
+            setLoad({
+              status: "error",
+              message: error instanceof Error ? error.message : String(error),
+            })
+        }
+      )
     return () => {
       cancelled = true
     }
   }, [])
 
-  if (load.status === "ready") return <Workbench loaded={load.loaded} />
+  if (load.status === "ready")
+    return (
+      <Workbench
+        loaded={load.loaded}
+        backing={load.backing}
+        initial={load.initial}
+        migrated={load.migrated}
+      />
+    )
 
   return (
     <div className="flex h-dvh flex-col bg-background font-sans text-foreground">
@@ -76,7 +103,54 @@ export function App() {
   )
 }
 
-function Header({ tab, onTab }: { tab: TabId; onTab: (tab: TabId) => void }) {
+function SaveBadge({
+  backing,
+  status,
+}: {
+  backing: Backing
+  status: SaveStatus
+}) {
+  if (backing.mode === "browser")
+    return (
+      <span
+        data-testid="save-status"
+        className="text-xs text-(--tx-dim)"
+        title="No dev server, so edits stay in this browser. Use Export to keep them."
+      >
+        Saved in this browser only
+      </span>
+    )
+  const text = {
+    saved: `Saved to ${backing.file}`,
+    saving: "Saving...",
+    error: "Not saved, will retry on next edit",
+    conflict: "Not saved: file changed elsewhere, reload",
+  }[status.state]
+  const bad = status.state === "error" || status.state === "conflict"
+  return (
+    <span
+      data-testid="save-status"
+      role={bad ? "alert" : undefined}
+      className={cn(
+        "text-xs",
+        bad ? "font-semibold text-destructive" : "text-(--tx-dim)"
+      )}
+      title={"message" in status ? status.message : backing.file}
+    >
+      {text}
+    </span>
+  )
+}
+
+function Header({
+  tab,
+  onTab,
+  children,
+}: {
+  tab: TabId
+  onTab: (tab: TabId) => void
+  children?: React.ReactNode
+}) {
   return (
     <header className="flex flex-none flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-(--line) bg-(--bg-bar) px-4 py-2">
       <div className="flex flex-col leading-tight">
@@ -85,6 +159,7 @@ function Header({ tab, onTab }: { tab: TabId; onTab: (tab: TabId) => void }) {
         </span>
         <h1 className="text-base font-semibold">Evaluation Hub</h1>
       </div>
+      {children}
       <nav
         role="tablist"
         aria-label="Evaluation sections"
@@ -121,9 +196,51 @@ export interface FocusRequest {
   nonce: number
 }
 
-function Workbench({ loaded }: { loaded: LoadedData }) {
+function Workbench({
+  loaded,
+  backing,
+  initial,
+  migrated,
+}: {
+  loaded: LoadedData
+  backing: Backing
+  initial: Persisted
+  migrated: boolean
+}) {
   const { data, files } = loaded
-  const store = useEvalStore()
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>({ state: "saved" })
+  const [saver] = useState(() =>
+    backing.mode === "file" ? new FileSaver(backing.etag, setSaveStatus) : null
+  )
+  const save = useMemo(
+    () =>
+      saver && backing.mode === "file"
+        ? (state: Persisted) =>
+            saver.save(buildTeamFile(state, data, backing.reviewer))
+        : undefined,
+    [saver, backing, data]
+  )
+  const store = useEvalStore(initial, save)
+
+  // Edits found only in this browser are written to the file once, on the
+  // first load with file saving.
+  const migratedOnce = useRef(false)
+  useEffect(() => {
+    if (migrated && save && !migratedOnce.current) {
+      migratedOnce.current = true
+      save(initial)
+    }
+  }, [migrated, save, initial])
+
+  useEffect(() => {
+    if (!saver) return
+    const warn = (event: BeforeUnloadEvent) => {
+      if (saver.busy) event.preventDefault()
+    }
+    window.addEventListener("beforeunload", warn)
+    return () => window.removeEventListener("beforeunload", warn)
+  }, [saver])
+
   const registry = useMemo(() => buildRegistry(data, files), [data, files])
   const [tab, setTab] = useState<TabId>("dashboard")
   const [runId, setRunId] = useState(data.selected_run_id)
@@ -151,7 +268,9 @@ function Workbench({ loaded }: { loaded: LoadedData }) {
 
   return (
     <div className="flex h-dvh flex-col bg-background font-sans text-foreground">
-      <Header tab={tab} onTab={setTab} />
+      <Header tab={tab} onTab={setTab}>
+        <SaveBadge backing={backing} status={saveStatus} />
+      </Header>
       <main className={cn("min-h-0 flex-1 overflow-y-auto")}>
         <div
           role="tabpanel"

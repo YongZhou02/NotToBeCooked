@@ -140,11 +140,14 @@ def clean_row(
     }
     if row.get("is_hard_case"):
         cleaned["is_hard_case"] = True
+    if isinstance(row.get("human_review"), dict):
+        cleaned["human_review"] = row["human_review"]
     return cleaned, ""
 
 
 def changed_fields(original: dict, edit: dict) -> list[str]:
     fields = [*EDITABLE, "evidence_groups", "answerable", "verified"]
+    fields += ["is_hard_case", "human_review"]
     return [f for f in fields if original.get(f) != edit.get(f)]
 
 
@@ -245,7 +248,7 @@ def merge(
         original = rows[index[row_id]]
         rows[index[row_id]] = {
             **original,
-            **{f: cleaned[f] for f in fields},
+            **{f: cleaned.get(f) for f in fields},
             "evidence_groups": cleaned["evidence_groups"],
             "edited_by": stem,
             "label_review": cleaned["label_review"],

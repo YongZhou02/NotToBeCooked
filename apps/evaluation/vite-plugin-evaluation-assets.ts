@@ -2,11 +2,17 @@ import fs from "node:fs"
 import path from "node:path"
 import type { Connect, Plugin } from "vite"
 
+import { annotationsHandler } from "./vite-annotations-store"
+
 interface Options {
   /** evaluation/dashboard/dashboard_data.json */
   dataFile: string
   /** evaluation/datasets/cpt316/documents */
   documentsDir: string
+  /** evaluation/datasets/cpt316/team: one saved-edits file per person. */
+  teamDir: string
+  /** The repository root, used to read the git user name. */
+  repoRoot: string
 }
 
 const DATA_URL = "dashboard_data.json"
@@ -36,7 +42,12 @@ function listPdfs(dir: string): string[] {
  * The list lets the app offer every PDF in the folder even when the data
  * file has not been rebuilt to name them yet.
  */
-export function evaluationAssets({ dataFile, documentsDir }: Options): Plugin {
+export function evaluationAssets({
+  dataFile,
+  documentsDir,
+  teamDir,
+  repoRoot,
+}: Options): Plugin {
   let base = "/"
 
   const handler: Connect.NextHandleFunction = (req, res, next) => {
@@ -91,6 +102,9 @@ export function evaluationAssets({ dataFile, documentsDir }: Options): Plugin {
       base = config.base.startsWith(".") ? "/" : config.base
     },
     configureServer(server) {
+      // Saving edits needs a server, so it exists only in dev. The static
+      // build has no endpoint and the app falls back to browser storage.
+      server.middlewares.use(annotationsHandler({ teamDir, repoRoot }))
       server.middlewares.use(handler)
     },
     generateBundle() {
