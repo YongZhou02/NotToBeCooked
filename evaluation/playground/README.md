@@ -79,9 +79,9 @@ retrieval.hit@1, retrieval.hit@5, retrieval.evidence_recall@5, retrieval.complet
 answer.shown, answer.block_reason, answer.n_citations, judge.correct, judge.supported, judge.useful
 ```
 
-A step adds columns. It never renames or removes another step's columns. Booleans are written as 1/0 and an empty cell means "not measured", never 0. `retrieval.ms` is the time spent in `retrieval.*` steps only. Query embedding is done up front and is not counted.
+A step adds columns. It never renames or removes another step's columns. Booleans are written as 1/0 and an empty cell means "not measured", never 0. `retrieval.ms` is the time spent in `retrieval.*` steps only. Query embedding is done up front and is not counted. `evaluation/builder/flat_results.py` writes the same table for `run_eval.py` runs, so both kinds of run can be loaded together.
 
-**Known noise.** Postgres returns keyword matches with equal scores in storage order, which shifts between runs. So `prod_keyword` and `prod_hybrid` can move by about 0.005 to 0.015 on hit@5 and recall@5 from run to run, even with nothing changed. `prod_vector` and the in-memory parts give the same result every time. Treat a difference smaller than that as no difference. `evaluation/builder/flat_results.py` writes the same table for `run_eval.py` runs, so both kinds of run can be loaded together.
+**Known noise.** Postgres returns keyword matches with equal scores in storage order, which shifts between runs. So `prod_keyword` and `prod_hybrid` can move by about 0.005 to 0.015 on hit@5 and recall@5 from run to run, even with nothing changed. `prod_vector` and the in-memory parts give the same result every time. Treat a difference smaller than that as no difference.
 
 ## A run folder
 
