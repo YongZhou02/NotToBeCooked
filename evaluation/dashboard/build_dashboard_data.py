@@ -106,7 +106,11 @@ def method_summary(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     output = {}
     test_rows = [row for row in rows if row.get("split") == "test"]
     for method in METHODS:
-        selected = [row for row in test_rows if row.get("method") == method]
+        selected = [
+            row
+            for row in test_rows
+            if row.get("method") == method and row.get("metrics") is not None
+        ]
         if not selected:
             continue
         timings = [value for row in selected for value in row.get("retrieval_ms", [])]
@@ -355,6 +359,9 @@ def split_composition(questions: list[dict[str, Any]]) -> dict[str, Any]:
 
 def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
     dataset, questions = load_dataset(dataset_path)
+    dataset_fingerprint = "+".join(
+        document["sha256"] for document in dataset.get("documents", [])
+    )
     run_paths = sorted(
         [
             path
@@ -365,6 +372,12 @@ def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
     runs, trace_by_question = [], {question["id"]: {} for question in questions}
     for run in run_paths:
         config = read_json(run / "config.json", {})
+        run_fingerprint = "+".join(
+            document["sha256"]
+            for document in config.get("corpus", {}).get("documents", [])
+        )
+        if run_fingerprint != dataset_fingerprint:
+            continue
         checks = read_json(run / "checks.json", {})
         extracted = read_json(run / "extracted_items.json", [])
         chunks = read_json(run / "chunks.json", [])
@@ -389,10 +402,7 @@ def assemble(dataset_path: Path, runs_path: Path) -> dict[str, Any]:
             if rows
             else "Extraction only"
         )
-        fingerprint = "+".join(
-            document["sha256"]
-            for document in config.get("corpus", {}).get("documents", [])
-        )
+        fingerprint = run_fingerprint
         runs.append(
             {
                 "id": run.name,

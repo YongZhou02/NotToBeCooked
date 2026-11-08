@@ -88,12 +88,14 @@ def load_dataset(folder: Path) -> tuple[dict, list[dict], dict, dict]:
         row
         for row in all_rows
         if row.get("label_review", {}).get("strict_retrieval_eligible", True)
+        or not row.get("answerable", True)
     ]
     questions = [
         {
             key: row[key]
             for key in ("id", "category", "split", "generation_review", "question")
         }
+        | {"answerable": row.get("answerable", True)}
         for row in rows
     ]
     answers = {
@@ -125,8 +127,14 @@ def load_dataset(folder: Path) -> tuple[dict, list[dict], dict, dict]:
         raise ValueError("Invalid development/test split")
     for question in questions:
         groups = evidence[question["id"]]["groups"]
-        if not groups or len({g["id"] for g in groups}) != len(groups):
+        if question["answerable"] and (
+            not groups or len({g["id"] for g in groups}) != len(groups)
+        ):
             raise ValueError(f"Missing/duplicate evidence groups: {question['id']}")
+        if not question["answerable"] and groups:
+            raise ValueError(
+                f"Unanswerable question must not have gold evidence: {question['id']}"
+            )
         if any(not g["alternatives"] for g in groups):
             raise ValueError(
                 "Every evidence group needs at least one acceptable source"
@@ -379,6 +387,7 @@ def summary(rows: list[dict], checks: dict, out: Path) -> None:
                     for r in rows
                     if r["split"] == split
                     and r["method"] == method
+                    and r["metrics"] is not None
                     and (category == "all" or r["category"] == category)
                 ]
                 if not selected:
@@ -563,6 +572,7 @@ async def main(args: argparse.Namespace) -> None:
         if not vector_valid(queries[q["id"]], settings.EMBEDDINGS_DIM):
             raise ValueError("Invalid query embedding")
     rows, reviews, generated_answers = [], [], []
+    generation_calls = 0
     # Savepoints contain route-level commits; the outer transaction ALWAYS rolls back.
     async with engine.connect() as connection:
         outer = await connection.begin()
@@ -639,12 +649,15 @@ async def main(args: argparse.Namespace) -> None:
                             "question": q["question"],
                             "category": q["category"],
                             "split": q["split"],
+                            "answerable": q["answerable"],
                             "method": method,
                             "query_embedding_ms": q["embedding_ms"],
                             "retrieval_ms": timings,
                             "sources": trace,
-                            "metrics": retrieval_metrics(
-                                trace, evidence[q["id"]]["groups"]
+                            "metrics": (
+                                retrieval_metrics(trace, evidence[q["id"]]["groups"])
+                                if q["answerable"]
+                                else None
                             ),
                         }
                         if (
@@ -652,6 +665,9 @@ async def main(args: argparse.Namespace) -> None:
                             and q["generation_review"]
                             and method == args.generation_method
                         ):
+                            if generation_calls and args.generation_delay_seconds:
+                                await asyncio.sleep(args.generation_delay_seconds)
+                            generation_calls += 1
                             started = perf_counter()
                             # Standalone adapter swaps ONLY retrieval results. The production
                             # route assembles context, calls Gemini, verifies citations and stores messages.
@@ -696,6 +712,7 @@ async def main(args: argparse.Namespace) -> None:
                                     "question_id": q["id"],
                                     "method": method,
                                     "question": q["question"],
+                                    "answerable": q["answerable"],
                                     "answer": result.answer,
                                     "reference_answer": answers[q["id"]][
                                         "reference_answer"
@@ -748,6 +765,12 @@ if __name__ == "__main__":
         help="Call the configured real model for the 15 review questions",
     )
     parser.add_argument("--generation-method", choices=METHODS, default="hybrid_rrf")
+    parser.add_argument(
+        "--generation-delay-seconds",
+        type=float,
+        default=4.2,
+        help="Delay model calls to stay below common free-tier request limits",
+    )
     parser.add_argument("--repeats", type=int, default=3)
     configure_logging()
     asyncio.run(main(parser.parse_args()))

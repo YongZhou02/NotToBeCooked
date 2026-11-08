@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "documents": [
+    {
+      "id": "topic2",
+      "path": "../documents/CPT316_Topic2_Lexical_Semantic_Text.pdf",
+      "sha256": "a778718b1791bd73134a53c2a77606afaec0edcfed50b5e4270f45f0309f704d",
+      "pages": 67,
+      "coverage": "PDF pages 1-67"
+    }
+  ]
+}

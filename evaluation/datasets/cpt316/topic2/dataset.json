@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "name": "CPT316 Topic 2 paraphrased challenge set",
+  "annotation_status": "provided gold answers; source-grounded draft; exact evidence spans machine-checked; human span review pending",
+  "scope": "single supplied Topic 2 semantic-text PDF",
+  "chart_extraction": false,
+  "ocr": true,
+  "chunk_max_tokens": 350,
+  "top_k": 5,
+  "candidate_limit": 50,
+  "rrf_k": 60,
+  "label_counts": {
+    "total": 50,
+    "answerable": 42,
+    "unanswerable": 8,
+    "dev": 15,
+    "test": 35
+  },
+  "gold_workbook": {
+    "path": "reviews/NTBC_Topic2_50_Paraphrased_Gold_Labels.xlsx",
+    "sha256": "4183428ef9e5c50f6aa3e01e5d982b0ae1ae9012be3e015a3b2cd278aab9acd2"
+  }
+}
