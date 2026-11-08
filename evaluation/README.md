@@ -70,6 +70,28 @@ uv run --project apps/api python evaluation/run_concerns.py [--run RUN_DIR] [--n
 
 Each concern is defined in plain words in [`concerns.md`](concerns.md). Judge numbers are labelled "AI judge, not yet checked by a human".
 
+## Flat results table
+
+One run spreads a question's results over several files. `results_flat.csv` joins them: **one row is one question under one retrieval method** (`vector`, `keyword` or `hybrid_rrf`) in one run. It sits in each run folder (`runs/<run-id>/results_flat.csv`) and is built automatically at the end of `run_concerns.py`. A run that never went through `run_concerns.py` gets it with:
+
+```powershell
+uv run --project apps/api python evaluation/builder/flat_results.py --run evaluation/runs/<run-id>
+# every run, plus one file with all of them for comparing runs:
+uv run --project apps/api python evaluation/builder/flat_results.py --all   # writes evaluation/reports/results_flat.csv
+```
+
+Columns: who the row is (`run_id`, `pipeline` such as `run_eval:hybrid_rrf`, `chunks_version`, `question_id`, `split`, `category`, `origin`, `answerable`, `verified`, `is_hard_case`, `author`), then one column per measure named `<step>.<measure>`: `retrieval.*` (hit, recall, MRR, `ms`), `pipeline.extraction` and `pipeline.chunking` (share of the question's evidence that survived), `answer.*` (was the answer shown, blocked or failed, and why), `judge.*` (raw AI-judge scores) and `concern.*` (1 if the question shows that concern). The same columns are used by `playground/`, so the two kinds of run can be loaded together.
+
+**An empty cell means "not measured", never zero.** For example, answer and judge cells are empty on the methods that were not generated, and retrieval cells are empty for questions the notes cannot answer.
+
+```python
+import pandas as pd
+
+df = pd.read_csv("evaluation/reports/results_flat.csv")
+df.groupby(["run_id", "pipeline"])["retrieval.hit@5"].mean()        # compare runs
+df[df["answer.state"] == "blocked"]["answer.block_reason"].value_counts()
+```
+
 ## References
 
 - Dashboard data contract and six phase scores: [`dashboard/README.md`](dashboard/README.md)

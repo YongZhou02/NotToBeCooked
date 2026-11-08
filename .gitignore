@@ -55,6 +55,7 @@ apps/api/storage/
 
 # Environment-specific run outputs (datasets and the curated HTML report stay versioned).
 /evaluation/runs/
+/evaluation/reports/results_flat.csv
 /evaluation/dashboard/documents/
 
 # personal type-checker / editor configs. pyrefly.toml is not a project

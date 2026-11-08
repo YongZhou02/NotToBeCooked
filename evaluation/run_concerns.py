@@ -19,6 +19,7 @@ sys.path.insert(0, str(ROOT / "apps/api"))
 sys.path.insert(0, str(EVALUATION))
 
 import httpx
+from builder.flat_results import build_run as build_flat_results
 from scorers.concerns import JUDGE, build_concerns, judge_messages, parse_judgement
 from scorers.retrieval import normalize
 
@@ -284,6 +285,8 @@ def main() -> None:
     )
     write(run / "concerns.json", concerns)
     print(f"Wrote {run / 'concerns.json'} at {datetime.now(UTC):%H:%M:%S}Z")
+    # The judge columns exist only now, so this is where the flat table is built.
+    print(f"Wrote {build_flat_results(run)}")
     for entry in concerns["items"]:
         print(f"  {entry['id']:<20} {entry['status']:<15} {entry['severity']}")
 
