@@ -4,11 +4,22 @@ Run commands from the repository root. For methodology and score definitions, se
 [`dashboard/README.md`](dashboard/README.md). For corpus limitations, see
 [`datasets/cpt316/README.md`](datasets/cpt316/README.md).
 
+## Where the findings live
+
+| File | What it holds |
+|---|---|
+| [`problems.md`](problems.md) | Every problem students hit, and every fix tested for it. Start here. |
+| [`experiments.md`](experiments.md) | Every experiment: question, setup, numbers, evidence. |
+| [`concerns.md`](concerns.md) | How each problem is measured after every run. |
+| [`decision.md`](decision.md) | What we decided to build and why. |
+| [`playground/README.md`](playground/README.md) | How to try a new pipeline on frozen chunks. |
+
 ## Structure
 
 ```text
 evaluation/
 |-- run_eval.py       # single evaluation entry point
+|-- playground/       # frozen chunks, toolkit and pipelines for experiments
 |-- datasets/         # PDFs, settings, golden questions and evidence
 |-- builder/          # dataset and PDF-audit utilities
 |-- scorers/          # pipeline, retrieval and answer-quality metrics
