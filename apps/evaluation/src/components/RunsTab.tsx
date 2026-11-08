@@ -2,7 +2,7 @@ import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 import { traceHelp } from "@/lib/help"
 import { runShort } from "@/lib/format"
-import type { AllMetrics } from "@/lib/questions"
+import type { AllMetrics, SplitMetrics } from "@/lib/questions"
 import type { SourceDocument } from "@/lib/documents"
 import type { DashboardData, Question, RunTrace } from "@/types"
 import {
@@ -109,6 +109,126 @@ function EvidenceBlock({
   )
 }
 
+function Stat({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-base font-semibold tabular-nums">{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+    </div>
+  )
+}
+
+/** "multi_evidence" becomes "Multi-evidence". */
+function typeLabel(key: string): string {
+  const text = key.replace(/_/g, "-")
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+/**
+ * One summary card. Every card has the same layout, ordered by how much the
+ * number matters when scanning: the headline count first, the two supporting
+ * counts next, and the breakdown last and quietest.
+ */
+function SummaryCard({
+  testId,
+  title,
+  tag,
+  tagTitle,
+  tagTone,
+  count,
+  countLabel,
+  stats,
+  breakdownTitle,
+  breakdown,
+  footnote,
+}: {
+  testId: string
+  title: string
+  tag: string
+  tagTitle: string
+  tagTone: "accent" | "neutral" | "warn"
+  count: number
+  countLabel: string
+  stats: { label: string; value: string | number }[]
+  breakdownTitle: string
+  breakdown: { label: string; count: number }[]
+  footnote?: string
+}) {
+  return (
+    <article
+      data-testid={testId}
+      className="flex min-w-0 flex-col gap-3 rounded-lg border border-(--line) bg-(--bg-raise) p-3"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold">{title}</h3>
+        <Chip tone={tagTone} title={tagTitle}>
+          {tag}
+        </Chip>
+      </div>
+
+      <p className="flex items-baseline gap-2">
+        <span className="text-4xl font-semibold tabular-nums">{count}</span>
+        <span className="text-sm text-muted-foreground">{countLabel}</span>
+      </p>
+
+      <div className="grid grid-cols-2 gap-3">
+        {stats.map((stat) => (
+          <Stat key={stat.label} {...stat} />
+        ))}
+      </div>
+
+      {breakdown.length > 0 && (
+        <div className="grid gap-1 border-t border-(--line-soft) pt-2">
+          <Eyebrow>{breakdownTitle}</Eyebrow>
+          <dl className="grid gap-0.5 text-xs text-muted-foreground">
+            {breakdown.map((row) => (
+              <div key={row.label} className="flex justify-between gap-2">
+                <dt>{row.label}</dt>
+                <dd className="tabular-nums">{row.count}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
+
+      {footnote && (
+        <p className="text-xs wrap-break-word text-muted-foreground">
+          {footnote}
+        </p>
+      )}
+    </article>
+  )
+}
+
+function splitCard(
+  title: string,
+  tag: string,
+  tagTitle: string,
+  tagTone: "accent" | "neutral" | "warn",
+  part: SplitMetrics
+) {
+  return (
+    <SummaryCard
+      testId={`split-${title.toLowerCase()}`}
+      title={title}
+      tag={tag}
+      tagTitle={tagTitle}
+      tagTone={tagTone}
+      count={part.questions}
+      countLabel="questions"
+      stats={[
+        { label: "golden quotes", value: part.golden_quotes },
+        { label: "evidence groups", value: part.evidence_groups },
+      ]}
+      breakdownTitle="Questions by type"
+      breakdown={Object.entries(part.categories).map(([key, count]) => ({
+        label: typeLabel(key),
+        count,
+      }))}
+    />
+  )
+}
+
 export function RunsTab({
   data,
   runId,
@@ -135,6 +255,7 @@ export function RunsTab({
   const trace = question?.traces?.[runId]
   const pages = registry.reduce((sum, d) => sum + (d.pages ?? 0), 0)
   const listed = data.dataset.documents ?? []
+  const pdfCount = listed.length || registry.length
 
   const move = (offset: number) => {
     const next =
@@ -180,7 +301,7 @@ export function RunsTab({
       <Panel aria-labelledby="runSplitTitle">
         <SectionHead
           eyebrow="Dataset split composition"
-          title="Dev and test split metrics"
+          title="Dataset splits"
           titleId="runSplitTitle"
           right={
             <Chip>
@@ -191,71 +312,49 @@ export function RunsTab({
           }
         />
         <div className="grid gap-3 min-[700px]:grid-cols-2 min-[1200px]:grid-cols-4">
-          {(
-            [
-              [
-                "Dev split",
-                metrics.dev,
-                "Used for prompt writing and development checks.",
-              ],
-              [
-                "Test split (scored benchmark)",
-                metrics.test,
-                "The official split scored for Recall@5, MRR@5, Hit@1 and Complete@5.",
-              ],
-              [
-                "Stress split (hard student questions)",
-                metrics.stress,
-                "Typos, Manglish, vague and unanswerable questions. Reported apart from the benchmark.",
-              ],
-            ] as const
-          ).map(([title, part, description]) => (
-            <div
-              key={title}
-              className="rounded-lg border border-(--line) bg-(--bg-raise) p-3"
-            >
-              <p className="text-xs font-semibold text-muted-foreground uppercase">
-                {title}
-              </p>
-              <p className="text-lg font-semibold">
-                {part.questions} questions
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {part.golden_quotes} golden quotes · {part.evidence_groups}{" "}
-                evidence groups
-              </p>
-              <p className="mt-1 text-xs break-words text-muted-foreground">
-                {Object.entries(part.categories)
-                  .map(([k, v]) => `${k}: ${v}`)
-                  .join(" | ")}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {description}
-              </p>
-            </div>
-          ))}
-          <div className="rounded-lg border border-(--line) bg-(--bg-raise) p-3">
-            <p className="text-xs font-semibold text-muted-foreground uppercase">
-              Corpus overview
-            </p>
-            <p className="text-lg font-semibold">
-              {metrics.total.questions} total items
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {metrics.total.golden_quotes} golden quotes across{" "}
-              {(listed.length || registry.length) === 1
-                ? "one PDF"
-                : `${listed.length || registry.length} PDFs`}
-              {pages ? ` (${pages} pages)` : ""}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              AI-written: {metrics.total.synthetic} · Human-written:{" "}
-              {metrics.total.human}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {(listed.length ? listed.map((d) => d.id) : []).join(", ")}
-            </p>
-          </div>
+          {splitCard(
+            "Dev split",
+            "Development",
+            "Used for prompt writing and development checks.",
+            "neutral",
+            metrics.dev
+          )}
+          {splitCard(
+            "Test split",
+            "Scored benchmark",
+            "The official split. Scored for Recall@5, MRR@5, Hit@1 and Complete@5.",
+            "accent",
+            metrics.test
+          )}
+          {splitCard(
+            "Stress split",
+            "Reported apart",
+            "Hard student questions: typos, Manglish, vague and unanswerable. Not part of the benchmark.",
+            "warn",
+            metrics.stress
+          )}
+          <SummaryCard
+            testId="corpus-overview"
+            title="Corpus overview"
+            tag="All splits"
+            tagTitle="Everything in the dev, test and stress splits together."
+            tagTone="neutral"
+            count={metrics.total.questions}
+            countLabel="items in total"
+            stats={[
+              { label: "golden quotes", value: metrics.total.golden_quotes },
+              {
+                label: `source PDF${pdfCount === 1 ? "" : "s"}${pages ? ` · ${pages} pages` : ""}`,
+                value: pdfCount,
+              },
+            ]}
+            breakdownTitle="Written by"
+            breakdown={[
+              { label: "AI-written", count: metrics.total.synthetic },
+              { label: "Human-written", count: metrics.total.human },
+            ]}
+            footnote={listed.map((d) => d.id).join(", ") || undefined}
+          />
         </div>
       </Panel>
 

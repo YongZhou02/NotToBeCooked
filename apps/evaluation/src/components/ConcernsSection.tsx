@@ -108,9 +108,7 @@ function ConcernListItem({
         onClick={onSelect}
         className={cn(
           "flex w-full min-w-0 flex-col gap-1.5 rounded-lg border bg-(--bg-raise) p-3 text-left transition-colors hover:border-(--acc) focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
-          selected
-            ? "border-(--acc) ring-1 ring-(--acc)"
-            : "border-(--line)"
+          selected ? "border-(--acc) ring-1 ring-(--acc)" : "border-(--line)"
         )}
       >
         <div className="flex items-start justify-between gap-2">
@@ -142,7 +140,7 @@ function ConcernDetail({
     <article
       aria-label={`Details: ${concern.title}`}
       data-testid="concern-detail"
-      className="flex min-w-0 flex-col gap-3 rounded-lg border border-(--line) bg-(--bg-raise) p-4"
+      className="flex h-full min-w-0 flex-col gap-3 overflow-y-auto rounded-lg border border-(--line) bg-(--bg-raise) p-4"
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="min-w-0 text-lg font-semibold">{concern.title}</h3>
@@ -289,10 +287,11 @@ export function ConcernsSection({
             : "No concerns have been recorded yet. They appear here once the evaluation data includes them."}
         </p>
       ) : (
-        <div className="grid items-start gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-          {/* Roughly three cards tall; the rest scroll inside the list. */}
+        // Both panes share one fixed height (about three cards), so a long
+        // detail never stretches the page. Each pane scrolls on its own.
+        <div className="grid gap-3 md:h-108 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:grid-rows-[minmax(0,1fr)]">
           <ul
-            className="grid max-h-[27rem] gap-2 overflow-y-auto pr-1"
+            className="grid max-h-88 content-start gap-2 overflow-y-auto pr-1 md:h-full md:max-h-none"
             aria-label="Concerns"
             tabIndex={0}
           >
@@ -305,7 +304,7 @@ export function ConcernsSection({
               />
             ))}
           </ul>
-          <div className="md:sticky md:top-2">
+          <div className="max-h-112 min-h-0 md:h-full md:max-h-none">
             <ConcernDetail
               key={selected.id}
               concern={selected}
