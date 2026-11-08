@@ -150,11 +150,13 @@ export function Chip({
   className,
   children,
   title,
+  ...rest
 }: {
   tone?: "neutral" | "accent" | "ok" | "warn" | "danger" | "cite"
   className?: string
   children: ReactNode
   title?: string
+  "data-testid"?: string
 }) {
   const tones = {
     neutral: "bg-secondary text-secondary-foreground",
@@ -169,6 +171,7 @@ export function Chip({
       variant="secondary"
       title={title}
       className={cn("h-auto py-0.5", tones[tone], className)}
+      {...rest}
     >
       {children}
     </Badge>
