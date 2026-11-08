@@ -79,10 +79,14 @@ They do not change `datasets/.../questions.jsonl`, so `run_eval.py` still scores
 original set, and a run's stored results still reflect the evidence it was scored on.
 
 **Export** lists the questions your filters show, all ticked; untick what you do not
-want to share. A teammate brings the file in with **More > Import JSON**, which
+want to share. **Human-written only** unticks every question that is not human-written
+and keeps those out of the file. A teammate brings the file in with **More > Import JSON**, which
 merges those questions and overwrites their verified state and review for each one.
 The Source filter counts each question under the PDFs its evidence points at; only
 Topic 1 has questions until the candidate topics get a reviewed set.
+
+A React version of this dashboard lives in `apps/evaluation` (`pnpm dev:evaluation`); it
+reads the same `dashboard_data.json` and uses the same saved-edit keys and export format.
 
 ## Phase Score Definitions
 
