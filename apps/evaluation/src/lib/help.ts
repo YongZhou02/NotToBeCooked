@@ -80,7 +80,7 @@ export const traceHelp: Record<string, string[]> = {
 
 export const concernsHelp = [
   "Concerns: what a student would run into",
-  "Each card describes one problem in everyday terms.",
-  "Measured: we have a number for it. Not measured: we know it matters but have no number yet.",
-  "Click an example to read that question next to its PDF.",
+  "Each card describes one problem in everyday terms. Click a card to see its details on the right.",
+  "Tags: High, Medium, Low or Not known show how serious it is. Measured, Partially or Not measured show whether we have a number for it.",
+  "In the details, click an example question to read it next to its PDF.",
 ]
