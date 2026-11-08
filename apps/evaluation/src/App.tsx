@@ -7,6 +7,7 @@ import { useEvalStore } from "@/lib/use-eval-store"
 import { cn } from "@workspace/ui/lib/utils"
 import { DashboardTab } from "@/components/DashboardTab"
 import { RunsTab } from "@/components/RunsTab"
+import { VisualizationTab } from "@/components/VisualizationTab"
 
 export type TabId = "dashboard" | "runs" | "visualization"
 
@@ -149,12 +150,7 @@ function Workbench({ loaded }: { loaded: LoadedData }) {
   return (
     <div className="flex h-dvh flex-col bg-background font-sans text-foreground">
       <Header tab={tab} onTab={setTab} />
-      <main
-        className={cn(
-          "min-h-0 flex-1 overflow-y-auto",
-          tab === "visualization" && "min-[1000px]:overflow-hidden"
-        )}
-      >
+      <main className={cn("min-h-0 flex-1 overflow-y-auto")}>
         <div
           role="tabpanel"
           id="panel-dashboard"
@@ -198,10 +194,15 @@ function Workbench({ loaded }: { loaded: LoadedData }) {
           data-panel="visualization"
           className="h-full"
         >
-          <p className="p-6 text-sm text-muted-foreground">
-            {all.length} questions, {registry.length} source PDFs.
-            {focus ? ` Asked to open ${focus.id}.` : ""}
-          </p>
+          <VisualizationTab
+            data={data}
+            registry={registry}
+            store={store}
+            all={all}
+            runId={run.id}
+            focus={focus}
+            isActive={tab === "visualization"}
+          />
         </div>
       </main>
     </div>

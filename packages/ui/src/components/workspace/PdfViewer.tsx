@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type RefObject } from "react"
 import {
   GlobalWorkerOptions,
   TextLayer,
@@ -23,6 +23,28 @@ interface PdfViewerProps {
   quotes: readonly string[]
   /** Told whether the quotes were found, so the caller can fall back. */
   onQuoteFound?: (found: boolean) => void
+  /**
+   * Optional. When given, a found quote is centred inside this scrolling
+   * element only, instead of with scrollIntoView, which also scrolls every
+   * ancestor (and so moves a fixed-height page).
+   */
+  scrollContainerRef?: RefObject<HTMLElement | null>
+  /** Optional. Told how many pages the document has once it is open. */
+  onNumPages?: (numPages: number) => void
+}
+
+/** Scrolls `box` so the elements sit in its middle, touching nothing else. */
+function centerInside(box: HTMLElement, elements: HTMLElement[]) {
+  if (elements.length === 0) return
+  const frame = box.getBoundingClientRect()
+  const rects = elements.map((el) => el.getBoundingClientRect())
+  const top = Math.min(...rects.map((r) => r.top))
+  const bottom = Math.max(...rects.map((r) => r.bottom))
+  const left = Math.min(...rects.map((r) => r.left))
+  box.scrollTo({
+    top: box.scrollTop + top - frame.top - (box.clientHeight - (bottom - top)) / 2,
+    left: box.scrollLeft + left - frame.left - 12,
+  })
 }
 
 /**
@@ -40,6 +62,8 @@ export default function PdfViewer({
   zoom,
   quotes,
   onQuoteFound,
+  scrollContainerRef,
+  onNumPages,
 }: PdfViewerProps) {
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -57,7 +81,10 @@ export default function PdfViewer({
     task.promise.then(
       (loaded) => {
         // A cancelled load is torn down by task.destroy() below.
-        if (!cancelled) setDoc(loaded)
+        if (!cancelled) {
+          setDoc(loaded)
+          onNumPages?.(loaded.numPages)
+        }
       },
       (err: unknown) => {
         if (!cancelled) {
@@ -72,6 +99,8 @@ export default function PdfViewer({
       setDoc(null)
       void task.destroy()
     }
+    // onNumPages is only read when a document finishes loading.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url])
 
   // Fit to the reader's width, and follow it when the panes are resized.
@@ -137,7 +166,15 @@ export default function PdfViewer({
       if (quotes.length > 0) {
         onQuoteFound?.(marked.size > 0)
         const first = Math.min(...marked)
-        divs[first]?.scrollIntoView({ block: "center" })
+        const box = scrollContainerRef?.current
+        if (box && marked.size > 0) {
+          centerInside(
+            box,
+            [...marked].flatMap((index) => (divs[index] ? [divs[index]] : []))
+          )
+        } else {
+          divs[first]?.scrollIntoView({ block: "center" })
+        }
       }
     })().catch((err: unknown) => {
       if (!cancelled) {
