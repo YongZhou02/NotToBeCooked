@@ -67,6 +67,16 @@ class Trace:
         })
 
 
+def csv_cell(value: Any) -> Any:
+    """How every results table writes a value: 1/0 for booleans, empty for
+    not measured, so playground and run_eval tables load together."""
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return int(value)
+    return value
+
+
 def current() -> Trace | None:
     return _current.get()
 

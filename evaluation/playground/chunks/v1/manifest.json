@@ -1,0 +1,55 @@
+{
+  "version": "v1",
+  "created_at": "2026-11-08T03:50:45.142852+00:00",
+  "source_run_id": "20261108T004258996111Z",
+  "git_commit": "d7422aeeb019b32a0b50ed04ab0f551079f12eb6",
+  "git_dirty": true,
+  "chunker": {
+    "description": "apps/api production ingestion (app.services.ingestion: Docling extract_text + create_chunk)",
+    "settings": {
+      "chunk_max_tokens": 350,
+      "ocr": true,
+      "chart_extraction": false
+    }
+  },
+  "retrieval_settings": {
+    "top_k": 5,
+    "candidate_limit": 50,
+    "rrf_k": 60
+  },
+  "documents": [
+    {
+      "id": "topic1",
+      "path": "../documents/CPT316_Topic1_Semantic_Text_Only.pdf",
+      "sha256": "d4da975c7bbef3a21ee9fcc2db2433b0d100f60150d8dc9c0f0bec711c90e62d",
+      "pages": 38,
+      "coverage": "PDF pages 1-38"
+    },
+    {
+      "id": "cpt316-topic2-lexical",
+      "path": "../documents/CPT316_Topic2_Lexical_Semantic_Text.pdf",
+      "sha256": "a778718b1791bd73134a53c2a77606afaec0edcfed50b5e4270f45f0309f704d",
+      "pages": 67,
+      "coverage": "PDF pages 1-67"
+    },
+    {
+      "id": "cpt316-topic3-student",
+      "path": "../documents/CPT316_Topic3_Student_Semantic_Text.pdf",
+      "sha256": "28be51a1c69be182626149c5913ad0d87cb15d8456f05ea7a4263414809ba972",
+      "pages": 77,
+      "coverage": "PDF pages 1-77"
+    },
+    {
+      "id": "cpt316-topic3-updated",
+      "path": "../documents/CPT316_Topic3_Updated_Semantic_Text.pdf",
+      "sha256": "714d4f285e16b6dd4e4c676a2b3b1fe1dbbfe1a84f9db0c8064ad3d190c15cec",
+      "pages": 65,
+      "coverage": "PDF pages 1-65"
+    }
+  ],
+  "source_run_embedding_model": "jinaai/jina-embeddings-v5-text-small",
+  "source_run_pdfs_match_dataset": true,
+  "chunk_count": 198,
+  "chunks_file": "chunks.jsonl",
+  "chunks_sha256": "3c7371e8633dc25787f38dd7e96484e679d4ae0e14bdde8073e5a89b5ba8aa85"
+}

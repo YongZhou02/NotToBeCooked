@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from playground.toolkit import EVALUATION, PLAYGROUND  # noqa: E402
 from playground.toolkit.citation import VARIANTS  # noqa: E402
-from playground.toolkit.trace import Trace  # noqa: E402
+from playground.toolkit.trace import Trace, csv_cell  # noqa: E402
 
 DEFAULT_RUN = EVALUATION / "runs/20261108T004258996111Z"
 QUESTIONS = EVALUATION / "datasets/cpt316/all/questions.jsonl"
@@ -108,7 +108,7 @@ def write_csv(rows: list[dict]) -> Path:
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=FIXED + STEP, extrasaction="ignore")
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows({k: csv_cell(v) for k, v in row.items()} for row in rows)
     return path
 
 

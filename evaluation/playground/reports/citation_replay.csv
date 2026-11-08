@@ -1,325 +1,325 @@
 run_id,pipeline,chunks_version,question_id,split,category,origin,answerable,verified,is_hard_case,author,answer.shown,answer.block_reason,answer.n_citations,judge.correct,judge.supported,judge.useful,citation.changed
-20261108T004258996111Z,replay:prod,run-local,t1-001,dev,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-001,dev,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-001,dev,definition,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-001,dev,definition,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-002,dev,definition,synthetic,True,True,False,original,False,citation [4] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-002,dev,definition,synthetic,True,True,False,original,False,citation [4] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-002,dev,definition,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-002,dev,definition,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-003,dev,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-003,dev,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-003,dev,definition,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-003,dev,definition,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-004,test,definition,synthetic,True,True,False,original,False,citation [2] is listed but never referred to in the answer | citation [4] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-004,test,definition,synthetic,True,True,False,original,False,citation [2] is listed but never referred to in the answer | citation [4] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-004,test,definition,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-004,test,definition,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-005,test,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-005,test,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-005,test,definition,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-005,test,definition,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-006,test,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-006,test,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-006,test,definition,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-006,test,definition,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-007,test,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-007,test,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-007,test,definition,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-007,test,definition,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-008,test,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-008,test,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-008,test,definition,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-008,test,definition,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-009,test,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-009,test,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-009,test,definition,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-009,test,definition,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-010,test,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-010,test,definition,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-010,test,definition,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-010,test,definition,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-011,dev,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-011,dev,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-011,dev,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-011,dev,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-012,dev,exact,synthetic,True,True,False,original,True,,0,0,2,0,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-012,dev,exact,synthetic,True,True,False,original,True,,0,0,2,0,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-012,dev,exact,synthetic,True,True,False,original,True,,0,0,2,0,False
-20261108T004258996111Z,replay:auto_marker,run-local,t1-012,dev,exact,synthetic,True,True,False,original,True,,0,0,2,0,False
-20261108T004258996111Z,replay:prod,run-local,t1-013,dev,exact,synthetic,True,True,False,original,False,"no draft: 2 validation errors for LlmAnswer
+20261108T004258996111Z,replay:prod,run-local,t1-001,dev,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-001,dev,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-001,dev,definition,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-001,dev,definition,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-002,dev,definition,synthetic,1,1,0,original,0,citation [4] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-002,dev,definition,synthetic,1,1,0,original,0,citation [4] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-002,dev,definition,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-002,dev,definition,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-003,dev,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-003,dev,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-003,dev,definition,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-003,dev,definition,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-004,test,definition,synthetic,1,1,0,original,0,citation [2] is listed but never referred to in the answer | citation [4] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-004,test,definition,synthetic,1,1,0,original,0,citation [2] is listed but never referred to in the answer | citation [4] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-004,test,definition,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-004,test,definition,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-005,test,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-005,test,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-005,test,definition,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-005,test,definition,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-006,test,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-006,test,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-006,test,definition,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-006,test,definition,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-007,test,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-007,test,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-007,test,definition,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-007,test,definition,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-008,test,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-008,test,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-008,test,definition,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-008,test,definition,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-009,test,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-009,test,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-009,test,definition,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-009,test,definition,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-010,test,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-010,test,definition,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-010,test,definition,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-010,test,definition,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-011,dev,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-011,dev,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-011,dev,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-011,dev,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-012,dev,exact,synthetic,1,1,0,original,1,,0,0,2,0,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-012,dev,exact,synthetic,1,1,0,original,1,,0,0,2,0,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-012,dev,exact,synthetic,1,1,0,original,1,,0,0,2,0,0
+20261108T004258996111Z,replay:auto_marker,run-local,t1-012,dev,exact,synthetic,1,1,0,original,1,,0,0,2,0,0
+20261108T004258996111Z,replay:prod,run-local,t1-013,dev,exact,synthetic,1,1,0,original,0,"no draft: 2 validation errors for LlmAnswer
 answer
-  Field required [t",0,0,2,0,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-013,dev,exact,synthetic,True,True,False,original,False,"no draft: 2 validation errors for LlmAnswer
+  Field required [t",0,0,2,0,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-013,dev,exact,synthetic,1,1,0,original,0,"no draft: 2 validation errors for LlmAnswer
 answer
-  Field required [t",0,0,2,0,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-013,dev,exact,synthetic,True,True,False,original,False,"no draft: 2 validation errors for LlmAnswer
+  Field required [t",0,0,2,0,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-013,dev,exact,synthetic,1,1,0,original,0,"no draft: 2 validation errors for LlmAnswer
 answer
-  Field required [t",0,0,2,0,False
-20261108T004258996111Z,replay:auto_marker,run-local,t1-013,dev,exact,synthetic,True,True,False,original,False,"no draft: 2 validation errors for LlmAnswer
+  Field required [t",0,0,2,0,0
+20261108T004258996111Z,replay:auto_marker,run-local,t1-013,dev,exact,synthetic,1,1,0,original,0,"no draft: 2 validation errors for LlmAnswer
 answer
-  Field required [t",0,0,2,0,False
-20261108T004258996111Z,replay:prod,run-local,t1-014,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-014,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-014,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-014,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-015,test,exact,synthetic,True,True,False,original,False,citation [4] is listed but never referred to in the answer | the quote on [4] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Optimized intermediate code: t1 = id3 * 60.0. id1 = id2 + t1',0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-015,test,exact,synthetic,True,True,False,original,False,citation [4] is listed but never referred to in the answer | the quote on [4] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Optimized intermediate code: t1 = id3 * 60.0. id1 = id2 + t1',0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-015,test,exact,synthetic,True,True,False,original,False,citation [4] is listed but never referred to in the answer | the quote on [4] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Optimized intermediate code: t1 = id3 * 60.0. id1 = id2 + t1',0,2,2,2,False
-20261108T004258996111Z,replay:auto_marker,run-local,t1-015,test,exact,synthetic,True,True,False,original,False,the quote on [4] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Optimized intermediate code: t1 = id3 * 60.0. id1 = id2 + t1',0,2,2,2,False
-20261108T004258996111Z,replay:prod,run-local,t1-016,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-016,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-016,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-016,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-017,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-017,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-017,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-017,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-018,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-018,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-018,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-018,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-019,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-019,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-019,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-019,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-020,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-020,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-020,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-020,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-021,dev,paraphrase,synthetic,True,True,False,original,False,citation [2] is listed but never referred to in the answer | citation [4] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-021,dev,paraphrase,synthetic,True,True,False,original,False,citation [2] is listed but never referred to in the answer | citation [4] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-021,dev,paraphrase,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-021,dev,paraphrase,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-022,dev,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-022,dev,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-022,dev,paraphrase,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-022,dev,paraphrase,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-023,dev,visual,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-023,dev,visual,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-023,dev,visual,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-023,dev,visual,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-024,test,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,1,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-024,test,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,1,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-024,test,paraphrase,synthetic,True,True,False,original,True,,1,2,2,1,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-024,test,paraphrase,synthetic,True,True,False,original,True,,1,2,2,1,True
-20261108T004258996111Z,replay:prod,run-local,t1-025,test,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-025,test,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-025,test,paraphrase,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-025,test,paraphrase,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-026,test,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-026,test,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-026,test,paraphrase,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-026,test,paraphrase,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-028,test,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [3] is listed but never referred to in the answer | citation [4] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-028,test,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [3] is listed but never referred to in the answer | citation [4] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-028,test,paraphrase,synthetic,True,True,False,original,True,,4,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-028,test,paraphrase,synthetic,True,True,False,original,True,,4,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-029,test,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-029,test,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-029,test,paraphrase,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-029,test,paraphrase,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-030,test,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-030,test,paraphrase,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-030,test,paraphrase,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-030,test,paraphrase,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-031,dev,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-031,dev,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-031,dev,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-031,dev,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-032,dev,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-032,dev,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-032,dev,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-032,dev,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-033,dev,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-033,dev,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-033,dev,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-033,dev,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-034,test,relationship,synthetic,True,True,False,original,False,citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-034,test,relationship,synthetic,True,True,False,original,False,citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-034,test,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-034,test,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-035,test,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [3] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-035,test,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [3] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-035,test,relationship,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-035,test,relationship,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-036,test,relationship,synthetic,True,True,False,original,False,citation [4] is listed but never referred to in the answer,0,1,2,1,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-036,test,relationship,synthetic,True,True,False,original,False,citation [4] is listed but never referred to in the answer,0,1,2,1,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-036,test,relationship,synthetic,True,True,False,original,True,,1,1,2,1,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-036,test,relationship,synthetic,True,True,False,original,True,,1,1,2,1,True
-20261108T004258996111Z,replay:prod,run-local,t1-037,test,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-037,test,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-037,test,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-037,test,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-038,test,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-038,test,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-038,test,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-038,test,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-039,test,relationship,synthetic,True,True,False,original,False,citation [5] is listed but never referred to in the answer,0,1,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-039,test,relationship,synthetic,True,True,False,original,False,citation [5] is listed but never referred to in the answer,0,1,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-039,test,relationship,synthetic,True,True,False,original,True,,1,1,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-039,test,relationship,synthetic,True,True,False,original,True,,1,1,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-040,test,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-040,test,relationship,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-040,test,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-040,test,relationship,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-041,dev,multi_evidence,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer | the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Output of analysis = Intermediate Representation. Input to synthesis = Intermediate Representation.',0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-041,dev,multi_evidence,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer | the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Output of analysis = Intermediate Representation. Input to synthesis = Intermediate Representation.',0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-041,dev,multi_evidence,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer | the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Output of analysis = Intermediate Representation. Input to synthesis = Intermediate Representation.',0,2,2,2,False
-20261108T004258996111Z,replay:auto_marker,run-local,t1-041,dev,multi_evidence,synthetic,True,True,False,original,False,the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Output of analysis = Intermediate Representation. Input to synthesis = Intermediate Representation.',0,2,2,2,False
-20261108T004258996111Z,replay:prod,run-local,t1-042,dev,multi_evidence,synthetic,True,True,False,original,True,,3,1,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-042,dev,multi_evidence,synthetic,True,True,False,original,True,,3,1,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-042,dev,multi_evidence,synthetic,True,True,False,original,True,,3,1,2,2,False
-20261108T004258996111Z,replay:auto_marker,run-local,t1-042,dev,multi_evidence,synthetic,True,True,False,original,True,,3,1,2,2,False
-20261108T004258996111Z,replay:prod,run-local,t1-043,dev,multi_evidence,synthetic,True,True,False,original,True,,0,0,2,0,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-043,dev,multi_evidence,synthetic,True,True,False,original,True,,0,0,2,0,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-043,dev,multi_evidence,synthetic,True,True,False,original,True,,0,0,2,0,False
-20261108T004258996111Z,replay:auto_marker,run-local,t1-043,dev,multi_evidence,synthetic,True,True,False,original,True,,0,0,2,0,False
-20261108T004258996111Z,replay:prod,run-local,t1-044,test,multi_evidence,synthetic,True,True,False,original,False,the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Compiler -> Target Assembly Program' | the quote on [2] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Assembler -> Relocatable Object Code',0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-044,test,multi_evidence,synthetic,True,True,False,original,False,the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Compiler -> Target Assembly Program' | the quote on [2] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Assembler -> Relocatable Object Code',0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-044,test,multi_evidence,synthetic,True,True,False,original,False,the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Compiler -> Target Assembly Program' | the quote on [2] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Assembler -> Relocatable Object Code',0,2,2,2,False
-20261108T004258996111Z,replay:auto_marker,run-local,t1-044,test,multi_evidence,synthetic,True,True,False,original,False,the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Compiler -> Target Assembly Program' | the quote on [2] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Assembler -> Relocatable Object Code',0,2,2,2,False
-20261108T004258996111Z,replay:prod,run-local,t1-045,test,multi_evidence,synthetic,True,True,False,original,True,,1,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-045,test,multi_evidence,synthetic,True,True,False,original,True,,1,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-045,test,multi_evidence,synthetic,True,True,False,original,True,,1,2,2,2,False
-20261108T004258996111Z,replay:auto_marker,run-local,t1-045,test,multi_evidence,synthetic,True,True,False,original,True,,1,2,2,2,False
-20261108T004258996111Z,replay:prod,run-local,t1-046,test,multi_evidence,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,1,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-046,test,multi_evidence,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,1,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-046,test,multi_evidence,synthetic,True,True,False,original,True,,2,1,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-046,test,multi_evidence,synthetic,True,True,False,original,True,,2,1,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-047,test,multi_evidence,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-047,test,multi_evidence,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-047,test,multi_evidence,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-047,test,multi_evidence,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-048,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-048,test,exact,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-048,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-048,test,exact,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-049,test,multi_evidence,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-049,test,multi_evidence,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:quote_only,run-local,t1-049,test,multi_evidence,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-049,test,multi_evidence,synthetic,True,True,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,t1-050,test,multi_evidence,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,t1-050,test,multi_evidence,synthetic,True,True,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,t1-050,test,multi_evidence,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,t1-050,test,multi_evidence,synthetic,True,True,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-001,stress,vague,assistant_stress,True,False,False,original,False,citation [3] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-001,stress,vague,assistant_stress,True,False,False,original,False,citation [3] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-001,stress,vague,assistant_stress,True,False,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-001,stress,vague,assistant_stress,True,False,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-002,stress,vague,assistant_stress,True,False,False,original,False,citation [2] is listed but never referred to in the answer,0,0,2,0,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-002,stress,vague,assistant_stress,True,False,False,original,False,citation [2] is listed but never referred to in the answer,0,0,2,0,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-002,stress,vague,assistant_stress,True,False,False,original,True,,2,0,2,0,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-002,stress,vague,assistant_stress,True,False,False,original,True,,2,0,2,0,True
-20261108T004258996111Z,replay:prod,run-local,s1-003,stress,vague,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,0,2,0,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-003,stress,vague,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,0,2,0,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-003,stress,vague,assistant_stress,True,False,False,original,True,,2,0,2,0,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-003,stress,vague,assistant_stress,True,False,False,original,True,,2,0,2,0,True
-20261108T004258996111Z,replay:prod,run-local,s1-004,stress,vague,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer,0,1,2,1,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-004,stress,vague,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer,0,1,2,1,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-004,stress,vague,assistant_stress,True,False,False,original,True,,2,1,2,1,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-004,stress,vague,assistant_stress,True,False,False,original,True,,2,1,2,1,True
-20261108T004258996111Z,replay:prod,run-local,s1-005,stress,vague,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-005,stress,vague,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-005,stress,vague,assistant_stress,True,False,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-005,stress,vague,assistant_stress,True,False,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-006,stress,typo,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-006,stress,typo,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-006,stress,typo,assistant_stress,True,False,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-006,stress,typo,assistant_stress,True,False,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-007,stress,typo,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-007,stress,typo,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-007,stress,typo,assistant_stress,True,False,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-007,stress,typo,assistant_stress,True,False,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-008,stress,typo,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-008,stress,typo,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-008,stress,typo,assistant_stress,True,False,False,original,True,,3,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-008,stress,typo,assistant_stress,True,False,False,original,True,,3,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-009,stress,typo,assistant_stress,True,False,False,original,False,citation [4] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-009,stress,typo,assistant_stress,True,False,False,original,False,citation [4] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-009,stress,typo,assistant_stress,True,False,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-009,stress,typo,assistant_stress,True,False,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-010,stress,typo,assistant_stress,True,False,False,original,False,citation [3] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-010,stress,typo,assistant_stress,True,False,False,original,False,citation [3] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-010,stress,typo,assistant_stress,True,False,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-010,stress,typo,assistant_stress,True,False,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-011,stress,manglish,assistant_stress,True,False,False,original,True,,6,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-011,stress,manglish,assistant_stress,True,False,False,original,True,,6,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-011,stress,manglish,assistant_stress,True,False,False,original,True,,6,2,2,2,False
-20261108T004258996111Z,replay:auto_marker,run-local,s1-011,stress,manglish,assistant_stress,True,False,False,original,True,,6,2,2,2,False
-20261108T004258996111Z,replay:prod,run-local,s1-012,stress,manglish,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-012,stress,manglish,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-012,stress,manglish,assistant_stress,True,False,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-012,stress,manglish,assistant_stress,True,False,False,original,True,,1,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-013,stress,manglish,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-013,stress,manglish,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-013,stress,manglish,assistant_stress,True,False,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-013,stress,manglish,assistant_stress,True,False,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-014,stress,manglish,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [3] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-014,stress,manglish,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [3] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-014,stress,manglish,assistant_stress,True,False,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-014,stress,manglish,assistant_stress,True,False,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-015,stress,manglish,assistant_stress,True,False,False,original,True,,2,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-015,stress,manglish,assistant_stress,True,False,False,original,True,,2,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-015,stress,manglish,assistant_stress,True,False,False,original,True,,2,2,2,2,False
-20261108T004258996111Z,replay:auto_marker,run-local,s1-015,stress,manglish,assistant_stress,True,False,False,original,True,,2,2,2,2,False
-20261108T004258996111Z,replay:prod,run-local,s1-016,stress,explain,assistant_stress,True,False,False,original,True,,3,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-016,stress,explain,assistant_stress,True,False,False,original,True,,3,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-016,stress,explain,assistant_stress,True,False,False,original,True,,3,2,2,2,False
-20261108T004258996111Z,replay:auto_marker,run-local,s1-016,stress,explain,assistant_stress,True,False,False,original,True,,3,2,2,2,False
-20261108T004258996111Z,replay:prod,run-local,s1-017,stress,explain,assistant_stress,True,False,False,original,True,,3,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-017,stress,explain,assistant_stress,True,False,False,original,True,,3,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-017,stress,explain,assistant_stress,True,False,False,original,True,,3,2,2,2,False
-20261108T004258996111Z,replay:auto_marker,run-local,s1-017,stress,explain,assistant_stress,True,False,False,original,True,,3,2,2,2,False
-20261108T004258996111Z,replay:prod,run-local,s1-018,stress,explain,assistant_stress,True,False,False,original,True,,2,1,2,1,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-018,stress,explain,assistant_stress,True,False,False,original,True,,2,1,2,1,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-018,stress,explain,assistant_stress,True,False,False,original,True,,2,1,2,1,False
-20261108T004258996111Z,replay:auto_marker,run-local,s1-018,stress,explain,assistant_stress,True,False,False,original,True,,2,1,2,1,False
-20261108T004258996111Z,replay:prod,run-local,s1-019,stress,explain,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-019,stress,explain,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-019,stress,explain,assistant_stress,True,False,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-019,stress,explain,assistant_stress,True,False,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-020,stress,explain,assistant_stress,True,False,False,original,True,,3,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-020,stress,explain,assistant_stress,True,False,False,original,True,,3,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-020,stress,explain,assistant_stress,True,False,False,original,True,,3,2,2,2,False
-20261108T004258996111Z,replay:auto_marker,run-local,s1-020,stress,explain,assistant_stress,True,False,False,original,True,,3,2,2,2,False
-20261108T004258996111Z,replay:prod,run-local,s1-021,stress,cross_part,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,1,1,1,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-021,stress,cross_part,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,1,1,1,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-021,stress,cross_part,assistant_stress,True,False,False,original,True,,2,1,1,1,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-021,stress,cross_part,assistant_stress,True,False,False,original,True,,2,1,1,1,True
-20261108T004258996111Z,replay:prod,run-local,s1-022,stress,cross_part,assistant_stress,True,False,False,original,False,citation [4] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-022,stress,cross_part,assistant_stress,True,False,False,original,False,citation [4] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-022,stress,cross_part,assistant_stress,True,False,False,original,True,,3,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-022,stress,cross_part,assistant_stress,True,False,False,original,True,,3,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-023,stress,cross_part,assistant_stress,True,False,False,original,True,,2,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-023,stress,cross_part,assistant_stress,True,False,False,original,True,,2,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-023,stress,cross_part,assistant_stress,True,False,False,original,True,,2,2,2,2,False
-20261108T004258996111Z,replay:auto_marker,run-local,s1-023,stress,cross_part,assistant_stress,True,False,False,original,True,,2,2,2,2,False
-20261108T004258996111Z,replay:prod,run-local,s1-024,stress,cross_part,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,0,0,0,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-024,stress,cross_part,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,0,0,0,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-024,stress,cross_part,assistant_stress,True,False,False,original,True,,3,0,0,0,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-024,stress,cross_part,assistant_stress,True,False,False,original,True,,3,0,0,0,True
-20261108T004258996111Z,replay:prod,run-local,s1-025,stress,cross_part,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-025,stress,cross_part,assistant_stress,True,False,False,original,False,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-025,stress,cross_part,assistant_stress,True,False,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-025,stress,cross_part,assistant_stress,True,False,False,original,True,,2,2,2,2,True
-20261108T004258996111Z,replay:prod,run-local,s1-026,stress,unanswerable,assistant_stress,False,False,False,original,True,,0,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-026,stress,unanswerable,assistant_stress,False,False,False,original,True,,0,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-026,stress,unanswerable,assistant_stress,False,False,False,original,True,,0,2,2,2,False
-20261108T004258996111Z,replay:auto_marker,run-local,s1-026,stress,unanswerable,assistant_stress,False,False,False,original,True,,0,2,2,2,False
-20261108T004258996111Z,replay:prod,run-local,s1-027,stress,unanswerable,assistant_stress,False,False,False,original,True,,2,0,2,0,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-027,stress,unanswerable,assistant_stress,False,False,False,original,True,,2,0,2,0,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-027,stress,unanswerable,assistant_stress,False,False,False,original,True,,2,0,2,0,False
-20261108T004258996111Z,replay:auto_marker,run-local,s1-027,stress,unanswerable,assistant_stress,False,False,False,original,True,,2,0,2,0,False
-20261108T004258996111Z,replay:prod,run-local,s1-028,stress,unanswerable,assistant_stress,False,False,False,original,True,,0,2,2,1,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-028,stress,unanswerable,assistant_stress,False,False,False,original,True,,0,2,2,1,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-028,stress,unanswerable,assistant_stress,False,False,False,original,True,,0,2,2,1,False
-20261108T004258996111Z,replay:auto_marker,run-local,s1-028,stress,unanswerable,assistant_stress,False,False,False,original,True,,0,2,2,1,False
-20261108T004258996111Z,replay:prod,run-local,s1-029,stress,unanswerable,assistant_stress,False,False,False,original,False,citation [1] is listed but never referred to in the answer,0,0,1,1,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-029,stress,unanswerable,assistant_stress,False,False,False,original,True,,2,0,1,1,True
-20261108T004258996111Z,replay:quote_only,run-local,s1-029,stress,unanswerable,assistant_stress,False,False,False,original,True,,2,0,1,1,True
-20261108T004258996111Z,replay:auto_marker,run-local,s1-029,stress,unanswerable,assistant_stress,False,False,False,original,True,,2,0,1,1,True
-20261108T004258996111Z,replay:prod,run-local,s1-030,stress,unanswerable,assistant_stress,False,False,False,original,True,,2,2,2,2,False
-20261108T004258996111Z,replay:marker_styles,run-local,s1-030,stress,unanswerable,assistant_stress,False,False,False,original,True,,2,2,2,2,False
-20261108T004258996111Z,replay:quote_only,run-local,s1-030,stress,unanswerable,assistant_stress,False,False,False,original,True,,2,2,2,2,False
-20261108T004258996111Z,replay:auto_marker,run-local,s1-030,stress,unanswerable,assistant_stress,False,False,False,original,True,,2,2,2,2,False
+  Field required [t",0,0,2,0,0
+20261108T004258996111Z,replay:prod,run-local,t1-014,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-014,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-014,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-014,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-015,test,exact,synthetic,1,1,0,original,0,citation [4] is listed but never referred to in the answer | the quote on [4] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Optimized intermediate code: t1 = id3 * 60.0. id1 = id2 + t1',0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-015,test,exact,synthetic,1,1,0,original,0,citation [4] is listed but never referred to in the answer | the quote on [4] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Optimized intermediate code: t1 = id3 * 60.0. id1 = id2 + t1',0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-015,test,exact,synthetic,1,1,0,original,0,citation [4] is listed but never referred to in the answer | the quote on [4] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Optimized intermediate code: t1 = id3 * 60.0. id1 = id2 + t1',0,2,2,2,0
+20261108T004258996111Z,replay:auto_marker,run-local,t1-015,test,exact,synthetic,1,1,0,original,0,the quote on [4] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Optimized intermediate code: t1 = id3 * 60.0. id1 = id2 + t1',0,2,2,2,0
+20261108T004258996111Z,replay:prod,run-local,t1-016,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-016,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-016,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-016,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-017,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-017,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-017,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-017,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-018,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-018,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-018,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-018,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-019,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-019,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-019,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-019,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-020,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-020,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-020,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-020,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-021,dev,paraphrase,synthetic,1,1,0,original,0,citation [2] is listed but never referred to in the answer | citation [4] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-021,dev,paraphrase,synthetic,1,1,0,original,0,citation [2] is listed but never referred to in the answer | citation [4] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-021,dev,paraphrase,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-021,dev,paraphrase,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-022,dev,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-022,dev,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-022,dev,paraphrase,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-022,dev,paraphrase,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-023,dev,visual,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-023,dev,visual,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-023,dev,visual,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-023,dev,visual,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-024,test,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,1,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-024,test,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,1,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-024,test,paraphrase,synthetic,1,1,0,original,1,,1,2,2,1,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-024,test,paraphrase,synthetic,1,1,0,original,1,,1,2,2,1,1
+20261108T004258996111Z,replay:prod,run-local,t1-025,test,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-025,test,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-025,test,paraphrase,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-025,test,paraphrase,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-026,test,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-026,test,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-026,test,paraphrase,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-026,test,paraphrase,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-028,test,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [3] is listed but never referred to in the answer | citation [4] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-028,test,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [3] is listed but never referred to in the answer | citation [4] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-028,test,paraphrase,synthetic,1,1,0,original,1,,4,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-028,test,paraphrase,synthetic,1,1,0,original,1,,4,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-029,test,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-029,test,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-029,test,paraphrase,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-029,test,paraphrase,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-030,test,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-030,test,paraphrase,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-030,test,paraphrase,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-030,test,paraphrase,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-031,dev,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-031,dev,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-031,dev,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-031,dev,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-032,dev,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-032,dev,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-032,dev,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-032,dev,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-033,dev,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-033,dev,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-033,dev,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-033,dev,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-034,test,relationship,synthetic,1,1,0,original,0,citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-034,test,relationship,synthetic,1,1,0,original,0,citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-034,test,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-034,test,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-035,test,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [3] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-035,test,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [3] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-035,test,relationship,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-035,test,relationship,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-036,test,relationship,synthetic,1,1,0,original,0,citation [4] is listed but never referred to in the answer,0,1,2,1,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-036,test,relationship,synthetic,1,1,0,original,0,citation [4] is listed but never referred to in the answer,0,1,2,1,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-036,test,relationship,synthetic,1,1,0,original,1,,1,1,2,1,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-036,test,relationship,synthetic,1,1,0,original,1,,1,1,2,1,1
+20261108T004258996111Z,replay:prod,run-local,t1-037,test,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-037,test,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-037,test,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-037,test,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-038,test,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-038,test,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-038,test,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-038,test,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-039,test,relationship,synthetic,1,1,0,original,0,citation [5] is listed but never referred to in the answer,0,1,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-039,test,relationship,synthetic,1,1,0,original,0,citation [5] is listed but never referred to in the answer,0,1,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-039,test,relationship,synthetic,1,1,0,original,1,,1,1,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-039,test,relationship,synthetic,1,1,0,original,1,,1,1,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-040,test,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-040,test,relationship,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-040,test,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-040,test,relationship,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-041,dev,multi_evidence,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer | the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Output of analysis = Intermediate Representation. Input to synthesis = Intermediate Representation.',0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-041,dev,multi_evidence,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer | the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Output of analysis = Intermediate Representation. Input to synthesis = Intermediate Representation.',0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-041,dev,multi_evidence,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer | the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Output of analysis = Intermediate Representation. Input to synthesis = Intermediate Representation.',0,2,2,2,0
+20261108T004258996111Z,replay:auto_marker,run-local,t1-041,dev,multi_evidence,synthetic,1,1,0,original,0,the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Output of analysis = Intermediate Representation. Input to synthesis = Intermediate Representation.',0,2,2,2,0
+20261108T004258996111Z,replay:prod,run-local,t1-042,dev,multi_evidence,synthetic,1,1,0,original,1,,3,1,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-042,dev,multi_evidence,synthetic,1,1,0,original,1,,3,1,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-042,dev,multi_evidence,synthetic,1,1,0,original,1,,3,1,2,2,0
+20261108T004258996111Z,replay:auto_marker,run-local,t1-042,dev,multi_evidence,synthetic,1,1,0,original,1,,3,1,2,2,0
+20261108T004258996111Z,replay:prod,run-local,t1-043,dev,multi_evidence,synthetic,1,1,0,original,1,,0,0,2,0,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-043,dev,multi_evidence,synthetic,1,1,0,original,1,,0,0,2,0,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-043,dev,multi_evidence,synthetic,1,1,0,original,1,,0,0,2,0,0
+20261108T004258996111Z,replay:auto_marker,run-local,t1-043,dev,multi_evidence,synthetic,1,1,0,original,1,,0,0,2,0,0
+20261108T004258996111Z,replay:prod,run-local,t1-044,test,multi_evidence,synthetic,1,1,0,original,0,the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Compiler -> Target Assembly Program' | the quote on [2] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Assembler -> Relocatable Object Code',0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-044,test,multi_evidence,synthetic,1,1,0,original,0,the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Compiler -> Target Assembly Program' | the quote on [2] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Assembler -> Relocatable Object Code',0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-044,test,multi_evidence,synthetic,1,1,0,original,0,the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Compiler -> Target Assembly Program' | the quote on [2] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Assembler -> Relocatable Object Code',0,2,2,2,0
+20261108T004258996111Z,replay:auto_marker,run-local,t1-044,test,multi_evidence,synthetic,1,1,0,original,0,the quote on [1] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Compiler -> Target Assembly Program' | the quote on [2] does not appear in the source it points at (CPT316_Topic1_Semantic_Text_Only.pdf): 'Assembler -> Relocatable Object Code',0,2,2,2,0
+20261108T004258996111Z,replay:prod,run-local,t1-045,test,multi_evidence,synthetic,1,1,0,original,1,,1,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-045,test,multi_evidence,synthetic,1,1,0,original,1,,1,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-045,test,multi_evidence,synthetic,1,1,0,original,1,,1,2,2,2,0
+20261108T004258996111Z,replay:auto_marker,run-local,t1-045,test,multi_evidence,synthetic,1,1,0,original,1,,1,2,2,2,0
+20261108T004258996111Z,replay:prod,run-local,t1-046,test,multi_evidence,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,1,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-046,test,multi_evidence,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,1,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-046,test,multi_evidence,synthetic,1,1,0,original,1,,2,1,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-046,test,multi_evidence,synthetic,1,1,0,original,1,,2,1,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-047,test,multi_evidence,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-047,test,multi_evidence,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-047,test,multi_evidence,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-047,test,multi_evidence,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-048,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-048,test,exact,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-048,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-048,test,exact,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-049,test,multi_evidence,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-049,test,multi_evidence,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:quote_only,run-local,t1-049,test,multi_evidence,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-049,test,multi_evidence,synthetic,1,1,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,t1-050,test,multi_evidence,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,t1-050,test,multi_evidence,synthetic,1,1,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,t1-050,test,multi_evidence,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,t1-050,test,multi_evidence,synthetic,1,1,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-001,stress,vague,assistant_stress,1,0,0,original,0,citation [3] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-001,stress,vague,assistant_stress,1,0,0,original,0,citation [3] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-001,stress,vague,assistant_stress,1,0,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-001,stress,vague,assistant_stress,1,0,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-002,stress,vague,assistant_stress,1,0,0,original,0,citation [2] is listed but never referred to in the answer,0,0,2,0,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-002,stress,vague,assistant_stress,1,0,0,original,0,citation [2] is listed but never referred to in the answer,0,0,2,0,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-002,stress,vague,assistant_stress,1,0,0,original,1,,2,0,2,0,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-002,stress,vague,assistant_stress,1,0,0,original,1,,2,0,2,0,1
+20261108T004258996111Z,replay:prod,run-local,s1-003,stress,vague,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,0,2,0,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-003,stress,vague,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,0,2,0,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-003,stress,vague,assistant_stress,1,0,0,original,1,,2,0,2,0,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-003,stress,vague,assistant_stress,1,0,0,original,1,,2,0,2,0,1
+20261108T004258996111Z,replay:prod,run-local,s1-004,stress,vague,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer,0,1,2,1,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-004,stress,vague,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer,0,1,2,1,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-004,stress,vague,assistant_stress,1,0,0,original,1,,2,1,2,1,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-004,stress,vague,assistant_stress,1,0,0,original,1,,2,1,2,1,1
+20261108T004258996111Z,replay:prod,run-local,s1-005,stress,vague,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-005,stress,vague,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-005,stress,vague,assistant_stress,1,0,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-005,stress,vague,assistant_stress,1,0,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-006,stress,typo,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-006,stress,typo,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-006,stress,typo,assistant_stress,1,0,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-006,stress,typo,assistant_stress,1,0,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-007,stress,typo,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-007,stress,typo,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-007,stress,typo,assistant_stress,1,0,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-007,stress,typo,assistant_stress,1,0,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-008,stress,typo,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-008,stress,typo,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-008,stress,typo,assistant_stress,1,0,0,original,1,,3,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-008,stress,typo,assistant_stress,1,0,0,original,1,,3,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-009,stress,typo,assistant_stress,1,0,0,original,0,citation [4] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-009,stress,typo,assistant_stress,1,0,0,original,0,citation [4] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-009,stress,typo,assistant_stress,1,0,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-009,stress,typo,assistant_stress,1,0,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-010,stress,typo,assistant_stress,1,0,0,original,0,citation [3] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-010,stress,typo,assistant_stress,1,0,0,original,0,citation [3] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-010,stress,typo,assistant_stress,1,0,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-010,stress,typo,assistant_stress,1,0,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-011,stress,manglish,assistant_stress,1,0,0,original,1,,6,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-011,stress,manglish,assistant_stress,1,0,0,original,1,,6,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-011,stress,manglish,assistant_stress,1,0,0,original,1,,6,2,2,2,0
+20261108T004258996111Z,replay:auto_marker,run-local,s1-011,stress,manglish,assistant_stress,1,0,0,original,1,,6,2,2,2,0
+20261108T004258996111Z,replay:prod,run-local,s1-012,stress,manglish,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-012,stress,manglish,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-012,stress,manglish,assistant_stress,1,0,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-012,stress,manglish,assistant_stress,1,0,0,original,1,,1,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-013,stress,manglish,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-013,stress,manglish,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-013,stress,manglish,assistant_stress,1,0,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-013,stress,manglish,assistant_stress,1,0,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-014,stress,manglish,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [3] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-014,stress,manglish,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [3] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-014,stress,manglish,assistant_stress,1,0,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-014,stress,manglish,assistant_stress,1,0,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-015,stress,manglish,assistant_stress,1,0,0,original,1,,2,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-015,stress,manglish,assistant_stress,1,0,0,original,1,,2,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-015,stress,manglish,assistant_stress,1,0,0,original,1,,2,2,2,2,0
+20261108T004258996111Z,replay:auto_marker,run-local,s1-015,stress,manglish,assistant_stress,1,0,0,original,1,,2,2,2,2,0
+20261108T004258996111Z,replay:prod,run-local,s1-016,stress,explain,assistant_stress,1,0,0,original,1,,3,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-016,stress,explain,assistant_stress,1,0,0,original,1,,3,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-016,stress,explain,assistant_stress,1,0,0,original,1,,3,2,2,2,0
+20261108T004258996111Z,replay:auto_marker,run-local,s1-016,stress,explain,assistant_stress,1,0,0,original,1,,3,2,2,2,0
+20261108T004258996111Z,replay:prod,run-local,s1-017,stress,explain,assistant_stress,1,0,0,original,1,,3,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-017,stress,explain,assistant_stress,1,0,0,original,1,,3,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-017,stress,explain,assistant_stress,1,0,0,original,1,,3,2,2,2,0
+20261108T004258996111Z,replay:auto_marker,run-local,s1-017,stress,explain,assistant_stress,1,0,0,original,1,,3,2,2,2,0
+20261108T004258996111Z,replay:prod,run-local,s1-018,stress,explain,assistant_stress,1,0,0,original,1,,2,1,2,1,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-018,stress,explain,assistant_stress,1,0,0,original,1,,2,1,2,1,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-018,stress,explain,assistant_stress,1,0,0,original,1,,2,1,2,1,0
+20261108T004258996111Z,replay:auto_marker,run-local,s1-018,stress,explain,assistant_stress,1,0,0,original,1,,2,1,2,1,0
+20261108T004258996111Z,replay:prod,run-local,s1-019,stress,explain,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-019,stress,explain,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-019,stress,explain,assistant_stress,1,0,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-019,stress,explain,assistant_stress,1,0,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-020,stress,explain,assistant_stress,1,0,0,original,1,,3,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-020,stress,explain,assistant_stress,1,0,0,original,1,,3,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-020,stress,explain,assistant_stress,1,0,0,original,1,,3,2,2,2,0
+20261108T004258996111Z,replay:auto_marker,run-local,s1-020,stress,explain,assistant_stress,1,0,0,original,1,,3,2,2,2,0
+20261108T004258996111Z,replay:prod,run-local,s1-021,stress,cross_part,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,1,1,1,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-021,stress,cross_part,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,1,1,1,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-021,stress,cross_part,assistant_stress,1,0,0,original,1,,2,1,1,1,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-021,stress,cross_part,assistant_stress,1,0,0,original,1,,2,1,1,1,1
+20261108T004258996111Z,replay:prod,run-local,s1-022,stress,cross_part,assistant_stress,1,0,0,original,0,citation [4] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-022,stress,cross_part,assistant_stress,1,0,0,original,0,citation [4] is listed but never referred to in the answer | citation [5] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-022,stress,cross_part,assistant_stress,1,0,0,original,1,,3,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-022,stress,cross_part,assistant_stress,1,0,0,original,1,,3,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-023,stress,cross_part,assistant_stress,1,0,0,original,1,,2,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-023,stress,cross_part,assistant_stress,1,0,0,original,1,,2,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-023,stress,cross_part,assistant_stress,1,0,0,original,1,,2,2,2,2,0
+20261108T004258996111Z,replay:auto_marker,run-local,s1-023,stress,cross_part,assistant_stress,1,0,0,original,1,,2,2,2,2,0
+20261108T004258996111Z,replay:prod,run-local,s1-024,stress,cross_part,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,0,0,0,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-024,stress,cross_part,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,0,0,0,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-024,stress,cross_part,assistant_stress,1,0,0,original,1,,3,0,0,0,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-024,stress,cross_part,assistant_stress,1,0,0,original,1,,3,0,0,0,1
+20261108T004258996111Z,replay:prod,run-local,s1-025,stress,cross_part,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-025,stress,cross_part,assistant_stress,1,0,0,original,0,citation [1] is listed but never referred to in the answer | citation [2] is listed but never referred to in the answer,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-025,stress,cross_part,assistant_stress,1,0,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-025,stress,cross_part,assistant_stress,1,0,0,original,1,,2,2,2,2,1
+20261108T004258996111Z,replay:prod,run-local,s1-026,stress,unanswerable,assistant_stress,0,0,0,original,1,,0,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-026,stress,unanswerable,assistant_stress,0,0,0,original,1,,0,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-026,stress,unanswerable,assistant_stress,0,0,0,original,1,,0,2,2,2,0
+20261108T004258996111Z,replay:auto_marker,run-local,s1-026,stress,unanswerable,assistant_stress,0,0,0,original,1,,0,2,2,2,0
+20261108T004258996111Z,replay:prod,run-local,s1-027,stress,unanswerable,assistant_stress,0,0,0,original,1,,2,0,2,0,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-027,stress,unanswerable,assistant_stress,0,0,0,original,1,,2,0,2,0,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-027,stress,unanswerable,assistant_stress,0,0,0,original,1,,2,0,2,0,0
+20261108T004258996111Z,replay:auto_marker,run-local,s1-027,stress,unanswerable,assistant_stress,0,0,0,original,1,,2,0,2,0,0
+20261108T004258996111Z,replay:prod,run-local,s1-028,stress,unanswerable,assistant_stress,0,0,0,original,1,,0,2,2,1,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-028,stress,unanswerable,assistant_stress,0,0,0,original,1,,0,2,2,1,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-028,stress,unanswerable,assistant_stress,0,0,0,original,1,,0,2,2,1,0
+20261108T004258996111Z,replay:auto_marker,run-local,s1-028,stress,unanswerable,assistant_stress,0,0,0,original,1,,0,2,2,1,0
+20261108T004258996111Z,replay:prod,run-local,s1-029,stress,unanswerable,assistant_stress,0,0,0,original,0,citation [1] is listed but never referred to in the answer,0,0,1,1,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-029,stress,unanswerable,assistant_stress,0,0,0,original,1,,2,0,1,1,1
+20261108T004258996111Z,replay:quote_only,run-local,s1-029,stress,unanswerable,assistant_stress,0,0,0,original,1,,2,0,1,1,1
+20261108T004258996111Z,replay:auto_marker,run-local,s1-029,stress,unanswerable,assistant_stress,0,0,0,original,1,,2,0,1,1,1
+20261108T004258996111Z,replay:prod,run-local,s1-030,stress,unanswerable,assistant_stress,0,0,0,original,1,,2,2,2,2,0
+20261108T004258996111Z,replay:marker_styles,run-local,s1-030,stress,unanswerable,assistant_stress,0,0,0,original,1,,2,2,2,2,0
+20261108T004258996111Z,replay:quote_only,run-local,s1-030,stress,unanswerable,assistant_stress,0,0,0,original,1,,2,2,2,2,0
+20261108T004258996111Z,replay:auto_marker,run-local,s1-030,stress,unanswerable,assistant_stress,0,0,0,original,1,,2,2,2,2,0
