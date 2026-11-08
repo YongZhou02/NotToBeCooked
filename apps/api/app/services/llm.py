@@ -77,15 +77,22 @@ class LlmClaim(BaseModel):
     markers: list[Annotated[int, Field(ge=1)]] = Field(default_factory=list)
 
 
+class GroqCitation(BaseModel):
+    """A source marker plus an ID for server-owned verbatim evidence."""
+
+    marker: int = Field(..., ge=1)
+    evidence_id: str = Field(..., min_length=3)
+
+
 class GroqAnswer(BaseModel):
     """Structured Groq output: the server, not the model, prints ``[n]``."""
 
     claims: list[LlmClaim]
     grounded: bool
-    citations: list[LlmCitation] = Field(default_factory=list)
+    citations: list[GroqCitation] = Field(default_factory=list)
     uncovered: str | None = None
 
-    def render(self) -> LlmAnswer:
+    def render(self, evidence: dict[str, tuple[int, str]]) -> LlmAnswer:
         parts: list[str] = []
         for claim in self.claims:
             text = claim.text.strip()
@@ -98,10 +105,22 @@ class GroqAnswer(BaseModel):
             parts.append(f"{text} {suffix}".rstrip())
         if not parts:
             raise ValueError("Groq returned no answer claims")
+        citations: list[LlmCitation] = []
+        for citation in self.citations:
+            resolved = evidence.get(citation.evidence_id)
+            if resolved is None:
+                raise ValueError(f"Unknown Groq evidence ID: {citation.evidence_id}")
+            marker, quote = resolved
+            if marker != citation.marker:
+                raise ValueError(
+                    f"Evidence {citation.evidence_id} belongs to marker {marker}, "
+                    f"not {citation.marker}"
+                )
+            citations.append(LlmCitation(marker=marker, quote=quote))
         return LlmAnswer(
             answer="\n\n".join(parts),
             grounded=self.grounded,
-            citations=self.citations,
+            citations=citations,
             uncovered=self.uncovered,
         )
 
@@ -165,9 +184,9 @@ _JSON_SCHEMA: dict[str, Any] = {
                 "type": "object",
                 "properties": {
                     "marker": {"type": "integer"},
-                    "quote": {"type": "string"},
+                    "evidence_id": {"type": "string"},
                 },
-                "required": ["marker", "quote"],
+                "required": ["marker", "evidence_id"],
             },
         },
     },
@@ -180,8 +199,10 @@ OUTPUT FORMAT OVERRIDE FOR THIS PROVIDER
 Return the answer as `claims`, not as one `answer` string. Each claim has plain
 `text` with no handwritten citation brackets and a `markers` array containing
 the source numbers that support that claim. The server renders those numbers as
-`[n]`. For a refusal, return one plain claim with an empty markers array, set
-grounded to false, and leave citations empty.
+`[n]`. For every citation, copy an `evidence_id` from the EVIDENCE PASSAGES
+catalogue; never write or paraphrase a quote. The server resolves that ID back
+to the exact source text. For a refusal, return one plain claim with an empty
+markers array, set grounded to false, and leave citations empty.
 """.strip()
 
 REFUSAL = "The supplied material does not cover this question."
@@ -233,6 +254,27 @@ def _verbatim_opening(content: str, limit: int = 110) -> str:
     head = content[:limit]
     cut = head.rfind(" ")
     return head[:cut] if cut > 0 else head
+
+
+def _evidence_catalog(
+    sources: list[RetrievedChunk],
+) -> tuple[dict[str, tuple[int, str]], str]:
+    """Create exact, server-owned evidence spans for Groq to reference by ID."""
+    evidence: dict[str, tuple[int, str]] = {}
+    rendered: list[str] = ["EVIDENCE PASSAGES"]
+    for marker, source in enumerate(sources, start=1):
+        parts = re.split(
+            r"(?:\r?\n+|\s*▪\s*|(?<=[.!?])\s+)",
+            source.content,
+        )
+        spans = [part.strip() for part in parts if part.strip()]
+        if not spans:
+            spans = [source.content.strip()]
+        for index, quote in enumerate(spans, start=1):
+            evidence_id = f"{marker}.{index}"
+            evidence[evidence_id] = (marker, quote)
+            rendered.append(f"{evidence_id}: {quote}")
+    return evidence, "\n".join(rendered)
 
 
 def _fake_answer(question: str, sources: list[RetrievedChunk]) -> LlmAnswer:
@@ -302,11 +344,20 @@ async def generate_answer(
 
     # Gemini first when both keys are set; Groq only when it is the sole key.
     if settings.llm_provider == "groq":
-        return await _generate_groq(system_instruction, user_turn)
+        evidence, evidence_block = _evidence_catalog(sources)
+        return await _generate_groq(
+            system_instruction,
+            user_turn + "\n\n" + evidence_block,
+            evidence,
+        )
     return await _generate_gemini(system_instruction, user_turn)
 
 
-async def _generate_groq(system_instruction: str, user_turn: str) -> LlmAnswer:
+async def _generate_groq(
+    system_instruction: str,
+    user_turn: str,
+    evidence: dict[str, tuple[int, str]],
+) -> LlmAnswer:
     """Groq's OpenAI-compatible chat completions, JSON-schema constrained.
 
     The free tier is token-per-minute limited, so a 429 is expected: honour
@@ -354,7 +405,7 @@ async def _generate_groq(system_instruction: str, user_turn: str) -> LlmAnswer:
         text = body["choices"][0]["message"]["content"]
     except (KeyError, IndexError, TypeError) as exc:
         raise RuntimeError(f"Groq returned no choice: {body}") from exc
-    return GroqAnswer.model_validate(json.loads(text)).render()
+    return GroqAnswer.model_validate(json.loads(text)).render(evidence)
 
 
 async def _generate_gemini(system_instruction: str, user_turn: str) -> LlmAnswer:

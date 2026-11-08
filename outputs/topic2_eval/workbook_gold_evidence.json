@@ -1,0 +1,640 @@
+[
+  {
+    "id": "t2-001",
+    "evidence": [
+      {
+        "pdf_page": 5,
+        "quote": "To read the input characters of the produce as"
+      },
+      {
+        "pdf_page": 5,
+        "quote": "group into lexemes"
+      },
+      {
+        "pdf_page": 5,
+        "quote": "produce as output a group them into sequence of tokens lexemes for each lexeme in the source program."
+      }
+    ]
+  },
+  {
+    "id": "t2-002",
+    "evidence": [
+      {
+        "pdf_page": 23,
+        "quote": "Lexical Analyzer often needs to look one or more characters beyond the next lexeme before we can be sure we have the right lexeme."
+      },
+      {
+        "pdf_page": 23,
+        "quote": "therefore to reduce this overhead, specialized buffering techniques have been developed."
+      },
+      {
+        "pdf_page": 27,
+        "quote": "▪Using one system read command, we can read N INPUT BUFFERING characters into the buffer, rather than using one system call per character."
+      }
+    ]
+  },
+  {
+    "id": "t2-003",
+    "evidence": [
+      {
+        "pdf_page": 45,
+        "quote": "letter ( letter | digit )*"
+      },
+      {
+        "pdf_page": 48,
+        "quote": "Spot the difference\nLetter letter | digit *\nvs\nLetter (letter|digit) *"
+      }
+    ]
+  },
+  {
+    "id": "t2-004",
+    "evidence": [
+      {
+        "pdf_page": 23,
+        "quote": "Lexical Analyzer often needs to look one or more characters beyond the next lexeme before we can be sure we have the right lexeme."
+      },
+      {
+        "pdf_page": 61,
+        "quote": "* indicates retract the input one position"
+      }
+    ]
+  },
+  {
+    "id": "t2-005",
+    "evidence": [
+      {
+        "pdf_page": 11,
+        "quote": "Token: \u0000A pair consisting of token name and an optional attribute value. \u0000Remember the form <token-name, attribute-value>"
+      },
+      {
+        "pdf_page": 12,
+        "quote": "ii- score id"
+      },
+      {
+        "pdf_page": 15,
+        "quote": "<id, pointer to symbol table entry for E>"
+      },
+      {
+        "pdf_page": 17,
+        "quote": "<id, pointer to entry for pi>"
+      }
+    ]
+  },
+  {
+    "id": "t2-006",
+    "evidence": [
+      {
+        "pdf_page": 19,
+        "quote": "▪For example: if the source-code (in C language) HANDLING LEXICAL ERRORS encounters ‘fi’, the lexical analyzer will not detect it as an error and can’t tell whether it is a misspelled keyword or an undeclared literal."
+      },
+      {
+        "pdf_page": 19,
+        "quote": "Since fi is a valid lexeme for the token id, the lexical analyzer must return the token id to the parser and let some other phases (probably the parser in this case) handle an error due to the transposition of letters."
+      },
+      {
+        "pdf_page": 58,
+        "quote": "Parser relies on token distinctions \u0000An identifier is treated differently than a keyword"
+      },
+      {
+        "pdf_page": 65,
+        "quote": "RECOGNITION OF RESERVED WORDS"
+      }
+    ]
+  },
+  {
+    "id": "t2-007",
+    "evidence": []
+  },
+  {
+    "id": "t2-008",
+    "evidence": [
+      {
+        "pdf_page": 35,
+        "quote": "Alphabet\nIt represents any finite set of symbols."
+      },
+      {
+        "pdf_page": 36,
+        "quote": "String\nA string over an alphabet is a finite sequence of symbols drawn from that alphabet."
+      },
+      {
+        "pdf_page": 39,
+        "quote": "An alphabet ∑ is a set of characters Example: ∑ = {a, b} ▪ A string over ∑ is a finite sequence of elements from ∑ Example: aabba"
+      }
+    ]
+  },
+  {
+    "id": "t2-009",
+    "evidence": [
+      {
+        "pdf_page": 8,
+        "quote": "Simpler Design – This separation leads to simpler design of parser as unnecessary tokens (comments & whitespaces) are eliminated by the scanner already."
+      },
+      {
+        "pdf_page": 8,
+        "quote": "Improved Portability – The compiler's portability is enhanced as specialized symbols and characters (machine and language specific) are isolated during this phase."
+      },
+      {
+        "pdf_page": 8,
+        "quote": "▪Increased Efficiency – A separate lexical analyzer LEXICAL ANALYSIS VERSUS PARSING allows us to apply specialized techniques that serve only the lexical task, not the job of parsing."
+      },
+      {
+        "pdf_page": 9,
+        "quote": "A. Scanning\n• the simple processes\n• do not require tokenization of the input\n• e.g. deletion of comments and compaction of consecutive whitespace characters into one."
+      }
+    ]
+  },
+  {
+    "id": "t2-010",
+    "evidence": [
+      {
+        "pdf_page": 25,
+        "quote": "segment of ▪The lexical analyzer processes characters the source file into a buffer. from one buffer ▪The lexical analyzer processes the buffer ▪The second buffer is simultaneously loaded character by character to detect tokens. with the next set of characters from the source file. ▪Once the buffer is depleted, it is refilled with the next set of characters, and the cycle continues. ▪This"
+      },
+      {
+        "pdf_page": 25,
+        "quote": "one buffer ▪The lexical analyzer processes the buffer ▪The second buffer is simultaneously loaded character by character to detect tokens. with the next set of characters from the source file. ▪Once the buffer is depleted, it is"
+      },
+      {
+        "pdf_page": 26,
+        "quote": "Two-Buffer Scheme is discussed here in which the two buffers are alternately reloaded."
+      }
+    ]
+  },
+  {
+    "id": "t2-011",
+    "evidence": [
+      {
+        "pdf_page": 47,
+        "quote": "(r | s) denotes L(r) ∪L(s)\nr or s (alternation)\n(rs) denotes L(r)L(s)\nr followed by s (concatenation)"
+      },
+      {
+        "pdf_page": 49,
+        "quote": "(a|b)(a |b) : Denotes {aa, ab, ba, bb}, the language of all strings of length 2 over the alphabet ∑. Equivalent to: aa|ab|ba|bb."
+      }
+    ]
+  },
+  {
+    "id": "t2-012",
+    "evidence": [
+      {
+        "pdf_page": 61,
+        "quote": "return(relop,LT) return(relop,EQ) > = return(relop,GE)"
+      }
+    ]
+  },
+  {
+    "id": "t2-013",
+    "evidence": []
+  },
+  {
+    "id": "t2-014",
+    "evidence": [
+      {
+        "pdf_page": 11,
+        "quote": "Token: \u0000A pair consisting of token name and an optional attribute value."
+      },
+      {
+        "pdf_page": 12,
+        "quote": "ii- score id"
+      },
+      {
+        "pdf_page": 17,
+        "quote": "<id, pointer to entry for pi>"
+      }
+    ]
+  },
+  {
+    "id": "t2-015",
+    "evidence": [
+      {
+        "pdf_page": 19,
+        "quote": "Most of the times, the lexical analyzer is not able to detect source-code errors."
+      },
+      {
+        "pdf_page": 20,
+        "quote": "What Errors A Lexical Analyzer Can Recognize?\nWhen none of the patterns for tokens matches a prefix of remaining input."
+      }
+    ]
+  },
+  {
+    "id": "t2-016",
+    "evidence": [
+      {
+        "pdf_page": 36,
+        "quote": "The empty string denoted by ‘ɛ’ has Zero length."
+      },
+      {
+        "pdf_page": 42,
+        "quote": "The empty string is identity under concatenation"
+      },
+      {
+        "pdf_page": 46,
+        "quote": "is a regular expression, and L(\u0000) is {\u0000}, that is, the language whose sole member is the empty string."
+      }
+    ]
+  },
+  {
+    "id": "t2-017",
+    "evidence": [
+      {
+        "pdf_page": 8,
+        "quote": "▪Increased Efficiency – A separate lexical analyzer LEXICAL ANALYSIS VERSUS PARSING allows us to apply specialized techniques that serve only the lexical task, not the job of parsing. The specialized buffering techniques for reading input characters can speed up the compiler’s efficiency."
+      },
+      {
+        "pdf_page": 23,
+        "quote": "therefore to reduce this overhead, specialized buffering techniques have been developed."
+      },
+      {
+        "pdf_page": 25,
+        "quote": "Double Buffering/ Two- Buffer"
+      }
+    ]
+  },
+  {
+    "id": "t2-018",
+    "evidence": [
+      {
+        "pdf_page": 23,
+        "quote": "▪Since the large source programs consist of a large INPUT BUFFERING number of characters and a huge time is required to process those characters, therefore to reduce this overhead, specialized buffering techniques have been developed."
+      },
+      {
+        "pdf_page": 27,
+        "quote": "▪Size of each buffer is usually N, where N is the size of a disk block. ▪Using one system read command, we can read N INPUT BUFFERING characters into the buffer, rather than using one system call per character."
+      }
+    ]
+  },
+  {
+    "id": "t2-019",
+    "evidence": []
+  },
+  {
+    "id": "t2-020",
+    "evidence": [
+      {
+        "pdf_page": 47,
+        "quote": "(r*) denotes (L(r))*\nZero or more occurrences of r (kleen closure)"
+      },
+      {
+        "pdf_page": 49,
+        "quote": "(a|b)* : Denotes all strings consisting of zero or more a’s or b’s."
+      }
+    ]
+  },
+  {
+    "id": "t2-021",
+    "evidence": [
+      {
+        "pdf_page": 62,
+        "quote": "RECOGNITION OF IDENTIERS\nID = letter(letter | digit) *"
+      },
+      {
+        "pdf_page": 63,
+        "quote": "retract(1); insert(id); return;"
+      }
+    ]
+  },
+  {
+    "id": "t2-022",
+    "evidence": [
+      {
+        "pdf_page": 5,
+        "quote": "When the lexical analyzer discovers a lexeme constituting an identifier, it needs to enter that lexeme into symbol table."
+      },
+      {
+        "pdf_page": 15,
+        "quote": "<id, pointer to symbol table entry for E> <assign-op> <id, pointer ……….. For M> <mult-op> ▪"
+      }
+    ]
+  },
+  {
+    "id": "t2-023",
+    "evidence": [
+      {
+        "pdf_page": 20,
+        "quote": "Delete the successive characters from the remaining input until analyzer can find a well-formed token."
+      }
+    ]
+  },
+  {
+    "id": "t2-024",
+    "evidence": [
+      {
+        "pdf_page": 36,
+        "quote": "A string over an alphabet is a finite sequence of symbols drawn from that alphabet."
+      },
+      {
+        "pdf_page": 38,
+        "quote": "3. Language LANGUAGES A countable set of strings over some fixed alphabet."
+      },
+      {
+        "pdf_page": 39,
+        "quote": "A string over ∑ is a finite sequence of elements from ∑ Example: aabba ▪ A language is a set of strings"
+      }
+    ]
+  },
+  {
+    "id": "t2-025",
+    "evidence": []
+  },
+  {
+    "id": "t2-026",
+    "evidence": [
+      {
+        "pdf_page": 9,
+        "quote": "A. Scanning\n• the simple processes\n• do not require tokenization of the input\n• e.g. deletion of comments and compaction of consecutive whitespace characters into one."
+      },
+      {
+        "pdf_page": 9,
+        "quote": "B Lexical analysis\n• the more complex portion\n• produces tokens from the output of the scanner."
+      },
+      {
+        "pdf_page": 11,
+        "quote": "Token: \u0000A pair consisting of token name and an optional attribute value."
+      }
+    ]
+  },
+  {
+    "id": "t2-027",
+    "evidence": [
+      {
+        "pdf_page": 28,
+        "quote": "▪Two pointers of the input are maintained:\n▪lexemeBegin – marks the beginning of the current lexeme.\n▪forward – scans ahead until a pattern match is found."
+      }
+    ]
+  },
+  {
+    "id": "t2-028",
+    "evidence": [
+      {
+        "pdf_page": 47,
+        "quote": "(rs) denotes L(r)L(s) r followed by s (concatenation) (r*) denotes (L(r))* Zero or more occurrences of r (kleen closure)"
+      },
+      {
+        "pdf_page": 50,
+        "quote": "RE will be:\n( a | c ) b* or ( a + c ) b*"
+      }
+    ]
+  },
+  {
+    "id": "t2-029",
+    "evidence": [
+      {
+        "pdf_page": 60,
+        "quote": "one of several patterns 2. Edges are directed from one state of the transition diagram to another."
+      },
+      {
+        "pdf_page": 62,
+        "quote": "RECOGNITION OF IDENTIERS"
+      },
+      {
+        "pdf_page": 63,
+        "quote": "MAPPING TRANSITION DIAGRAMS INTO C CODE"
+      },
+      {
+        "pdf_page": 64,
+        "quote": "LEXICAL ANALYZER LOOP"
+      }
+    ]
+  },
+  {
+    "id": "t2-030",
+    "evidence": [
+      {
+        "pdf_page": 15,
+        "quote": "<exp-op>\n<number, integer value 2>"
+      }
+    ]
+  },
+  {
+    "id": "t2-031",
+    "evidence": []
+  },
+  {
+    "id": "t2-032",
+    "evidence": [
+      {
+        "pdf_page": 20,
+        "quote": "Delete the successive characters from the remaining input until analyzer can find a well-formed token."
+      },
+      {
+        "pdf_page": 21,
+        "quote": "Possible Error Recovery Actions:\n▪Deleting extraneous characters\n▪Replacing or transposing two adjacent characters\n▪Replacing an incorrect character by a correct one\n▪Inserting missing characters"
+      }
+    ]
+  },
+  {
+    "id": "t2-033",
+    "evidence": [
+      {
+        "pdf_page": 41,
+        "quote": "The most fundamental operations on languages are:\n▪Union\n▪Concatenation\n▪Closure"
+      },
+      {
+        "pdf_page": 43,
+        "quote": "Let L be the set of letters {A; B; …; Z; a; b; …; z}\nand let D be the set of digits {0; 1; …9}.\na) L ∪ D\nb) LD"
+      }
+    ]
+  },
+  {
+    "id": "t2-034",
+    "evidence": [
+      {
+        "pdf_page": 8,
+        "quote": "▪Improved Portability – The compiler's portability is enhanced as specialized symbols and characters (machine and language specific) are isolated during this phase."
+      }
+    ]
+  },
+  {
+    "id": "t2-035",
+    "evidence": [
+      {
+        "pdf_page": 28,
+        "quote": "Once the next lexeme is determined, the forward is set to the character at its right end. Then, after the lexeme is recorded as an attribute value of a token returned to the parser, lexemeBegin is set to the character immediately after the lexeme just found."
+      }
+    ]
+  },
+  {
+    "id": "t2-036",
+    "evidence": [
+      {
+        "pdf_page": 52,
+        "quote": "Regular definitions allow names to be given to certain regular expressions. These names can then be used in subsequent expressions as if they were symbols."
+      },
+      {
+        "pdf_page": 53,
+        "quote": "REGULAR DEFINITIONS EXAMPLE"
+      },
+      {
+        "pdf_page": 54,
+        "quote": "REGULAR DEFINITIONS EXAMPLE"
+      }
+    ]
+  },
+  {
+    "id": "t2-037",
+    "evidence": []
+  },
+  {
+    "id": "t2-038",
+    "evidence": [
+      {
+        "pdf_page": 58,
+        "quote": "Parser relies on token distinctions \u0000An identifier is treated differently than a keyword"
+      },
+      {
+        "pdf_page": 62,
+        "quote": "RECOGNITION OF IDENTIERS"
+      },
+      {
+        "pdf_page": 65,
+        "quote": "RECOGNITION OF RESERVED WORDS\n▪Install the reserved words in the symbol table initially.\n▪A field of the symbol-table entry indicates that these strings are never ordinary identifiers, and tells which token they represent."
+      }
+    ]
+  },
+  {
+    "id": "t2-039",
+    "evidence": [
+      {
+        "pdf_page": 11,
+        "quote": "Token: \u0000A pair consisting of token name and an optional attribute value. \u0000Remember the form <token-name, attribute-value>"
+      },
+      {
+        "pdf_page": 17,
+        "quote": "<number, floating point 3.1416>"
+      }
+    ]
+  },
+  {
+    "id": "t2-040",
+    "evidence": [
+      {
+        "pdf_page": 19,
+        "quote": "Most of the times, the lexical analyzer is not able to detect source-code errors."
+      },
+      {
+        "pdf_page": 20,
+        "quote": "What Errors A Lexical Analyzer Can Recognize?\nWhen none of the patterns for tokens matches a prefix of remaining input."
+      }
+    ]
+  },
+  {
+    "id": "t2-041",
+    "evidence": [
+      {
+        "pdf_page": 43,
+        "quote": "c) \u00004 d) \u0000∗ e) \u0000\u0000∪\u0000 f) \u0000+"
+      },
+      {
+        "pdf_page": 47,
+        "quote": "(r*) denotes (L(r))* Zero or more occurrences of r (kleen closure) (\u0000+) denotes (L(r))+ One or more occurrences of r (Positive Closure)"
+      },
+      {
+        "pdf_page": 49,
+        "quote": "a*: Denotes the language consisting of all strings of zero or more a's, {\u0000, a, aa, aaa, ...}"
+      }
+    ]
+  },
+  {
+    "id": "t2-042",
+    "evidence": [
+      {
+        "pdf_page": 27,
+        "quote": "Eof marks the end of source file and is different from any possible character of the source program."
+      },
+      {
+        "pdf_page": 30,
+        "quote": "▪The buffer end test can be combined with the test for the current character if we extend each buffer to hold a sentinel character at the end. ▪Sentinel is the special character that cannot be a part of the source program and the natural choice is eof."
+      }
+    ]
+  },
+  {
+    "id": "t2-043",
+    "evidence": []
+  },
+  {
+    "id": "t2-044",
+    "evidence": [
+      {
+        "pdf_page": 54,
+        "quote": "Unsigned numbers (integer or floating point) are strings such as 5280, 0.01234, 6.336E4, or 1.89E-4."
+      },
+      {
+        "pdf_page": 66,
+        "quote": "THE TRANSITION DIAGRAM FOR TOKEN NUMBER"
+      }
+    ]
+  },
+  {
+    "id": "t2-045",
+    "evidence": [
+      {
+        "pdf_page": 54,
+        "quote": "Unsigned numbers (integer or floating point) are strings such as 5280, 0.01234, 6.336E4, or 1.89E-4."
+      },
+      {
+        "pdf_page": 66,
+        "quote": "Accepting integer Accepting float e.g. 12.31 Accepting float e.g. 12.31E4"
+      }
+    ]
+  },
+  {
+    "id": "t2-046",
+    "evidence": [
+      {
+        "pdf_page": 58,
+        "quote": "Parser relies on token distinctions \u0000An identifier is treated differently than a keyword"
+      },
+      {
+        "pdf_page": 65,
+        "quote": "RECOGNITION OF RESERVED WORDS\n▪Install the reserved words in the symbol table initially.\n▪A field of the symbol-table entry indicates that these strings are never ordinary identifiers, and tells which token they represent."
+      }
+    ]
+  },
+  {
+    "id": "t2-047",
+    "evidence": [
+      {
+        "pdf_page": 46,
+        "quote": "is a regular expression, and L(\u0000) is {\u0000}, that is, the language whose sole member is the empty string."
+      },
+      {
+        "pdf_page": 47,
+        "quote": "(r*) denotes (L(r))* Zero or more occurrences of r (kleen closure) (\u0000+) denotes (L(r))+ One or more occurrences of r (Positive Closure)"
+      },
+      {
+        "pdf_page": 49,
+        "quote": "a*: Denotes the language consisting of all strings of zero or more a's, {\u0000, a, aa, aaa, ...}"
+      }
+    ]
+  },
+  {
+    "id": "t2-048",
+    "evidence": [
+      {
+        "pdf_page": 30,
+        "quote": "The buffer end test can be combined with the test for the current character if we extend each buffer to hold a sentinel character at the end."
+      },
+      {
+        "pdf_page": 31,
+        "quote": "▪Note that eof retains its use as a marker for the end of entire input.\n▪Any eof that appears other than at the end of buffer means that the input is at an end."
+      }
+    ]
+  },
+  {
+    "id": "t2-049",
+    "evidence": []
+  },
+  {
+    "id": "t2-050",
+    "evidence": [
+      {
+        "pdf_page": 11,
+        "quote": "Pattern: \u0000An informal description of a form that lexemes of a token may take. For e.g. if token is a keyword , then pattern is just the sequence of characters that form the keyword. Lexeme: \u0000It is an actual stream of characters (in the source program) that matches the pattern and is identified by the lexical analyzer as an instance of that token."
+      },
+      {
+        "pdf_page": 45,
+        "quote": "A regular expression is a sequence of characters that defines a search pattern, typically used for pattern matching with strings."
+      }
+    ]
+  }
+]

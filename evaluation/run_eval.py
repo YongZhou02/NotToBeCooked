@@ -495,11 +495,18 @@ async def main(args: argparse.Namespace) -> None:
     manifest, questions, answers, evidence = load_dataset(folder)
     if args.split != "all":
         questions = [question for question in questions if question["split"] == args.split]
+    if args.question_id:
+        requested = set(args.question_id)
+        questions = [question for question in questions if question["id"] in requested]
+        missing = requested - {question["id"] for question in questions}
+        if missing:
+            raise ValueError(f"Question IDs not selected by this dataset/split: {sorted(missing)}")
+    if args.split != "all" or args.question_id:
         selected_ids = {question["id"] for question in questions}
         answers = {key: value for key, value in answers.items() if key in selected_ids}
         evidence = {key: value for key, value in evidence.items() if key in selected_ids}
         if not questions:
-            raise ValueError(f"Dataset has no questions in split {args.split!r}")
+            raise ValueError("No questions selected")
     if args.generate and (settings.LLM_FAKE_MODE or settings.llm_provider is None):
         raise ValueError(
             "Real generation requires LLM_FAKE_MODE=false and a GEMINI_API_KEY "
@@ -557,6 +564,7 @@ async def main(args: argparse.Namespace) -> None:
         "generation_model": settings.llm_model_name if args.generate else None,
         "generation_method": args.generation_method,
         "question_split": args.split,
+        "question_ids": args.question_id or None,
         "repeats": args.repeats,
         "seed": 37,
         "scope": "single-turn, file-scoped production query; no HTTP/auth or original-image benchmark",
@@ -827,6 +835,11 @@ if __name__ == "__main__":
         choices=("all", "dev", "test", "stress"),
         default="all",
         help="Evaluate only one dataset split",
+    )
+    parser.add_argument(
+        "--question-id",
+        action="append",
+        help="Evaluate one question ID; repeat the option for multiple IDs",
     )
     parser.add_argument(
         "--generation-delay-seconds",

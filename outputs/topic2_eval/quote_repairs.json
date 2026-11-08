@@ -1,0 +1,254 @@
+[
+  {
+    "id": "t2-001",
+    "page": 5,
+    "similarity": 0.875,
+    "old": "To read the input characters of the source program",
+    "new": "To read the input characters of the produce as"
+  },
+  {
+    "id": "t2-001",
+    "page": 5,
+    "similarity": 0.878,
+    "old": "group them into lexemes",
+    "new": "group into lexemes"
+  },
+  {
+    "id": "t2-001",
+    "page": 5,
+    "similarity": 0.8652,
+    "old": "produce as output a sequence of tokens for each lexeme in the source program.",
+    "new": "produce as output a group them into sequence of tokens lexemes for each lexeme in the source program."
+  },
+  {
+    "id": "t2-002",
+    "page": 27,
+    "similarity": 0.9344,
+    "old": "Using one system read command, we can read N characters into the buffer, rather than using one system call per character.",
+    "new": "▪Using one system read command, we can read N INPUT BUFFERING characters into the buffer, rather than using one system call per character."
+  },
+  {
+    "id": "t2-005",
+    "page": 11,
+    "similarity": 0.9917,
+    "old": "Token:\nA pair consisting of token name and an optional attribute value.\nRemember the form <token-name, attribute-value>",
+    "new": "Token: \u0000A pair consisting of token name and an optional attribute value. \u0000Remember the form <token-name, attribute-value>"
+  },
+  {
+    "id": "t2-006",
+    "page": 19,
+    "similarity": 0.9389,
+    "old": "For example: if the source-code (in C language) encounters ‘fi’, the lexical analyzer will not detect it as an error and can’t tell whether it is a misspelled keyword or an undeclared literal.",
+    "new": "▪For example: if the source-code (in C language) HANDLING LEXICAL ERRORS encounters ‘fi’, the lexical analyzer will not detect it as an error and can’t tell whether it is a misspelled keyword or an undeclared literal."
+  },
+  {
+    "id": "t2-006",
+    "page": 58,
+    "similarity": 0.9943,
+    "old": "Parser relies on token distinctions\nAn identifier is treated differently than a keyword",
+    "new": "Parser relies on token distinctions \u0000An identifier is treated differently than a keyword"
+  },
+  {
+    "id": "t2-008",
+    "page": 39,
+    "similarity": 0.9922,
+    "old": "An alphabet ∑ is a set of characters\nExample: ∑ = {a, b}\nA string over ∑ is a finite sequence of elements from ∑\nExample: aabba",
+    "new": "An alphabet ∑ is a set of characters Example: ∑ = {a, b} ▪ A string over ∑ is a finite sequence of elements from ∑ Example: aabba"
+  },
+  {
+    "id": "t2-009",
+    "page": 8,
+    "similarity": 0.9009,
+    "old": "Increased Efficiency – A separate lexical analyzer allows us to apply specialized techniques that serve only the lexical task, not the job of parsing.",
+    "new": "▪Increased Efficiency – A separate lexical analyzer LEXICAL ANALYSIS VERSUS PARSING allows us to apply specialized techniques that serve only the lexical task, not the job of parsing."
+  },
+  {
+    "id": "t2-010",
+    "page": 25,
+    "similarity": 0.6039,
+    "old": "Single Buffering\n▪The compiler loads a substantial segment of the source file into a buffer.\n▪The lexical analyzer processes the buffer character by character to detect tokens.\n▪Once the buffer is depleted, it is refilled with the next set of characters, and the cycle continues.\n▪This approach can be inefficient as it requires processing to halt each time the buffer is replenished.",
+    "new": "segment of ▪The lexical analyzer processes characters the source file into a buffer. from one buffer ▪The lexical analyzer processes the buffer ▪The second buffer is simultaneously loaded character by character to detect tokens. with the next set of characters from the source file. ▪Once the buffer is depleted, it is refilled with the next set of characters, and the cycle continues. ▪This"
+  },
+  {
+    "id": "t2-010",
+    "page": 25,
+    "similarity": 0.5687,
+    "old": "Double Buffering/ Two- Buffer\n▪The lexical analyzer processes characters from one buffer\n▪The second buffer is simultaneously loaded with the next set of characters from the source file.\n▪This concurrent processing and reading ensure a steady stream of characters and minimizes wait times.",
+    "new": "one buffer ▪The lexical analyzer processes the buffer ▪The second buffer is simultaneously loaded character by character to detect tokens. with the next set of characters from the source file. ▪Once the buffer is depleted, it is"
+  },
+  {
+    "id": "t2-012",
+    "page": 61,
+    "similarity": 0.9231,
+    "old": "return(relop,LE)\nreturn(relop,NE)\nreturn(relop,GE)",
+    "new": "return(relop,LT) return(relop,EQ) > = return(relop,GE)"
+  },
+  {
+    "id": "t2-014",
+    "page": 11,
+    "similarity": 0.993,
+    "old": "Token:\nA pair consisting of token name and an optional attribute value.",
+    "new": "Token: \u0000A pair consisting of token name and an optional attribute value."
+  },
+  {
+    "id": "t2-016",
+    "page": 46,
+    "similarity": 0.9901,
+    "old": "is a regular expression, and L() is {}, that is, the language whose sole member is the empty string.",
+    "new": "is a regular expression, and L(\u0000) is {\u0000}, that is, the language whose sole member is the empty string."
+  },
+  {
+    "id": "t2-017",
+    "page": 8,
+    "similarity": 0.9394,
+    "old": "Increased Efficiency – A separate lexical analyzer allows us to apply specialized techniques that serve only the lexical task, not the job of parsing. The specialized buffering techniques for reading input characters can speed up the compiler’s efficiency.",
+    "new": "▪Increased Efficiency – A separate lexical analyzer LEXICAL ANALYSIS VERSUS PARSING allows us to apply specialized techniques that serve only the lexical task, not the job of parsing. The specialized buffering techniques for reading input characters can speed up the compiler’s efficiency."
+  },
+  {
+    "id": "t2-018",
+    "page": 23,
+    "similarity": 0.9623,
+    "old": "Since the large source programs consist of a large number of characters and a huge time is required to process those characters, therefore to reduce this overhead, specialized buffering techniques have been developed.",
+    "new": "▪Since the large source programs consist of a large INPUT BUFFERING number of characters and a huge time is required to process those characters, therefore to reduce this overhead, specialized buffering techniques have been developed."
+  },
+  {
+    "id": "t2-018",
+    "page": 27,
+    "similarity": 0.9552,
+    "old": "Size of each buffer is usually N, where N is the size of a disk block.\nUsing one system read command, we can read N characters into the buffer, rather than using one system call per character.",
+    "new": "▪Size of each buffer is usually N, where N is the size of a disk block. ▪Using one system read command, we can read N INPUT BUFFERING characters into the buffer, rather than using one system call per character."
+  },
+  {
+    "id": "t2-021",
+    "page": 63,
+    "similarity": 0.8732,
+    "old": "case 11:\nretract(1);\ninsert(id);\nreturn;",
+    "new": "retract(1); insert(id); return;"
+  },
+  {
+    "id": "t2-022",
+    "page": 15,
+    "similarity": 0.8867,
+    "old": "<id, pointer to symbol table entry for E>\n<assign-op>\n<id, pointer ……….. For M>\n<mult-op>\n<id, pointer……… for C>",
+    "new": "<id, pointer to symbol table entry for E> <assign-op> <id, pointer ……….. For M> <mult-op> ▪"
+  },
+  {
+    "id": "t2-024",
+    "page": 38,
+    "similarity": 0.9275,
+    "old": "3. Language\nA countable set of strings over some fixed alphabet.",
+    "new": "3. Language LANGUAGES A countable set of strings over some fixed alphabet."
+  },
+  {
+    "id": "t2-024",
+    "page": 39,
+    "similarity": 0.9101,
+    "old": "A string over ∑ is a finite sequence of elements from ∑\nA language is a set of strings",
+    "new": "A string over ∑ is a finite sequence of elements from ∑ Example: aabba ▪ A language is a set of strings"
+  },
+  {
+    "id": "t2-026",
+    "page": 11,
+    "similarity": 0.993,
+    "old": "Token:\nA pair consisting of token name and an optional attribute value.",
+    "new": "Token: \u0000A pair consisting of token name and an optional attribute value."
+  },
+  {
+    "id": "t2-028",
+    "page": 47,
+    "similarity": 0.906,
+    "old": "(r | s) denotes L(r) ∪L(s)\nr or s (alternation)\n(r*) denotes (L(r))*\nZero or more occurrences of r (kleen closure)",
+    "new": "(rs) denotes L(r)L(s) r followed by s (concatenation) (r*) denotes (L(r))* Zero or more occurrences of r (kleen closure)"
+  },
+  {
+    "id": "t2-029",
+    "page": 60,
+    "similarity": 0.8036,
+    "old": "1. A collection of nodes or circles, called states.\n2. Edges are directed from one state of the transition diagram to another.",
+    "new": "one of several patterns 2. Edges are directed from one state of the transition diagram to another."
+  },
+  {
+    "id": "t2-038",
+    "page": 58,
+    "similarity": 0.9943,
+    "old": "Parser relies on token distinctions\nAn identifier is treated differently than a keyword",
+    "new": "Parser relies on token distinctions \u0000An identifier is treated differently than a keyword"
+  },
+  {
+    "id": "t2-039",
+    "page": 11,
+    "similarity": 0.9917,
+    "old": "Token:\nA pair consisting of token name and an optional attribute value.\nRemember the form <token-name, attribute-value>",
+    "new": "Token: \u0000A pair consisting of token name and an optional attribute value. \u0000Remember the form <token-name, attribute-value>"
+  },
+  {
+    "id": "t2-041",
+    "page": 43,
+    "similarity": 0.8636,
+    "old": "c) 4\nd) ∗\ne) ∪\nf) +",
+    "new": "c) \u00004 d) \u0000∗ e) \u0000\u0000∪\u0000 f) \u0000+"
+  },
+  {
+    "id": "t2-041",
+    "page": 47,
+    "similarity": 0.9963,
+    "old": "(r*) denotes (L(r))*\nZero or more occurrences of r (kleen closure)\n(+) denotes (L(r))+\nOne or more occurrences of r (Positive Closure)",
+    "new": "(r*) denotes (L(r))* Zero or more occurrences of r (kleen closure) (\u0000+) denotes (L(r))+ One or more occurrences of r (Positive Closure)"
+  },
+  {
+    "id": "t2-041",
+    "page": 49,
+    "similarity": 0.9945,
+    "old": "a*: Denotes the language consisting of all strings of zero or more a's, {, a, aa, aaa, ...}",
+    "new": "a*: Denotes the language consisting of all strings of zero or more a's, {\u0000, a, aa, aaa, ...}"
+  },
+  {
+    "id": "t2-042",
+    "page": 30,
+    "similarity": 0.996,
+    "old": "The buffer end test can be combined with the test for the current character if we extend each buffer to hold a sentinel character at the end.\nSentinel is the special character that cannot be a part of the source program and the natural choice is eof.",
+    "new": "▪The buffer end test can be combined with the test for the current character if we extend each buffer to hold a sentinel character at the end. ▪Sentinel is the special character that cannot be a part of the source program and the natural choice is eof."
+  },
+  {
+    "id": "t2-045",
+    "page": 66,
+    "similarity": 0.9481,
+    "old": "Accepting integer\ne.g. 12\nAccepting float\ne.g. 12.31\nAccepting float\ne.g. 12.31E4",
+    "new": "Accepting integer Accepting float e.g. 12.31 Accepting float e.g. 12.31E4"
+  },
+  {
+    "id": "t2-046",
+    "page": 58,
+    "similarity": 0.9943,
+    "old": "Parser relies on token distinctions\nAn identifier is treated differently than a keyword",
+    "new": "Parser relies on token distinctions \u0000An identifier is treated differently than a keyword"
+  },
+  {
+    "id": "t2-047",
+    "page": 46,
+    "similarity": 0.9901,
+    "old": "is a regular expression, and L() is {}, that is, the language whose sole member is the empty string.",
+    "new": "is a regular expression, and L(\u0000) is {\u0000}, that is, the language whose sole member is the empty string."
+  },
+  {
+    "id": "t2-047",
+    "page": 47,
+    "similarity": 0.9963,
+    "old": "(r*) denotes (L(r))*\nZero or more occurrences of r (kleen closure)\n(+) denotes (L(r))+\nOne or more occurrences of r (Positive Closure)",
+    "new": "(r*) denotes (L(r))* Zero or more occurrences of r (kleen closure) (\u0000+) denotes (L(r))+ One or more occurrences of r (Positive Closure)"
+  },
+  {
+    "id": "t2-047",
+    "page": 49,
+    "similarity": 0.9945,
+    "old": "a*: Denotes the language consisting of all strings of zero or more a's, {, a, aa, aaa, ...}",
+    "new": "a*: Denotes the language consisting of all strings of zero or more a's, {\u0000, a, aa, aaa, ...}"
+  },
+  {
+    "id": "t2-050",
+    "page": 11,
+    "similarity": 0.9971,
+    "old": "Pattern:\nAn informal description of a form that lexemes of a token may take. For e.g. if token is a keyword , then pattern is just the sequence of characters that form the keyword.\nLexeme:\nIt is an actual stream of characters (in the source program) that matches the pattern and is identified by the lexical analyzer as an instance of that token.",
+    "new": "Pattern: \u0000An informal description of a form that lexemes of a token may take. For e.g. if token is a keyword , then pattern is just the sequence of characters that form the keyword. Lexeme: \u0000It is an actual stream of characters (in the source program) that matches the pattern and is identified by the lexical analyzer as an instance of that token."
+  }
+]
