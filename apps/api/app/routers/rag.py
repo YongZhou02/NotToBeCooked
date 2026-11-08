@@ -38,6 +38,7 @@ from app.services.chat import get_or_create_conversation
 from app.services.embeddings import embed_query
 from app.services.grounding import (
     check_grounding,
+    drop_duplicate_citations,
     drop_unreferenced,
     drop_unverified,
     extract_markers,
@@ -508,6 +509,13 @@ async def query(
     #    something: the model's own claim is an input to the decision, never the
     #    decision itself.
     citations = _resolve_citations(draft.citations, selected)
+    citations, duplicates = drop_duplicate_citations(citations)
+    if duplicates:
+        logger.info(
+            "dropped duplicate citations: conversation_id=%s markers=%s",
+            conv_id,
+            [citation.marker for citation in duplicates],
+        )
     citations, dropped = drop_unreferenced(draft.answer, citations)
     if dropped:
         logger.info(

@@ -5,6 +5,7 @@ from uuid import uuid4
 from app.schemas.rag import Citation, RetrievedChunk
 from app.services.grounding import (
     check_grounding,
+    drop_duplicate_citations,
     drop_unreferenced,
     drop_unverified,
     extract_markers,
@@ -97,6 +98,18 @@ def test_an_unreferenced_citation_is_dropped_and_the_rest_then_passes():
     assert [c.marker for c in kept] == [1]
     assert dropped == [2]
     assert check_grounding(answer, kept, SELECTED).ok
+
+
+def test_identical_citations_are_deduplicated_without_dropping_distinct_quotes():
+    first = cite(1, C1, "Photosynthesis converts light energy")
+    duplicate = cite(1, C1, "  PHOTOSYNTHESIS converts light energy  ")
+    distinct = cite(1, C1, "chemical energy stored in glucose")
+
+    kept, dropped = drop_duplicate_citations([first, duplicate, distinct])
+
+    assert kept == [first, distinct]
+    assert dropped == [duplicate]
+    assert check_grounding("The process stores energy [1].", kept, SELECTED).ok
 
 
 def test_dropping_never_rescues_a_bad_quote_on_a_marker_the_answer_uses():

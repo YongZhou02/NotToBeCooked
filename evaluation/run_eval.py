@@ -493,6 +493,13 @@ def summary(rows: list[dict], checks: dict, out: Path) -> None:
 async def main(args: argparse.Namespace) -> None:
     folder = args.dataset.resolve()
     manifest, questions, answers, evidence = load_dataset(folder)
+    if args.split != "all":
+        questions = [question for question in questions if question["split"] == args.split]
+        selected_ids = {question["id"] for question in questions}
+        answers = {key: value for key, value in answers.items() if key in selected_ids}
+        evidence = {key: value for key, value in evidence.items() if key in selected_ids}
+        if not questions:
+            raise ValueError(f"Dataset has no questions in split {args.split!r}")
     if args.generate and (settings.LLM_FAKE_MODE or settings.llm_provider is None):
         raise ValueError(
             "Real generation requires LLM_FAKE_MODE=false and a GEMINI_API_KEY "
@@ -549,6 +556,7 @@ async def main(args: argparse.Namespace) -> None:
         "embedding_dimension": settings.EMBEDDINGS_DIM,
         "generation_model": settings.llm_model_name if args.generate else None,
         "generation_method": args.generation_method,
+        "question_split": args.split,
         "repeats": args.repeats,
         "seed": 37,
         "scope": "single-turn, file-scoped production query; no HTTP/auth or original-image benchmark",
@@ -814,6 +822,12 @@ if __name__ == "__main__":
         help="With --generate, answer every question, not only the review set",
     )
     parser.add_argument("--generation-method", choices=METHODS, default="hybrid_rrf")
+    parser.add_argument(
+        "--split",
+        choices=("all", "dev", "test", "stress"),
+        default="all",
+        help="Evaluate only one dataset split",
+    )
     parser.add_argument(
         "--generation-delay-seconds",
         type=float,

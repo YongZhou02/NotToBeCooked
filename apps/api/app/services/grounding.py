@@ -97,6 +97,28 @@ def drop_unreferenced(answer: str, citations: list[Citation]) -> tuple[list[Cita
     return kept, dropped
 
 
+def drop_duplicate_citations(
+    citations: list[Citation],
+) -> tuple[list[Citation], list[Citation]]:
+    """Keep one copy of an identical marker/quote pair.
+
+    Repeating the same verified quote adds no provenance and should not block an
+    otherwise valid answer. Different quotes under the same marker are retained:
+    they may support separate claims and must still be verified independently.
+    """
+    seen: set[tuple[int, str]] = set()
+    kept: list[Citation] = []
+    dropped: list[Citation] = []
+    for citation in citations:
+        key = (citation.marker, _normalise(citation.quote))
+        if key in seen:
+            dropped.append(citation)
+        else:
+            seen.add(key)
+            kept.append(citation)
+    return kept, dropped
+
+
 def _normalise(text: str) -> str:
     """Collapse whitespace and case for quote comparison.
 
