@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "name": "CPT316 Topic 1 stress set",
+  "annotation_status": "unreviewed assistant-written stress questions",
+  "scope": "single supplied text-transcribed Topic 1 PDF; not original-image understanding",
+  "chart_extraction": false,
+  "ocr": true,
+  "chunk_max_tokens": 350,
+  "top_k": 5,
+  "candidate_limit": 50,
+  "rrf_k": 60,
+  "label_review": null
+}

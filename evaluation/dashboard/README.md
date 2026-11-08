@@ -32,19 +32,9 @@ The evaluation hub is organized into three tabs:
    - Per-question run drill-down with six-stage trace status chips and evidence accordion inspector.
 
 3. **Visualization & Annotation (`data-panel="visualization"`)**:
-   - Inspect dataset questions, answer keys (reference answers), golden quote evidence, required scoring facts, and model outputs.
-   - **Split metrics & composition**: Real-time breakdown of `dev` and `test` splits, questions, golden quotes, categories, and verification status.
-   - **Filter toolbar**: Filter by split (`dev` / `test`), origin (`Synthetic` / `Human`), answer key status (`Unverified only` / `Verified only`), or search query.
-   - **Answer key verification workflow**:
-     - Check whether answer keys are `Verified` or `Unverified`.
-     - Filter to "Unverified only" to easily ignore verified answer keys.
-     - For unverified answer keys: inline editor to edit, correct, and save changes with one-click verification (`Save & Mark as verified`).
-   - **Human-written questions & hard cases**:
-     - Add new human-authored questions tagged with `[Human]` (distinct from `[Synthetic]` AI-written questions).
-     - Support for flagging questions as very hard cases (`[Human · Hard case]`).
-     - Includes gold quotes, PDF page mapping, required facts, and categories.
-     - Persists in `localStorage` across page reloads.
-     - Full export feature (`Export data (JSON)`) generating complete annotated datasets.
+   - Review one question at a time beside its source PDF, annotate it, edit any part of
+     it, write new questions and hard cases, and export a chosen set. See
+     [Visualization & Annotation tab](#visualization--annotation-tab).
 
 ## Build and Preview
 
@@ -62,7 +52,41 @@ python -m http.server 8766 --directory evaluation
 
 Then open `http://127.0.0.1:8766/dashboard/` (served from `evaluation/` so the PDFs in `datasets/cpt316/documents/` resolve).
 
+## Visualization & Annotation tab
+
+A fixed-height workbench: the page does not scroll, and each card keeps a size that
+does not depend on its text, so long content scrolls inside its own card. Below
+1000px wide it falls back to a normal scrolling page.
+
+| Key | Action |
+| :--- | :--- |
+| `Left` / `Right` | Previous / next question |
+| `1` `2` `3` | Approve / Needs revision / Reject |
+| `V` | Verify or unverify the answer key |
+| `E` | Edit everything about the question |
+| `H` | Mark or unmark as a hard case |
+| `N` | Jump to notes |
+| `Esc` | Leave a text field so the keys above work again |
+
+**Edit** opens one editor for the question, answer key, split, category, hard-case and
+verified flags, gold evidence and required facts. **+ Question** and **+ Hard case** use
+the same editor. It replaces the left column only, so the PDF stays usable: select text
+there and press **Use PDF selection** to fill a quote, its document and its page, and
+**Check in PDF** to confirm a typed quote is really on that page.
+
+Edits are stored as changes over the originals in this browser's `localStorage`.
+They do not change `datasets/.../questions.jsonl`, so `run_eval.py` still scores the
+original set, and a run's stored results still reflect the evidence it was scored on.
+
+**Export** lists the questions your filters show, all ticked; untick what you do not
+want to share. A teammate brings the file in with **More > Import JSON**, which
+merges those questions and overwrites their verified state and review for each one.
+The Source filter counts each question under the PDFs its evidence points at; only
+Topic 1 has questions until the candidate topics get a reviewed set.
+
 ## Phase Score Definitions
+
+The phase scores use different, explicitly labelled measurements:
 
 1. Extraction: exact gold-evidence coverage. Fuzzy coverage is diagnostic and uses a normalized, page-aware sliding-window similarity threshold of 0.88.
 2. Chunking: required evidence intact in at least one chunk.
