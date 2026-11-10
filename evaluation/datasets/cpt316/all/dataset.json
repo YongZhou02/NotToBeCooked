@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "name": "CPT316 four-PDF evaluation set",
+  "annotation_status": "merged by builder/merge_team_questions.py; see each row for review status",
+  "scope": "four supplied text-transcribed PDFs; not original-image understanding",
+  "chart_extraction": false,
+  "ocr": true,
+  "chunk_max_tokens": 350,
+  "top_k": 5,
+  "candidate_limit": 50,
+  "rrf_k": 60
+}

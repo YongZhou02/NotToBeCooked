@@ -66,7 +66,7 @@ def client(monkeypatch):
     async def fake_conversation(**_kwargs):
         return conversation
 
-    async def fake_retrieve(_request, _session, _user_id):
+    async def fake_retrieve(_request, _session, _user_id, **_kwargs):
         return list(SOURCES)
 
     monkeypatch.setattr(rag_module, "get_or_create_conversation", fake_conversation)
@@ -88,6 +88,214 @@ def client(monkeypatch):
 
 def _assistant_turn(client):
     return next(m for m in client.added if m.role == ChatRole.ASSISTANT)
+
+
+def test_retrieval_confidence_combines_peak_and_support():
+    weak = rag_module._confidence_from_similarities([0.507, 0.479, 0.477, 0.476, 0.472])
+    strong = rag_module._confidence_from_similarities([0.62, 0.55, 0.51, 0.44, 0.40])
+    assert weak["strong_chunk_count"] == 1
+    assert weak["score"] == pytest.approx(0.466333, abs=1e-5)
+    assert weak["score"] < 0.5 < strong["score"]
+
+
+def test_rrf_merge_rewards_chunks_found_by_both_queries():
+    shared = SOURCES[0]
+    original_only = SOURCES[1]
+    rewritten_only = SOURCES[1].model_copy(update={"chunk_id": uuid4(), "page_start": 99})
+    merged = rag_module._rrf_merge([original_only, shared], [rewritten_only, shared], limit=3)
+    assert [chunk.chunk_id for chunk in merged] == [
+        shared.chunk_id,
+        rewritten_only.chunk_id,
+        original_only.chunk_id,
+    ]
+
+
+def test_decomposition_merge_keeps_page_diversity():
+    duplicate_page = SOURCES[0].model_copy(update={"chunk_id": uuid4()})
+    another_page = SOURCES[0].model_copy(update={"chunk_id": uuid4(), "page_start": 15})
+    merged = rag_module._rrf_merge_many(
+        [[SOURCES[0]], [duplicate_page, another_page]],
+        limit=2,
+        dedupe_pages=True,
+    )
+    assert [chunk.page_start for chunk in merged] == [12, 15]
+
+
+def test_decomposition_merge_drops_near_duplicate_pages():
+    toolchain = SOURCES[0].model_copy(
+        update={
+            "chunk_id": uuid4(),
+            "page_start": 29,
+            "content": "Source program passes through compiler assembler linker into machine code.",
+        }
+    )
+    repeated = SOURCES[0].model_copy(
+        update={
+            "chunk_id": uuid4(),
+            "page_start": 30,
+            "content": "Source program passes through compiler assembler linker into target machine code.",
+        }
+    )
+    distinct = SOURCES[0].model_copy(
+        update={
+            "chunk_id": uuid4(),
+            "page_start": 13,
+            "content": "A position map tracks each token location for diagnostic messages.",
+        }
+    )
+
+    merged = rag_module._rrf_merge_many(
+        [[toolchain, repeated, distinct]],
+        limit=2,
+        dedupe_similar=True,
+    )
+
+    assert [chunk.page_start for chunk in merged] == [29, 13]
+
+
+def test_anchor_terms_keep_content_and_drop_question_framing():
+    assert rag_module._anchor_terms(
+        "A source comment disappears before parsing, whereas count becomes an identifier token."
+    ) == ["comment", "disappears", "parsing", "count", "identifier", "token"]
+
+
+@pytest.mark.parametrize(
+    ("question", "expected"),
+    [
+        ("What is a compiler?", False),
+        (
+            "How does the example progress from source identifiers to a tree with type conversion?",
+            True,
+        ),
+        (
+            "How does the optimized literal differ from the original source literal, and why?",
+            True,
+        ),
+    ],
+)
+def test_selective_decomposition_router_is_conservative(question, expected):
+    assert rag_module._should_decompose(question) is expected
+
+
+def test_complex_question_decomposes_once_and_skips_rewrite(client, monkeypatch):
+    monkeypatch.setattr(settings, "LLM_FAKE_MODE", False)
+    monkeypatch.setattr(settings, "RETRIEVAL_DECOMPOSITION_ENABLED", True)
+    monkeypatch.setattr(settings, "QUERY_REWRITE_ENABLED", True)
+    monkeypatch.setattr(rag_module, "embed_query", lambda _query: [0.0] * 1024)
+    sub_questions = [
+        "How are source identifiers mapped?",
+        "How is multiplication grouped in the syntax tree?",
+        "Where is type conversion inserted?",
+    ]
+    decompose = AsyncMock(return_value=sub_questions)
+    rewrite = AsyncMock()
+    confidence = AsyncMock()
+    monkeypatch.setattr(rag_module, "decompose_question", decompose)
+    monkeypatch.setattr(rag_module, "rewrite_query", rewrite)
+    monkeypatch.setattr(rag_module, "_retrieval_confidence", confidence)
+    evidence = [
+        SOURCES[0].model_copy(update={"chunk_id": uuid4(), "page_start": page})
+        for page in (13, 16, 17)
+    ]
+    retrieve = AsyncMock(side_effect=[list(SOURCES), [evidence[0]], [evidence[1]], [evidence[2]]])
+    monkeypatch.setattr(rag_module, "_retrieve", retrieve)
+    candidate = LlmAnswer(
+        answer="The conversion is inserted in the multiplication branch [1].",
+        grounded=True,
+        citations=[rag_module.LlmCitation(marker=1, quote=evidence[2].content)],
+    )
+    generate = AsyncMock(return_value=candidate)
+    monkeypatch.setattr(rag_module, "generate_answer", generate)
+
+    body = client.post(
+        "/rag/query",
+        json={
+            "question": (
+                "How does the example progress from source identifiers to a tree "
+                "with type conversion?"
+            )
+        },
+    ).json()
+
+    decompose.assert_awaited_once()
+    rewrite.assert_not_awaited()
+    confidence.assert_not_awaited()
+    assert retrieve.await_count == 4
+    assert all(call.args[0].top_k == 5 for call in retrieve.await_args_list[1:])
+    assert generate.await_count == 1
+    assert body["grounded"] is True
+    trace = _assistant_turn(client).scope_snapshot["question_decomposition"]
+    assert trace["attempted"] is True
+    assert trace["accepted"] is True
+    assert trace["sub_questions"] == sub_questions
+
+
+def test_low_confidence_rewrites_before_one_generation_and_keeps_scope(client, monkeypatch):
+    monkeypatch.setattr(settings, "LLM_FAKE_MODE", False)
+    monkeypatch.setattr(settings, "QUERY_REWRITE_ENABLED", True)
+    monkeypatch.setattr(rag_module, "embed_query", lambda _query: [0.0] * 1024)
+    monkeypatch.setattr(
+        rag_module,
+        "_retrieval_confidence",
+        AsyncMock(side_effect=[{"score": 0.4}, {"score": 0.8}]),
+    )
+    rewrite = AsyncMock(return_value="partial index WHERE clause")
+    monkeypatch.setattr(rag_module, "rewrite_query", rewrite)
+    retry_source = SOURCES[0].model_copy(update={"chunk_id": uuid4(), "page_start": 99})
+    retrieve = AsyncMock(side_effect=[list(SOURCES), [retry_source]])
+    monkeypatch.setattr(rag_module, "_retrieve", retrieve)
+    monkeypatch.setattr(
+        rag_module, "_keyword_anchor_retrieve", AsyncMock(return_value=[retry_source])
+    )
+    candidate = LlmAnswer(
+        answer="A partial index covers matching rows [1].",
+        grounded=True,
+        citations=[rag_module.LlmCitation(marker=1, quote=retry_source.content)],
+    )
+    generate = AsyncMock(return_value=candidate)
+    monkeypatch.setattr(rag_module, "generate_answer", generate)
+    body = client.post(
+        "/rag/query",
+        json={
+            "question": "What is a partial index?",
+            "course_id": str(COURSE_ID),
+            "file_ids": [str(SOURCES[0].file_id)],
+        },
+    ).json()
+    assert generate.await_count == 1
+    assert retrieve.await_count == 2
+    original = retrieve.await_args_list[0].args
+    retry_call = retrieve.await_args_list[1]
+    retry = retry_call.args
+    assert retry[0].question == "partial index WHERE clause"
+    assert retry[0].file_ids == original[0].file_ids
+    assert retry[0].course_id == original[0].course_id
+    assert retry[2] == original[2] == USER_ID
+    assert retry_call.kwargs["search_config"].keyword_weight == 2.0
+    assert retry_call.kwargs["search_config"].vector_weight == 1.0
+    assert generate.await_args is not None
+    assert generate.await_args.kwargs["question"] == "What is a partial index?"
+    assert [source.page_start for source in generate.await_args.kwargs["sources"]] == [99, 12, 5]
+    assert body["grounded"] is True
+    trace = _assistant_turn(client).scope_snapshot["query_rewrite"]
+    assert trace["attempted"]
+    assert trace["accepted"] is True
+    assert body["citations"][0]["page"] == 99
+    assert str(retry_source.chunk_id) in _assistant_turn(client).scope_snapshot["used_chunk_ids"]
+
+
+def test_high_confidence_does_not_rewrite(client, monkeypatch):
+    monkeypatch.setattr(settings, "LLM_FAKE_MODE", False)
+    monkeypatch.setattr(settings, "QUERY_REWRITE_ENABLED", True)
+    monkeypatch.setattr(rag_module, "embed_query", lambda _query: [0.0] * 1024)
+    monkeypatch.setattr(rag_module, "_retrieval_confidence", AsyncMock(return_value={"score": 0.8}))
+    rewrite = AsyncMock()
+    monkeypatch.setattr(rag_module, "rewrite_query", rewrite)
+    generate = AsyncMock(return_value=LlmAnswer(answer=REFUSAL, grounded=False, citations=[]))
+    monkeypatch.setattr(rag_module, "generate_answer", generate)
+    body = client.post("/rag/query", json={"question": "What is a partial index?"}).json()
+    rewrite.assert_not_awaited()
+    assert body["grounded"] is False
 
 
 def test_a_verifiable_answer_is_sent_and_marked_grounded(client):

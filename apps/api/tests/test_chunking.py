@@ -55,3 +55,20 @@ def test_the_heading_counts_against_the_token_budget():
     # Heading 1 word + 2 + 2 = 5 > 4, so the second item opens a new chunk.
     chunks = create_chunk([item(3, "one two"), item(3, "three four")], uuid4(), max_token=4)
     assert len(chunks) == 2
+
+
+def test_code_keeps_line_breaks_and_separate_boundaries_from_paragraphs():
+    diagram = "Source Program\n    |\n    v\nTranslator --> Target Program"
+    chunks = create_chunk(
+        [
+            item(4, "Before the diagram."),
+            {**item(4, diagram), "content_type": "code"},
+            item(4, "After the diagram."),
+        ],
+        uuid4(),
+    )
+    assert len(chunks) == 3
+    assert chunks[1].content == "Syntax\n" + diagram
+    assert chunks[1].page_start == chunks[1].page_end == 4
+    assert "Before" not in chunks[1].content
+    assert "After" not in chunks[1].content

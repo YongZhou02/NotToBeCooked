@@ -27,6 +27,7 @@ dependencies = [
     # for token counting -- both branches added this exact line, in different
     # positions, and merging them conflicted. One line survives.
     "peft>=0.20.0",
+    "httpx2>=2.16.0",
 ]
 
 [build-system]

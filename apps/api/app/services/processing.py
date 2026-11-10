@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from datetime import UTC, datetime
+from time import perf_counter
 from uuid import UUID
 
 from sqlmodel import col, update
@@ -15,6 +16,7 @@ from app.services.embeddings import embed_text
 from app.services.ingestion import count_pages, create_chunk, extract_text, ingest_document
 
 logger = logging.getLogger(__name__)
+_ingestion_slot = asyncio.Semaphore(1)
 
 INTERRUPTED_MESSAGE = "Indexing was interrupted by a server restart. Please retry."
 
@@ -57,8 +59,29 @@ async def process_file(
     file_path: str,
     session: AsyncSession,
 ) -> int | None:
+    # Bound heavy CPU/model work across uploads; waiting tasks use no worker thread.
+    async with _ingestion_slot:
+        return await _process_file(file_id, course_id, ingestion_run_id, file_path, session)
+
+
+async def _process_file(
+    file_id: UUID,
+    course_id: UUID,
+    ingestion_run_id: UUID,
+    file_path: str,
+    session: AsyncSession,
+) -> int | None:
     """Returns the page count, which only the parsed document knows."""
+    started = perf_counter()
+    logger.info("ingestion %s: parsing started", ingestion_run_id)
     chunk_creates, page_count = await asyncio.to_thread(_parse_and_chunk, file_path, file_id)
+    logger.info(
+        "ingestion %s: parsed pages=%s chunks=%d in %.1fs",
+        ingestion_run_id,
+        page_count,
+        len(chunk_creates),
+        perf_counter() - started,
+    )
     if not chunk_creates:
         raise NoExtractableContentError("No extractable content found")
 
@@ -70,6 +93,11 @@ async def process_file(
     # call into torch. It is the larger half of the two -- 239 s of the 395 s
     # above, against 125 s for the parse.
     embeddings = await asyncio.to_thread(embed_text, content_list)
+    logger.info(
+        "ingestion %s: embedding finished, elapsed %.1fs",
+        ingestion_run_id,
+        perf_counter() - started,
+    )
 
     database_chunks = []
     for chunk_create, embedding in zip(chunk_creates, embeddings, strict=True):

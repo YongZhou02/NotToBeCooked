@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>NTBC Evaluation Hub</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <p class="eyebrow">NTBC</p>
+        <h1>Evaluation Hub</h1>
+      </div>
+      <nav class="tabs" aria-label="Evaluation sections">
+        <button class="tab-button active" type="button" data-tab="dashboard">Dashboard</button>
+        <button class="tab-button" type="button" data-tab="runs">Run evaluations</button>
+        <button class="tab-button" type="button" data-tab="visualization">Visualization & Annotation</button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- TAB 1: DASHBOARD -->
+      <div class="tab-panel active" data-panel="dashboard">
+        <section class="summary" aria-labelledby="summaryTitle">
+          <div>
+            <p class="eyebrow" id="datasetName">Dataset</p>
+            <h2 id="summaryTitle">Pipeline scorecard & Ongoing overview</h2>
+          </div>
+          <div class="summary-meta" id="summaryMeta"></div>
+        </section>
+
+        <section class="phase-grid" id="phaseGrid" aria-label="Pipeline phase scores"></section>
+
+        <div class="dashboard-grid">
+          <section class="panel active-run-panel" aria-labelledby="activeRunTitle">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Execution</p>
+                <h2 id="activeRunTitle">Active run overview</h2>
+              </div>
+              <span class="chip" id="dashRunChip">Latest run</span>
+            </div>
+            <div class="active-run-body" id="dashRunDetails"></div>
+          </section>
+
+          <section class="panel corpus-summary-panel" aria-labelledby="corpusSummaryTitle">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Corpus & Splits</p>
+                <h2 id="corpusSummaryTitle">Dataset composition</h2>
+              </div>
+              <span class="chip neutral" id="dashSplitChip">Dev + Test</span>
+            </div>
+            <div class="split-overview-grid" id="dashSplitOverview"></div>
+          </section>
+        </div>
+
+        <section class="panel" aria-labelledby="retrievalTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Phase 3</p>
+              <h2 id="retrievalTitle">Retrieval benchmark</h2>
+            </div>
+            <span class="chip">test split</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Recall@5</th>
+                  <th>MRR@5</th>
+                  <th>Hit@1</th>
+                  <th>Complete@5</th>
+                  <th>Median latency</th>
+                </tr>
+              </thead>
+              <tbody id="retrievalBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 2: RUN EVALUATIONS -->
+      <div class="tab-panel" data-panel="runs" hidden>
+        <section class="summary">
+          <div>
+            <p class="eyebrow">Execution & Benchmarking</p>
+            <h2>Run evaluations</h2>
+          </div>
+          <div class="top-actions">
+            <label><span>Selected run</span><select id="runSelect" aria-label="Select evaluation run"></select></label>
+            <button type="button" disabled title="UI prototype: live execution is managed via 'uv run --project apps/api python evaluation/run_eval.py'">Run evaluation</button>
+          </div>
+        </section>
+
+        <!-- Split breakdown on Run page -->
+        <section class="panel split-section" aria-labelledby="runSplitTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Dataset split composition</p>
+              <h2 id="runSplitTitle">Dev and test split metrics</h2>
+            </div>
+            <span class="chip">Corpus: Topic 1 (38 pages)</span>
+          </div>
+          <div class="dataset-stats" id="runDatasetStats" aria-label="Dataset composition"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="historyTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Runs</p>
+              <h2 id="historyTitle">Run history & comparison</h2>
+            </div>
+            <span class="chip" id="runCount"></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Run ID</th>
+                  <th>Mode</th>
+                  <th>Source count</th>
+                  <th>Extraction exact</th>
+                  <th>Retrieval recall</th>
+                  <th>Generated answers</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel trace-panel" aria-labelledby="traceTitle">
+          <div class="section-head trace-head">
+            <div>
+              <p class="eyebrow">Evidence & Trace</p>
+              <h2 id="traceTitle">Run drill-down</h2>
+            </div>
+            <div class="trace-nav-wrap">
+              <div class="nav-button-group">
+                <button type="button" id="prevTraceQuestion" class="nav-btn" title="Previous question">← Previous</button>
+                <button type="button" id="nextTraceQuestion" class="nav-btn" title="Next question">Next →</button>
+              </div>
+              <label class="question-picker">
+                <span>Question</span>
+                <select id="questionSelect" aria-label="Select evidence question"></select>
+              </label>
+            </div>
+          </div>
+          <div id="questionSummary" class="question-summary"></div>
+          <div id="traceContent"></div>
+        </section>
+      </div>
+
+      <!-- TAB 3: VISUALIZATION & ANNOTATION
+           A fixed-height workbench: the page itself never scrolls here. Only the
+           inner panes do, so moving between questions cannot shift the layout. -->
+      <div class="tab-panel vis-shell" data-panel="visualization" hidden>
+        <!-- Row 1: filters and progress -->
+        <section class="vis-toolbar" aria-label="Filter questions">
+          <div class="filter-search-wrap">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input type="search" id="filterSearch" placeholder="Search questions, answers, IDs..." aria-label="Search questions" />
+          </div>
+
+          <div class="filter-control">
+            <span>Author</span>
+            <div class="segmented" role="group" aria-label="Filter by author" data-filter="origin">
+              <button type="button" data-value="all">All</button>
+              <button type="button" data-value="human">Human</button>
+              <button type="button" data-value="synthetic">AI</button>
+            </div>
+          </div>
+
+          <label class="filter-control">
+            <span>Source</span>
+            <select id="filterSource" aria-label="Filter by source document"></select>
+          </label>
+
+          <div class="filter-control">
+            <span>Answer key</span>
+            <div class="segmented" id="filterVerification" role="group" aria-label="Filter by verification" data-filter="verification">
+              <button type="button" data-value="all">All</button>
+              <button type="button" data-value="unverified">Unverified</button>
+              <button type="button" data-value="verified">Verified</button>
+            </div>
+          </div>
+
+          <div class="filter-control">
+            <span>Type</span>
+            <div class="segmented" role="group" aria-label="Filter by difficulty" data-filter="difficulty">
+              <button type="button" data-value="all">All</button>
+              <button type="button" data-value="hard">Hard</button>
+            </div>
+          </div>
+
+          <label class="filter-control">
+            <span>Split</span>
+            <select id="filterSplit" aria-label="Filter by split">
+              <option value="all">All</option>
+              <option value="dev">Dev</option>
+              <option value="test">Test</option>
+            </select>
+          </label>
+
+          <button type="button" id="clearFilters" class="btn-subtle btn-sm">Clear</button>
+
+          <div class="vis-progress">
+            <span class="chip status-verified" id="visVerifiedProgress">0 / 0 verified</span>
+            <span class="chip neutral" id="visReviewProgress">0 / 0 reviewed</span>
+          </div>
+        </section>
+
+        <!-- Row 2: navigation and authoring -->
+        <section class="vis-nav" aria-label="Question navigation">
+          <div class="vis-stepper">
+            <button type="button" id="previousVisQuestion" class="nav-btn" title="Previous question (Left arrow)">← Prev</button>
+            <span class="vis-position" id="visPosition" aria-live="polite">0 / 0</span>
+            <button type="button" id="nextVisQuestion" class="nav-btn" title="Next question (Right arrow)">Next →</button>
+          </div>
+
+          <select id="visQuestionSelect" aria-label="Select question to view and annotate"></select>
+
+          <div class="vis-actions">
+            <button type="button" id="btnToggleAddQuestion" class="btn-primary btn-sm">+ Question</button>
+            <button type="button" id="btnToggleAddHardCase" class="btn-secondary btn-sm">+ Hard case</button>
+            <button type="button" id="exportDatasetBtn" class="btn-secondary btn-sm" title="Choose questions to export">Export</button>
+            <details class="vis-menu" id="visMenu">
+              <summary class="btn-subtle btn-sm">More ▾</summary>
+              <div class="vis-menu-panel">
+                <div class="section-head">
+                  <div>
+                    <p class="eyebrow">Corpus contents</p>
+                    <h3>Split composition</h3>
+                  </div>
+                  <span class="chip neutral" id="visTotalStatsChip">50 questions · 73 golden quotes</span>
+                </div>
+                <div class="dataset-stats" id="visDatasetStats" aria-label="Dataset composition"></div>
+                <div class="vis-menu-actions">
+                  <input type="file" id="importDatasetFile" accept=".json" hidden />
+                  <button type="button" id="importDatasetBtn" class="btn-secondary btn-sm" title="Import a file exported from this dashboard">Import JSON</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- Row 3: LEFT = evaluation and annotation, RIGHT = PDF -->
+        <div class="vis-workspace-split">
+          <div class="vis-left-column" id="visContent"></div>
+
+          <div class="vis-right-column" id="visPdfColumn">
+            <div class="pdf-panel">
+              <div class="pdf-panel-header">
+                <select id="pdfDocSelect" class="pdf-doc-select" aria-label="Select source document"></select>
+
+                <div class="pdf-page-controls">
+                  <button type="button" id="pdfPrevPage" class="btn-subtle btn-sm" title="Previous page in PDF" aria-label="Previous PDF page">‹</button>
+                  <label class="pdf-jump-label">
+                    <input type="number" id="pdfPageInput" min="1" max="38" value="1" aria-label="PDF page number" />
+                    <span id="pdfTotalPages">/ 38</span>
+                  </label>
+                  <button type="button" id="pdfNextPage" class="btn-subtle btn-sm" title="Next page in PDF" aria-label="Next PDF page">›</button>
+                </div>
+
+                <div class="pdf-zoom-controls">
+                  <button type="button" id="pdfZoomOut" class="btn-subtle btn-sm" title="Zoom out" aria-label="Zoom out">−</button>
+                  <button type="button" id="pdfZoomReset" class="btn-subtle btn-sm" title="Fit width / Reset zoom"><span id="pdfZoomLevel">Fit</span></button>
+                  <button type="button" id="pdfZoomIn" class="btn-subtle btn-sm" title="Zoom in" aria-label="Zoom in">+</button>
+                </div>
+
+                <div class="pdf-actions">
+                  <button type="button" id="pdfHighlightBtn" class="btn-secondary btn-sm" title="Go back to the highlighted gold evidence">Locate quote</button>
+                  <a id="pdfOpenTab" href="../datasets/cpt316/documents/CPT316_Topic1_Semantic_Text_Only.pdf#page=1&view=FitH" target="_blank" class="btn-subtle btn-sm" title="Open PDF in new tab">Open ↗</a>
+                </div>
+              </div>
+
+              <div class="pdf-viewer-wrap" id="pdfViewerWrap">
+                <div class="pdf-viewport" id="pdfViewport">
+                  <div id="pdfPageWrapper" class="ntbc-pdf-page">
+                    <canvas id="pdfCanvas" class="pdf-canvas"></canvas>
+                    <div id="pdfTextLayer" class="textLayer"></div>
+                  </div>
+                </div>
+
+                <p class="pdf-quote-status" id="pdfQuoteStatus" hidden>Quote not matched in this page's text</p>
+
+                <div id="pdfLoadingOverlay" class="pdf-loading-overlay">
+                  <div class="pdf-spinner"></div>
+                  <span id="pdfLoadingText">Loading PDF...</span>
+                </div>
+
+                <div id="pdfErrorOverlay" class="pdf-error-overlay" hidden>
+                  <p id="pdfErrorText">Failed to load PDF</p>
+                  <button type="button" id="pdfRetryBtn" class="btn-secondary btn-sm">Retry</button>
+                </div>
+
+                <!-- Fallback for browsers where PDF.js fails. src is set only on failure. -->
+                <iframe id="pdfFrame" class="pdf-frame" style="display: none;" title="PDF Document Viewer"></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Choose which questions to share. -->
+        <dialog class="export-dialog" id="exportDialog" aria-labelledby="exportTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Share with a teammate</p>
+              <h2 id="exportTitle">Export questions</h2>
+            </div>
+            <button type="button" id="exportCancelBtn" class="btn-subtle btn-sm">Close</button>
+          </div>
+          <p class="export-hint">Listing the questions your filters show. Untick anything you do not want to share.</p>
+          <div class="export-tools">
+            <button type="button" id="exportSelectAll" class="btn-subtle btn-sm">Select all</button>
+            <button type="button" id="exportSelectNone" class="btn-subtle btn-sm">Select none</button>
+            <label class="export-human-only" title="Untick every AI-written question and export only the ones people wrote">
+              <input type="checkbox" id="exportHumanOnly" />
+              <span>Human-written only</span>
+            </label>
+            <span class="chip neutral" id="exportSelectionCount">0 selected</span>
+          </div>
+          <ul class="export-list" id="exportList"></ul>
+          <div class="export-actions">
+            <button type="button" id="exportConfirmBtn" class="btn-primary">Export 0 questions</button>
+          </div>
+        </dialog>
+      </div>
+    </main>
+
+    <template id="emptyRowTemplate">
+      <tr><td colspan="6" class="empty">Not available for this run.</td></tr>
+    </template>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

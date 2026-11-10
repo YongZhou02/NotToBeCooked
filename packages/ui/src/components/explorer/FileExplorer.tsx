@@ -40,6 +40,7 @@ interface FileExplorerProps {
   ) => Promise<void> | void
   onRetryIndexing: (fileId: string) => Promise<void> | void
   onDeleteFile: (fileId: string) => Promise<void> | void
+  onReplaceFile?: (fileId: string, file: File) => Promise<void>
   explorerStatus?: ExplorerStatus
   onRetryLoad?: () => void
 }
@@ -60,6 +61,7 @@ export function FileExplorer({
   onMoveFile,
   onRetryIndexing,
   onDeleteFile,
+  onReplaceFile,
   onOpenRoadmapModal,
   onOpenBatchUpload,
   onOpenDirectFolderUpload,
@@ -191,6 +193,7 @@ export function FileExplorer({
                 onMoveFile={onMoveFile}
                 onRetryIndexing={onRetryIndexing}
                 onDeleteFile={onDeleteFile}
+                onReplaceFile={onReplaceFile}
               />
             ))}
             {childFolders.map(renderFolder)}

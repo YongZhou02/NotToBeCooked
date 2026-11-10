@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "reviewed_on": "2026-11-08",
+  "source_workbook": "reviews/NTBC_Topic1_50_Labels_Individually_Verified.xlsx",
+  "source_workbook_sha256": "db16f6370a76fe4d17dd615ddf16f84ab67c305e894d89742ff4d8bd42ca581d",
+  "total_labels": 50,
+  "verified_after_revision": 50,
+  "strict_retrieval_eligible": 49,
+  "excluded_from_strict": {
+    "t1-027": "Low-value visual inference; retained for audit and UI review but excluded from strict retrieval scoring."
+  },
+  "applied_revisions": [
+    "t1-010",
+    "t1-013",
+    "t1-023",
+    "t1-025",
+    "t1-036",
+    "t1-048"
+  ],
+  "original_verdict_groups": {
+    "PASS": [
+      "t1-001",
+      "t1-002",
+      "t1-003",
+      "t1-005",
+      "t1-006",
+      "t1-007",
+      "t1-008",
+      "t1-012",
+      "t1-014",
+      "t1-015",
+      "t1-016",
+      "t1-018",
+      "t1-019",
+      "t1-020",
+      "t1-021",
+      "t1-024",
+      "t1-029",
+      "t1-040",
+      "t1-046",
+      "t1-047"
+    ],
+    "PASS - PARAPHRASE": [
+      "t1-004"
+    ],
+    "PASS - VISUAL": [
+      "t1-009",
+      "t1-011",
+      "t1-017",
+      "t1-028",
+      "t1-030",
+      "t1-031",
+      "t1-032",
+      "t1-033",
+      "t1-034",
+      "t1-035",
+      "t1-038",
+      "t1-039",
+      "t1-044"
+    ],
+    "REVISE ANSWER": [
+      "t1-010"
+    ],
+    "REVISE QUESTION": [
+      "t1-013"
+    ],
+    "PASS - INFERENCE": [
+      "t1-022",
+      "t1-026",
+      "t1-037"
+    ],
+    "UNSUPPORTED BY ORIGINAL": [
+      "t1-023",
+      "t1-048"
+    ],
+    "WRONG PAGE + REVISE": [
+      "t1-025"
+    ],
+    "LOW-VALUE VISUAL INFERENCE": [
+      "t1-027"
+    ],
+    "REVISE GOLD QUOTE": [
+      "t1-036"
+    ],
+    "PASS - SYNTHESIS": [
+      "t1-041",
+      "t1-042",
+      "t1-043",
+      "t1-045",
+      "t1-049",
+      "t1-050"
+    ]
+  }
+}

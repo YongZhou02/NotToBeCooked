@@ -16,6 +16,7 @@ from app.schemas.chat import (
 )
 from app.schemas.course import Course
 from app.schemas.errors import ApiError
+from app.schemas.feedback import AnswerFeedback, AnswerFeedbackRead
 
 chat_router = APIRouter()
 
@@ -101,13 +102,32 @@ async def get_session_by_session_id(
     msg_result = await session.execute(msg_statement)
     messages = msg_result.scalars().all()
 
+    message_ids = [message.id for message in messages if message.id is not None]
+    feedback_by_message: dict[UUID, AnswerFeedback] = {}
+    if message_ids:
+        feedback_statement = select(AnswerFeedback).where(
+            col(AnswerFeedback.user_id) == UUID(str(user_id)),
+            col(AnswerFeedback.message_id).in_(message_ids),
+        )
+        feedback_result = await session.execute(feedback_statement)
+        feedback_by_message = {
+            feedback.message_id: feedback for feedback in feedback_result.scalars().all()
+        }
+
+    message_reads: list[MessageRead] = []
+    for message in messages:
+        message_read = MessageRead.model_validate(message)
+        if message.id is not None and (feedback := feedback_by_message.get(message.id)):
+            message_read.feedback = AnswerFeedbackRead.model_validate(feedback)
+        message_reads.append(message_read)
+
     return ConversationDetail(
         id=conversation.id,
         course_id=conversation.course_id,
         title=conversation.title,
         created_at=conversation.created_at,
         updated_at=conversation.updated_at,
-        messages=[MessageRead.model_validate(m) for m in messages],
+        messages=message_reads,
     )
 
 

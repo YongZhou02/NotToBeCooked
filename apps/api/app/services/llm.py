@@ -13,11 +13,13 @@ sent, which `check_grounding` then catches. It can never invent a file that does
 not exist or a page that was never retrieved.
 """
 
+import asyncio
 import json
-from typing import Any
+import re
+from typing import Annotated, Any
 
 import httpx
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.core.config import settings
 from app.schemas.rag import RetrievedChunk
@@ -53,6 +55,75 @@ class LlmAnswer(BaseModel):
     # rejects the second.
     uncovered: str | None = None
 
+    @field_validator("answer", mode="before")
+    @classmethod
+    def canonicalise_marker_brackets(cls, value: Any) -> Any:
+        """Accept visual bracket variants without changing marker numbers.
+
+        Some providers render ``[5]`` as ``【5】`` or ``［5］``. These are the
+        same source reference to a reader, so normalise only those exact numeric
+        forms. Missing markers, unknown numbers and prose remain untouched and
+        still have to pass the grounding gate.
+        """
+        if not isinstance(value, str):
+            return value
+        return re.sub(r"[【［]\s*(\d+)\s*[】］]", r"[\1]", value)
+
+
+class LlmClaim(BaseModel):
+    """One Groq answer claim with source numbers, before server rendering."""
+
+    text: str = Field(..., min_length=1)
+    markers: list[Annotated[int, Field(ge=1)]] = Field(default_factory=list)
+
+
+class GroqCitation(BaseModel):
+    """A source marker plus an ID for server-owned verbatim evidence."""
+
+    marker: int = Field(..., ge=1)
+    evidence_id: str = Field(..., min_length=3)
+
+
+class GroqAnswer(BaseModel):
+    """Structured Groq output: the server, not the model, prints ``[n]``."""
+
+    claims: list[LlmClaim]
+    grounded: bool
+    citations: list[GroqCitation] = Field(default_factory=list)
+    uncovered: str | None = None
+
+    def render(self, evidence: dict[str, tuple[int, str]]) -> LlmAnswer:
+        parts: list[str] = []
+        for claim in self.claims:
+            text = claim.text.strip()
+            if re.search(r"(?:\[|【|［)\s*\d+\s*(?:\]|】|］)", text):
+                raise ValueError("Groq claim text must not contain handwritten markers")
+            markers = list(dict.fromkeys(claim.markers))
+            if self.grounded and not markers:
+                raise ValueError("Every grounded Groq claim needs a source marker")
+            suffix = " ".join(f"[{marker}]" for marker in markers)
+            parts.append(f"{text} {suffix}".rstrip())
+        if not parts:
+            raise ValueError("Groq returned no answer claims")
+        citations: list[LlmCitation] = []
+        for citation in self.citations:
+            resolved = evidence.get(citation.evidence_id)
+            if resolved is None:
+                raise ValueError(f"Unknown Groq evidence ID: {citation.evidence_id}")
+            marker, quote = resolved
+            if marker != citation.marker:
+                raise ValueError(
+                    f"Evidence {citation.evidence_id} belongs to marker {marker}, "
+                    f"not {citation.marker}"
+                )
+            citations.append(LlmCitation(marker=marker, quote=quote))
+        return LlmAnswer(
+            answer="\n\n".join(parts),
+            grounded=self.grounded,
+            citations=citations,
+            uncovered=self.uncovered,
+        )
+
 
 # Gemini's responseSchema is an OpenAPI subset with upper-case type names. It is
 # written out rather than derived from LlmAnswer because the two are not the
@@ -82,6 +153,60 @@ _RESPONSE_SCHEMA: dict[str, Any] = {
     },
     "required": ["answer", "grounded", "citations"],
 }
+
+# The same constraint in standard JSON Schema, for OpenAI-compatible providers.
+_JSON_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "claims": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "description": "One answer claim without citation brackets.",
+                    },
+                    "markers": {
+                        "type": "array",
+                        "items": {"type": "integer"},
+                        "description": "Source numbers supporting this claim.",
+                    },
+                },
+                "required": ["text", "markers"],
+            },
+        },
+        "grounded": {"type": "boolean"},
+        "uncovered": {"type": ["string", "null"]},
+        "citations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "marker": {"type": "integer"},
+                    "evidence_id": {"type": "string"},
+                },
+                "required": ["marker", "evidence_id"],
+            },
+        },
+    },
+    "required": ["claims", "grounded", "citations"],
+}
+
+_GROQ_CLAIM_INSTRUCTION = """
+OUTPUT FORMAT OVERRIDE FOR THIS PROVIDER
+
+Return the answer as `claims`, not as one `answer` string. Each claim has plain
+`text` with no handwritten citation brackets and a `markers` array containing
+the source numbers that support that claim. The server renders those numbers as
+`[n]`. For every citation, copy an `evidence_id` from the EVIDENCE PASSAGES
+catalogue; never write or paraphrase a quote. The server resolves that ID back
+to the exact source text. For a refusal, return one plain claim with an empty
+markers array, set grounded to false, and leave citations empty.
+
+IMPORTANT: If `grounded` is true, every claim MUST have at least one integer
+in its `markers` array. Never return `grounded: true` with empty markers.
+""".strip()
 
 REFUSAL = "The supplied material does not cover this question."
 
@@ -132,6 +257,27 @@ def _verbatim_opening(content: str, limit: int = 110) -> str:
     head = content[:limit]
     cut = head.rfind(" ")
     return head[:cut] if cut > 0 else head
+
+
+def _evidence_catalog(
+    sources: list[RetrievedChunk],
+) -> tuple[dict[str, tuple[int, str]], str]:
+    """Create exact, server-owned evidence spans for Groq to reference by ID."""
+    evidence: dict[str, tuple[int, str]] = {}
+    rendered: list[str] = ["EVIDENCE PASSAGES"]
+    for marker, source in enumerate(sources, start=1):
+        parts = re.split(
+            r"(?:\r?\n+|\s*▪\s*|(?<=[.!?])\s+)",
+            source.content,
+        )
+        spans = [part.strip() for part in parts if part.strip()]
+        if not spans:
+            spans = [source.content.strip()]
+        for index, quote in enumerate(spans, start=1):
+            evidence_id = f"{marker}.{index}"
+            evidence[evidence_id] = (marker, quote)
+            rendered.append(f"{evidence_id}: {quote}")
+    return evidence, "\n".join(rendered)
 
 
 def _fake_answer(question: str, sources: list[RetrievedChunk]) -> LlmAnswer:
@@ -189,8 +335,6 @@ async def generate_answer(
     if settings.LLM_FAKE_MODE:
         return _fake_answer(question, sources)
 
-    url = f"{settings.GEMINI_API_BASE_URL}/models/{settings.GEMINI_MODEL_NAME}:generateContent"
-
     # The instruction goes in system_instruction rather than being pasted on top
     # of the question. Prepending it would put the rules inside the same turn as
     # user-supplied text, where "ignore the above" is one sentence away.
@@ -198,12 +342,96 @@ async def generate_answer(
 
     if document_summary:
         system_instruction += "\n\n" + DOCUMENT_SUMMARY_INSTRUCTION
+
+    user_turn = f"{history}SOURCES\n\n{context}\n\nQUESTION\n\n{question}"
+
+    # Gemini first when both keys are set; Groq only when it is the sole key.
+    if settings.llm_provider == "groq":
+        evidence, evidence_block = _evidence_catalog(sources)
+        return await _generate_groq(
+            system_instruction,
+            user_turn + "\n\n" + evidence_block,
+            evidence,
+        )
+    return await _generate_gemini(system_instruction, user_turn)
+
+
+async def _generate_groq(
+    system_instruction: str,
+    user_turn: str,
+    evidence: dict[str, tuple[int, str]],
+) -> LlmAnswer:
+    """Groq's OpenAI-compatible chat completions, JSON-schema constrained.
+
+    The free tier is token-per-minute limited, so a 429 is expected: honour
+    `retry-after` (capped at 30 s) a bounded number of times.
+    """
+    payload: dict[str, Any] = {
+        "model": settings.GROQ_MODEL_NAME,
+        "temperature": 0,
+        "messages": [
+            {
+                "role": "system",
+                "content": system_instruction + "\n\n" + _GROQ_CLAIM_INSTRUCTION,
+            },
+            {"role": "user", "content": user_turn},
+        ],
+        # Non-strict on purpose: `uncovered` must stay omittable (see
+        # _RESPONSE_SCHEMA), which strict mode forbids. LlmAnswer validates.
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {"name": "answer", "strict": False, "schema": _JSON_SCHEMA},
+        },
+        "reasoning_effort": "low",
+    }
+    headers = {"Authorization": f"Bearer {settings.GROQ_API_KEY.get_secret_value()}"}
+    url = f"{settings.GROQ_API_BASE_URL}/chat/completions"
+
+    protocol_retry = False
+    async with httpx.AsyncClient(timeout=settings.GROQ_API_TIMEOUT_SECONDS) as client:
+        while True:
+            attempt = 0
+            while True:
+                response = await client.post(url, headers=headers, json=payload)
+                if response.status_code != 429 or attempt >= settings.GROQ_MAX_RETRIES:
+                    break
+                attempt += 1
+                try:
+                    wait = float(response.headers.get("retry-after", "5"))
+                except ValueError:
+                    wait = 5.0
+                await asyncio.sleep(min(max(wait, 1.0), 30.0))
+
+            if response.status_code != 200:
+                raise RuntimeError(f"Groq {response.status_code}: {response.text}")
+
+            body = response.json()
+            try:
+                text = body["choices"][0]["message"]["content"]
+            except (KeyError, IndexError, TypeError) as exc:
+                raise RuntimeError(f"Groq returned no choice: {body}") from exc
+            try:
+                return GroqAnswer.model_validate(json.loads(text)).render(evidence)
+            except ValueError as exc:
+                if protocol_retry or "needs a source marker" not in str(exc):
+                    raise
+                protocol_retry = True
+                payload["messages"].append({
+                    "role": "user",
+                    "content": (
+                        "Your previous JSON was invalid. Every grounded claim "
+                        "must include at least one valid source number in "
+                        "markers. Return corrected JSON only."
+                    ),
+                })
+
+
+async def _generate_gemini(system_instruction: str, user_turn: str) -> LlmAnswer:
+    url = f"{settings.GEMINI_API_BASE_URL}/models/{settings.GEMINI_MODEL_NAME}:generateContent"
     payload = {
         "system_instruction": {"parts": [{"text": system_instruction}]},
         # `history` is render_history's block, or "" on a first question.
-        "contents": [
-            {"parts": [{"text": f"{history}SOURCES\n\n{context}\n\nQUESTION\n\n{question}"}]}
-        ],
+        "contents": [{"parts": [{"text": user_turn}]}],
         "generationConfig": {
             "temperature": 0,
             "responseMimeType": "application/json",

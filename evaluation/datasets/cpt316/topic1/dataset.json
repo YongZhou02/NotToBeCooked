@@ -1,0 +1,21 @@
+{
+  "version": 3,
+  "name": "CPT316 Topic 1 semantic-text RAG pilot",
+  "annotation_status": "finalized: 50/50 labels individually reviewed; 49 strict retrieval eligible",
+  "scope": "single supplied text-transcribed Topic 1 PDF; not original-image understanding",
+  "chart_extraction": false,
+  "ocr": true,
+  "chunk_max_tokens": 350,
+  "top_k": 5,
+  "candidate_limit": 50,
+  "rrf_k": 60,
+  "label_review": {
+    "total_labels": 50,
+    "verified_labels": 50,
+    "strict_retrieval_labels": 49,
+    "excluded_from_strict": [
+      "t1-027"
+    ],
+    "source_audit": "reviews/NTBC_Topic1_50_Labels_Individually_Verified.xlsx"
+  }
+}

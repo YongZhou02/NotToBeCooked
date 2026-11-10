@@ -93,11 +93,13 @@ def embed_query(query: str) -> list[float]:
 
 def embed_text(texts: list[str]) -> list[list[float]]:
     """Used to build vector db with batch embeddings"""
+    # Bound float32 CPU activation memory when indexing full lecture decks.
+    batch_size = settings.BATCH_SIZE if torch.cuda.is_available() else min(settings.BATCH_SIZE, 4)
     return (
         _get_model()
         .encode(
             texts,
-            batch_size=settings.BATCH_SIZE,
+            batch_size=batch_size,
             show_progress_bar=True,
             normalize_embeddings=True,
             task="retrieval",

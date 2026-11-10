@@ -13,6 +13,7 @@ from app.routers import (
     chat_router,
     course_files_router,
     courses_router,
+    feedback_router,
     files_router,
     folders_router,
     ingestion_runs_router,
@@ -53,6 +54,12 @@ app.include_router(
 )
 app.include_router(
     chat_router, prefix="/chat", tags=["Chat"], dependencies=[Depends(get_current_user)]
+)
+app.include_router(
+    feedback_router,
+    prefix="/chat",
+    tags=["Feedback"],
+    dependencies=[Depends(get_current_user)],
 )
 app.include_router(
     ingestion_runs_router,

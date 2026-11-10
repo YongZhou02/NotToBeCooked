@@ -136,6 +136,7 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
     isSending,
     sendMessage,
     deleteSession,
+    submitFeedback,
     selectSession,
     startNewChat,
   } = useChatSession(activeCourseId, allFiles)
@@ -228,6 +229,30 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
   const showToast = (msg: string) => {
     setToastMessage(msg)
     setTimeout(() => setToastMessage(null), 3000)
+  }
+
+  const [fileRevisions, setFileRevisions] = useState<Record<string, number>>({})
+  const handleReplaceFile = async (fileId: string, replacement: File) => {
+    await api.files.replace(fileId, replacement)
+    setFileRevisions((current) => ({
+      ...current,
+      [fileId]: (current[fileId] ?? 0) + 1,
+    }))
+    setSelectedCitation((current) => (current?.f === fileId ? null : current))
+    updateTabViewState(activeCourseId, fileId, { page: 1 })
+    await queryClient.invalidateQueries({ queryKey: ["files", fileId, "text"] })
+    await queryClient.invalidateQueries({
+      queryKey: ["courses", activeCourseId, "files"],
+    })
+    try {
+      await ingestFileMutation.mutateAsync(fileId)
+      showToast("File replaced. Indexing started; ask again when Ready.")
+    } catch {
+      // Bytes were already replaced. Retry indexing, rather than uploading again.
+      showToast(
+        "File replaced, but indexing could not start. Use Start indexing in its menu."
+      )
+    }
   }
 
   const handleRenameFile = async (fileId: string, newFileName: string) => {
@@ -475,6 +500,7 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
               nextMilestoneText={roadmap.stats.nextText}
               onOpenFile={handleOpenFile}
               onRenameFile={handleRenameFile}
+              onReplaceFile={handleReplaceFile}
               onMoveFile={handleMoveFile}
               onRetryIndexing={handleRetryIndexing}
               onDeleteFile={handleDeleteFile}
@@ -531,7 +557,7 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
 
                 return (
                   <DocumentViewer
-                    key={fileId}
+                    key={`${fileId}:${fileRevisions[fileId] ?? 0}:${doc.status}`}
                     document={doc}
                     tab={tab}
                     isVisible={fileId === activeFileId}
@@ -609,6 +635,13 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
               isTyping={isSending}
               onSendMessage={handleSendMessage}
               onRetryMessage={handleRetryMessage}
+              onFeedback={async (messageId, rating, reason, comment) => {
+                await submitFeedback(messageId, {
+                  rating,
+                  reason: reason ?? null,
+                  comment: comment ?? null,
+                })
+              }}
               onSelectSession={(id) => selectSession(id)}
               onDeleteSession={(id) => deleteSession(id)}
               onNewChat={() => startNewChat()}

@@ -25,9 +25,13 @@ const RagAnswer = z.object({ answer: z.string().min(1), citations: z.array(Citat
 const course_id = z.union([z.string(), z.null()]).optional();
 const Conversation = z.object({ id: z.union([z.string(), z.null()]).optional(), course_id: z.string().uuid(), title: z.string().optional().default("New Chat"), created_at: z.string().datetime({ offset: true }).optional(), updated_at: z.string().datetime({ offset: true }).optional() }).passthrough();
 const ChatRole = z.enum(["user", "assistant"]);
-const MessageRead = z.object({ id: z.string().uuid(), conversation_id: z.string().uuid(), scope_course_id: z.string().uuid(), role: ChatRole, content: z.string(), grounded: z.boolean(), uncovered: z.union([z.string(), z.null()]), citations: z.union([z.array(z.object({}).partial().passthrough()), z.null()]), mentioned_file_ids: z.union([z.array(z.string().uuid()), z.null()]), created_at: z.string().datetime({ offset: true }) }).passthrough();
+const FeedbackRating = z.enum(["positive", "negative"]);
+const FeedbackReason = z.enum(["answer_incorrect", "retrieval_missed", "citation_unsupported", "answer_incomplete", "document_missing_answer"]);
+const AnswerFeedbackRead = z.object({ id: z.string().uuid(), message_id: z.string().uuid(), rating: FeedbackRating, reason: z.union([FeedbackReason, z.null()]), comment: z.union([z.string(), z.null()]), created_at: z.string().datetime({ offset: true }), updated_at: z.string().datetime({ offset: true }) }).passthrough();
+const MessageRead = z.object({ id: z.string().uuid(), conversation_id: z.string().uuid(), scope_course_id: z.string().uuid(), role: ChatRole, content: z.string(), grounded: z.boolean(), uncovered: z.union([z.string(), z.null()]), citations: z.union([z.array(z.object({}).partial().passthrough()), z.null()]), mentioned_file_ids: z.union([z.array(z.string().uuid()), z.null()]), feedback: z.union([AnswerFeedbackRead, z.null()]).optional(), created_at: z.string().datetime({ offset: true }) }).passthrough();
 const ConversationDetail = z.object({ id: z.string().uuid(), course_id: z.string().uuid(), title: z.string(), created_at: z.string().datetime({ offset: true }), updated_at: z.string().datetime({ offset: true }), messages: z.array(MessageRead).optional().default([]) }).passthrough();
 const DeleteSessionResponse = z.object({ status: z.string().default("ok") }).partial().passthrough();
+const AnswerFeedbackUpsert = z.object({ rating: FeedbackRating, reason: z.union([FeedbackReason, z.null()]).optional(), comment: z.union([z.string(), z.null()]).optional() }).passthrough();
 const IngestionRunStatus = z.enum(["queued", "processing", "ready", "failed"]);
 const IngestionRunRead = z.object({ id: z.string().uuid(), file_id: z.string().uuid(), status: IngestionRunStatus, started_at: z.union([z.string(), z.null()]), completed_at: z.union([z.string(), z.null()]), error_message: z.union([z.string(), z.null()]) }).passthrough();
 const CourseStatus = z.enum(["active", "archived"]);
@@ -64,9 +68,13 @@ export const schemas = {
 	course_id,
 	Conversation,
 	ChatRole,
+	FeedbackRating,
+	FeedbackReason,
+	AnswerFeedbackRead,
 	MessageRead,
 	ConversationDetail,
 	DeleteSessionResponse,
+	AnswerFeedbackUpsert,
 	IngestionRunStatus,
 	IngestionRunRead,
 	CourseStatus,
@@ -173,6 +181,73 @@ const endpoints = makeApi([
 			{
 				status: 400,
 				description: `Email already exists`,
+				schema: ApiError
+			},
+			{
+				status: 422,
+				description: `Validation Error`,
+				schema: HTTPValidationError
+			},
+		]
+	},
+	{
+		method: "put",
+		path: "/chat/messages/:message_id/feedback",
+		alias: "upsert_answer_feedback_chat_messages__message_id__feedback_put",
+		requestFormat: "json",
+		parameters: [
+			{
+				name: "body",
+				type: "Body",
+				schema: AnswerFeedbackUpsert
+			},
+			{
+				name: "message_id",
+				type: "Path",
+				schema: z.string().uuid()
+			},
+		],
+		response: AnswerFeedbackRead,
+		errors: [
+			{
+				status: 401,
+				description: `Missing, invalid or expired access token`,
+				schema: ApiError
+			},
+			{
+				status: 404,
+				description: `Assistant message not found`,
+				schema: ApiError
+			},
+			{
+				status: 422,
+				description: `Validation Error`,
+				schema: HTTPValidationError
+			},
+		]
+	},
+	{
+		method: "get",
+		path: "/chat/messages/:message_id/feedback",
+		alias: "get_answer_feedback_chat_messages__message_id__feedback_get",
+		requestFormat: "json",
+		parameters: [
+			{
+				name: "message_id",
+				type: "Path",
+				schema: z.string().uuid()
+			},
+		],
+		response: AnswerFeedbackRead,
+		errors: [
+			{
+				status: 401,
+				description: `Missing, invalid or expired access token`,
+				schema: ApiError
+			},
+			{
+				status: 404,
+				description: `Message or feedback not found`,
 				schema: ApiError
 			},
 			{

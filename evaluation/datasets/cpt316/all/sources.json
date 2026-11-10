@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "documents": [
+    {
+      "id": "topic1",
+      "path": "../documents/CPT316_Topic1_Semantic_Text_Only.pdf",
+      "sha256": "d4da975c7bbef3a21ee9fcc2db2433b0d100f60150d8dc9c0f0bec711c90e62d",
+      "pages": 38,
+      "coverage": "PDF pages 1-38"
+    },
+    {
+      "id": "cpt316-topic2-lexical",
+      "path": "../documents/CPT316_Topic2_Lexical_Semantic_Text.pdf",
+      "sha256": "a778718b1791bd73134a53c2a77606afaec0edcfed50b5e4270f45f0309f704d",
+      "pages": 67,
+      "coverage": "PDF pages 1-67"
+    },
+    {
+      "id": "cpt316-topic3-student",
+      "path": "../documents/CPT316_Topic3_Student_Semantic_Text.pdf",
+      "sha256": "28be51a1c69be182626149c5913ad0d87cb15d8456f05ea7a4263414809ba972",
+      "pages": 77,
+      "coverage": "PDF pages 1-77"
+    },
+    {
+      "id": "cpt316-topic3-updated",
+      "path": "../documents/CPT316_Topic3_Updated_Semantic_Text.pdf",
+      "sha256": "714d4f285e16b6dd4e4c676a2b3b1fe1dbbfe1a84f9db0c8064ad3d190c15cec",
+      "pages": 65,
+      "coverage": "PDF pages 1-65"
+    }
+  ]
+}

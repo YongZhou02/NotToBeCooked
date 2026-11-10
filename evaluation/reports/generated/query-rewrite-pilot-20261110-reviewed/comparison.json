@@ -1,0 +1,1609 @@
+{
+  "baseline": "evaluation\\runs\\20261110T071624838269Z",
+  "baseline_provider_failure_retest": "evaluation\\runs\\20261110T072415333747Z",
+  "treatment": "evaluation\\runs\\20261110T072657418320Z",
+  "treatment_prefix": "evaluation\\runs\\20261110T071921636369Z",
+  "summary": {
+    "questions": 15,
+    "answerable": 13,
+    "rewrite_attempted": 2,
+    "rewrite_accepted": 0,
+    "independent_model_runs": true,
+    "before": {
+      "grounded_rate_NOT_accuracy": 0.8666666666666667,
+      "mean_generation_ms": 13662.579726662565,
+      "generation_errors": 0,
+      "answerable_evidence_recall@5": 0.6794871794871795,
+      "fully_correct_count": 10,
+      "strict_full_reference_answer_rate": 0.6666666666666666,
+      "partial_credit_score": 0.8333333333333334
+    },
+    "after": {
+      "grounded_rate_NOT_accuracy": 0.8666666666666667,
+      "mean_generation_ms": 3345.0331866721776,
+      "generation_errors": 0,
+      "answerable_evidence_recall@5": 0.6794871794871795,
+      "fully_correct_count": 8,
+      "strict_full_reference_answer_rate": 0.5333333333333333,
+      "partial_credit_score": 0.7666666666666667
+    },
+    "correctness_review_status": "provisional AI review; not human verified; strict required-fact completeness"
+  },
+  "questions": [
+    {
+      "question_id": "t2-001",
+      "question": "A compiler meets `total_count` for the first time as raw characters. Which component should group them into one meaningful unit before grammar rules are considered?",
+      "answerable": true,
+      "reference_answer": "The lexical analyzer/scanner groups characters into a lexeme and returns an identifier token to the parser.",
+      "required_facts": [
+        "The lexical analyzer/scanner groups characters into a lexeme and returns an identifier token to the parser."
+      ],
+      "before": {
+        "answer": "The lexical analyzer groups raw input characters into meaningful units (lexemes) before any grammar rules are applied. [4]",
+        "citations": [
+          {
+            "marker": 4,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 5,
+            "page_end": 5,
+            "quote": "PAGE 5 Original lecture content: ROLE OF LEXICAL ANALYZER To read the input characters of the produce as output a group them into sequence of tokens lexemes for each lexeme in the source program."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "5fa4d479-060b-4cab-a823-af910b6c3c51"
+      },
+      "after": {
+        "answer": "The lexical analyzer groups raw characters into meaningful units (lexemes/tokens) before any grammar rules are applied. [5]",
+        "citations": [
+          {
+            "marker": 5,
+            "file_id": "681c307c-f3a6-4d7b-8a5e-414d7092e59f",
+            "course_id": "bd69e9e0-7306-4fd3-8c06-4100a6d5fae2",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 5,
+            "page_end": 5,
+            "quote": "PAGE 5 Original lecture content: ROLE OF LEXICAL ANALYZER To read the input characters of the produce as output a group them into sequence of tokens lexemes for each lexeme in the source program."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "42e81d0b-c553-4567-8eb6-4ff7767d56ea"
+      },
+      "treatment_initial_draft": {
+        "answer": "The lexical analyzer groups raw characters into meaningful units (lexemes/tokens) before any grammar rules are applied. [5]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 5,
+            "quote": "PAGE 5 Original lecture content: ROLE OF LEXICAL ANALYZER To read the input characters of the produce as output a group them into sequence of tokens lexemes for each lexeme in the source program."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 913.1858000182547,
+      "after_ms": 13197.45960002183,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false
+      },
+      "before_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 0.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 0.25
+      },
+      "after_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 0.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 0.2
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 1,
+        "after_correctness_0_to_2": 1,
+        "notes": "Both name the right component and grouping operation but omit returning an identifier token to the parser, required by the reference. This is a strict completeness deduction, not a wrong component.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-002",
+      "question": "A lexer occasionally needs one character beyond a token boundary to decide what it just recognized. What implementation need does that create?",
+      "answerable": true,
+      "reference_answer": "It needs lookahead and efficient input buffering so it can examine extra characters without excessive per-character reading overhead.",
+      "required_facts": [
+        "It needs lookahead and efficient input buffering so it can examine extra characters without excessive per-character reading overhead."
+      ],
+      "before": {
+        "answer": "Because a lexer sometimes must examine one or more characters beyond the end of the current token, it requires an input buffering mechanism that can provide look‑ahead without re‑reading the source file. [1]\n\nTo avoid the huge time cost of repeatedly accessing a large source program, specialized buffering techniques are used to support this look‑ahead capability. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 23,
+            "page_end": 23,
+            "quote": "Lexical Analyzer often needs to look one or more characters beyond the next lexeme before we can be sure we have the right lexeme."
+          },
+          {
+            "marker": 1,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 23,
+            "page_end": 23,
+            "quote": "Since the large source programs consist of a large INPUT BUFFERING number of characters and a huge time is required to process those characters, therefore to reduce this overhead, specialized buffering techniques have been developed."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "e33fec03-60ca-4b26-8b97-07c385100a56"
+      },
+      "after": {
+        "answer": "Because a lexer sometimes must examine one or more characters beyond the end of the current token, it requires an input‑buffering mechanism that can provide look‑ahead without re‑reading the source file. [1]\n\nTo avoid the huge time cost of repeatedly accessing a large source program, specialized buffering techniques are used to support this look‑ahead. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "681c307c-f3a6-4d7b-8a5e-414d7092e59f",
+            "course_id": "bd69e9e0-7306-4fd3-8c06-4100a6d5fae2",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 23,
+            "page_end": 23,
+            "quote": "Lexical Analyzer often needs to look one or more characters beyond the next lexeme before we can be sure we have the right lexeme."
+          },
+          {
+            "marker": 1,
+            "file_id": "681c307c-f3a6-4d7b-8a5e-414d7092e59f",
+            "course_id": "bd69e9e0-7306-4fd3-8c06-4100a6d5fae2",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 23,
+            "page_end": 23,
+            "quote": "Since the large source programs consist of a large INPUT BUFFERING number of characters and a huge time is required to process those characters, therefore to reduce this overhead, specialized buffering techniques have been developed."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "e54231be-4724-46f3-9410-6773c957fe74"
+      },
+      "treatment_initial_draft": {
+        "answer": "Because a lexer sometimes must examine one or more characters beyond the end of the current token, it requires an input‑buffering mechanism that can provide look‑ahead without re‑reading the source file. [1]\n\nTo avoid the huge time cost of repeatedly accessing a large source program, specialized buffering techniques are used to support this look‑ahead. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "Lexical Analyzer often needs to look one or more characters beyond the next lexeme before we can be sure we have the right lexeme."
+          },
+          {
+            "marker": 1,
+            "quote": "Since the large source programs consist of a large INPUT BUFFERING number of characters and a huge time is required to process those characters, therefore to reduce this overhead, specialized buffering techniques have been developed."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 2240.248400019482,
+      "after_ms": 921.4406000101008,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.5,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.5,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 2,
+        "after_correctness_0_to_2": 2,
+        "notes": "Both explain lookahead and efficient buffering.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-003",
+      "question": "Two patterns look similar: `letter(letter|digit)*` and `letter letter|digit*`. Why could they match different strings without any character class changing?",
+      "answerable": true,
+      "reference_answer": "Grouping and operator precedence change how alternatives and repetition bind: the first starts with a letter then any number of letters/digits; the ungrouped expression follows precedence and does not express the same requirement.",
+      "required_facts": [
+        "Grouping and operator precedence change how alternatives and repetition bind: the first starts with a letter then any number of letters/digits; the ungrouped expression follows precedence and does not express the same requirement."
+      ],
+      "before": {
+        "answer": "In a regular expression, the Kleene star (*) binds tighter than the alternation operator (|), so writing `letter letter|digit*` is interpreted as `(letter) | (digit*)` rather than `letter (letter|digit)*`. [5]\n\nTherefore `letter(letter|digit)*` matches a string that starts with a letter and is followed by any number (including zero) of letters or digits, while `letter letter|digit*` matches either a single letter or any number of digits, which can be completely different strings. [5]",
+        "citations": [
+          {
+            "marker": 5,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 48,
+            "page_end": 48,
+            "quote": "Original lecture content: PRECEDENCE FOR RE OPERATORS RE Operators Analogous Arithmetic Operator Precedence x|y x + y lowest xy x * y middle x* , x+ x ^ y highest Spot the difference Letter letter | digit * vs Letter (letter|digit) * CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS"
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "edc2e91a-cc61-4abf-b04f-f98b20015c30"
+      },
+      "after": {
+        "answer": "The two regular expressions have different operator precedence, so they are parsed differently. [5]\n\n**letter(letter|digit)*** groups the alternation **letter|digit** before applying the Kleene star, meaning the star repeats the whole group of a letter followed by any number of letters or digits. [5]\n\n**letter letter|digit*** is parsed as **(letter letter) | (digit*)** because concatenation has higher precedence than alternation, so the star applies only to **digit**, not to the preceding **letter**. [5]\n\nTherefore the first pattern matches strings that start with a letter and then have any sequence of letters or digits, while the second pattern matches either two consecutive letters or any number of digits, leading to different matched strings even though the character classes are unchanged. [5]",
+        "citations": [
+          {
+            "marker": 5,
+            "file_id": "681c307c-f3a6-4d7b-8a5e-414d7092e59f",
+            "course_id": "bd69e9e0-7306-4fd3-8c06-4100a6d5fae2",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 48,
+            "page_end": 48,
+            "quote": "Original lecture content: PRECEDENCE FOR RE OPERATORS RE Operators Analogous Arithmetic Operator Precedence x|y x + y lowest xy x * y middle x* , x+ x ^ y highest Spot the difference Letter letter | digit * vs Letter (letter|digit) * CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS"
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "735bc41c-6822-40a6-aa90-0a898695cca9"
+      },
+      "treatment_initial_draft": {
+        "answer": "The two regular expressions have different operator precedence, so they are parsed differently. [5]\n\n**letter(letter|digit)*** groups the alternation **letter|digit** before applying the Kleene star, meaning the star repeats the whole group of a letter followed by any number of letters or digits. [5]\n\n**letter letter|digit*** is parsed as **(letter letter) | (digit*)** because concatenation has higher precedence than alternation, so the star applies only to **digit**, not to the preceding **letter**. [5]\n\nTherefore the first pattern matches strings that start with a letter and then have any sequence of letters or digits, while the second pattern matches either two consecutive letters or any number of digits, leading to different matched strings even though the character classes are unchanged. [5]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 5,
+            "quote": "Original lecture content: PRECEDENCE FOR RE OPERATORS RE Operators Analogous Arithmetic Operator Precedence x|y x + y lowest xy x * y middle x* , x+ x ^ y highest Spot the difference Letter letter | digit * vs Letter (letter|digit) * CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS"
+          },
+          {
+            "marker": 5,
+            "quote": "Original lecture content: PRECEDENCE FOR RE OPERATORS RE Operators Analogous Arithmetic Operator Precedence x|y x + y lowest xy x * y middle x* , x+ x ^ y highest Spot the difference Letter letter | digit * vs Letter (letter|digit) * CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS"
+          },
+          {
+            "marker": 5,
+            "quote": "Original lecture content: PRECEDENCE FOR RE OPERATORS RE Operators Analogous Arithmetic Operator Precedence x|y x + y lowest xy x * y middle x* , x+ x ^ y highest Spot the difference Letter letter | digit * vs Letter (letter|digit) * CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS"
+          },
+          {
+            "marker": 5,
+            "quote": "Original lecture content: PRECEDENCE FOR RE OPERATORS RE Operators Analogous Arithmetic Operator Precedence x|y x + y lowest xy x * y middle x* , x+ x ^ y highest Spot the difference Letter letter | digit * vs Letter (letter|digit) * CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS"
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 8648.901299980935,
+      "after_ms": 3271.4512000093237,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 1,
+        "after_correctness_0_to_2": 1,
+        "notes": "Baseline drops one concatenated letter when interpreting the ungrouped pattern. Treatment correctly parses the second pattern but ambiguously/incorrectly describes what the first star repeats; its final comparison is correct. Conservatively partial for internal inconsistency. No rewrite triggered.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-004",
+      "question": "A scanner examines `<` and then another character. Why might it need to retract a character before returning the less-than token?",
+      "answerable": true,
+      "reference_answer": "If the next character is not `=` or `>`, that lookahead character belongs to the following lexeme; the relop diagram marks retract on the other-character transition.",
+      "required_facts": [
+        "If the next character is not `=` or `>`, that lookahead character belongs to the following lexeme; the relop diagram marks retract on the other-character transition."
+      ],
+      "before": {
+        "answer": "When the scanner sees a '<' it reads the following character to decide whether the token is just '<' or part of a multi‑character operator such as '<='. [3] [1]\n\nIf the next character does not belong to the '<' token, the scanner must retract (move the input pointer back by one) so that the extra character can be processed as the start of the next lexeme. [3] [1]",
+        "citations": [
+          {
+            "marker": 3,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 64,
+            "page_end": 64,
+            "quote": "Original lecture content: LEXICAL ANALYZER LOOP Token nexttoken() { while (1) { switch (state) { case 0: c = nextchar(); if (isspace(c)) state = 0; else if (c == '<') state = 1; else if (c == '=') state = 5; break; case 9: c = nextchar(); if (isletter(c)) state = 10; else state = fail break; case 10: // Logic for state 10 goes here break; case 11: retract(1); insert(id); return; } } } CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS"
+          },
+          {
+            "marker": 1,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 28,
+            "page_end": 28,
+            "quote": "forward - scans ahead until a pattern match is found."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "ac846d01-541c-4aa9-9dba-c84effe9400f"
+      },
+      "after": {
+        "answer": "When the scanner sees a '<' it reads the following character to see if the two together form a multi‑character operator such as \"<=\" or \"<<\". [2]\n\nIf the next character does not belong to that operator, the scanner must put it back (retract) so that it will be the first character of the next token rather than being lost. [2]\n\nRetracting works because the scanner maintains a forward pointer that can be moved ahead to look ahead and then moved back to the correct start of the next lexeme. [1]",
+        "citations": [
+          {
+            "marker": 2,
+            "file_id": "681c307c-f3a6-4d7b-8a5e-414d7092e59f",
+            "course_id": "bd69e9e0-7306-4fd3-8c06-4100a6d5fae2",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 64,
+            "page_end": 64,
+            "quote": "Original lecture content: LEXICAL ANALYZER LOOP Token nexttoken() { while (1) { switch (state) { case 0: c = nextchar(); if (isspace(c)) state = 0; else if (c == '<') state = 1; else if (c == '=') state = 5; break; case 9: c = nextchar(); if (isletter(c)) state = 10; else state = fail break; case 10: // Logic for state 10 goes here break; case 11: retract(1); insert(id); return; } } } CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS"
+          },
+          {
+            "marker": 1,
+            "file_id": "681c307c-f3a6-4d7b-8a5e-414d7092e59f",
+            "course_id": "bd69e9e0-7306-4fd3-8c06-4100a6d5fae2",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 28,
+            "page_end": 28,
+            "quote": "Two pointers of the input are maintained:"
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "eb7b5412-c71f-48f2-8e66-128bf70ffcf5"
+      },
+      "treatment_initial_draft": {
+        "answer": "When the scanner sees a '<' it reads the following character to see if the two together form a multi‑character operator such as \"<=\" or \"<<\". [2]\n\nIf the next character does not belong to that operator, the scanner must put it back (retract) so that it will be the first character of the next token rather than being lost. [2]\n\nRetracting works because the scanner maintains a forward pointer that can be moved ahead to look ahead and then moved back to the correct start of the next lexeme. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 2,
+            "quote": "Original lecture content: LEXICAL ANALYZER LOOP Token nexttoken() { while (1) { switch (state) { case 0: c = nextchar(); if (isspace(c)) state = 0; else if (c == '<') state = 1; else if (c == '=') state = 5; break; case 9: c = nextchar(); if (isletter(c)) state = 10; else state = fail break; case 10: // Logic for state 10 goes here break; case 11: retract(1); insert(id); return; } } } CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS"
+          },
+          {
+            "marker": 2,
+            "quote": "Original lecture content: LEXICAL ANALYZER LOOP Token nexttoken() { while (1) { switch (state) { case 0: c = nextchar(); if (isspace(c)) state = 0; else if (c == '<') state = 1; else if (c == '=') state = 5; break; case 9: c = nextchar(); if (isletter(c)) state = 10; else state = fail break; case 10: // Logic for state 10 goes here break; case 11: retract(1); insert(id); return; } } } CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS"
+          },
+          {
+            "marker": 1,
+            "quote": "Two pointers of the input are maintained:"
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 23605.02190000261,
+      "after_ms": 1390.5686000071,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false
+      },
+      "before_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 0.0,
+        "hit@5": 0.0,
+        "evidence_recall@5": 0.0,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 0.0
+      },
+      "after_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 0.0,
+        "hit@5": 0.0,
+        "evidence_recall@5": 0.0,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 0.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 2,
+        "after_correctness_0_to_2": 1,
+        "notes": "Both explain retraction, but treatment introduces << rather than the lecture's <> relational operator. Unsupported example prevents full credit. No rewrite triggered.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-005",
+      "question": "For `score`, distinguish the actual letters seen in source code from the category passed downstream and any optional metadata.",
+      "answerable": true,
+      "reference_answer": "`score` is the lexeme; its token name is id/identifier; an attribute may point to the corresponding symbol-table entry.",
+      "required_facts": [
+        "`score` is the lexeme; its token name is id/identifier; an attribute may point to the corresponding symbol-table entry."
+      ],
+      "before": {
+        "answer": "The characters ‘s’, ‘c’, ‘o’, ‘r’, ‘e’ are the actual letters (lexeme) that appear in the source code for the identifier score. [2] [4] [3]\n\nThe lexical analyzer passes downstream the token category ‘id’ to represent that lexeme. [4] [3]\n\nA token is a pair consisting of the token name and an optional attribute value, which can hold the lexeme string as metadata. [2]",
+        "citations": [
+          {
+            "marker": 2,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 11,
+            "page_end": 11,
+            "quote": "Lexeme: It is an actual stream of characters (in the source program) that matches the pattern and is identified by the lexical analyzer as an instance of that token."
+          },
+          {
+            "marker": 4,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 12,
+            "page_end": 12,
+            "quote": "PAGE 12 Original lecture content: Consider the following C statement: printf('Total= %d\\n', score); LEXICAL ANALYSIS Lexeme Token i- printf keyword ii- score id iii- 'Total=%d\\n' literal CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS"
+          },
+          {
+            "marker": 3,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 13,
+            "page_end": 13,
+            "quote": "Rows: if | characters i,f | if; else | characters e,l,s,e | else; comparison | < or > or <= or >= or == or != | <=, !=; id | letter followed by letters and digits | pi, score, D2; number | numeric constant | 3.14159, 0, 6.02e23; literal | characters surrounded by double quotes | \"core dumped\"."
+          },
+          {
+            "marker": 2,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 11,
+            "page_end": 11,
+            "quote": "PAGE 11 Original lecture content: TERMS IN LEXICAL ANALYSIS Token: A pair consisting of token name and an optional attribute value."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "c1310a14-37e5-4653-b370-2d186e83b2dc"
+      },
+      "after": {
+        "answer": "The characters **s**, **c**, **o**, **r**, **e** are the actual letters seen in the source code for the identifier. [2] [4]\n\nDownstream the lexical analyzer provides a token whose category (token name) is **id**, indicating an identifier. [3] [4]\n\nThe token can also carry an optional attribute value that stores the original lexeme \"score\" as metadata. [2]",
+        "citations": [
+          {
+            "marker": 2,
+            "file_id": "681c307c-f3a6-4d7b-8a5e-414d7092e59f",
+            "course_id": "bd69e9e0-7306-4fd3-8c06-4100a6d5fae2",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 11,
+            "page_end": 11,
+            "quote": "Lexeme: It is an actual stream of characters (in the source program) that matches the pattern and is identified by the lexical analyzer as an instance of that token."
+          },
+          {
+            "marker": 4,
+            "file_id": "681c307c-f3a6-4d7b-8a5e-414d7092e59f",
+            "course_id": "bd69e9e0-7306-4fd3-8c06-4100a6d5fae2",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 12,
+            "page_end": 12,
+            "quote": "PAGE 12 Original lecture content: Consider the following C statement: printf('Total= %d\\n', score); LEXICAL ANALYSIS Lexeme Token i- printf keyword ii- score id iii- 'Total=%d\\n' literal CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS"
+          },
+          {
+            "marker": 3,
+            "file_id": "681c307c-f3a6-4d7b-8a5e-414d7092e59f",
+            "course_id": "bd69e9e0-7306-4fd3-8c06-4100a6d5fae2",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 13,
+            "page_end": 13,
+            "quote": "Rows: if | characters i,f | if; else | characters e,l,s,e | else; comparison | < or > or <= or >= or == or != | <=, !=; id | letter followed by letters and digits | pi, score, D2; number | numeric constant | 3.14159, 0, 6.02e23; literal | characters surrounded by double quotes | \"core dumped\"."
+          },
+          {
+            "marker": 2,
+            "file_id": "681c307c-f3a6-4d7b-8a5e-414d7092e59f",
+            "course_id": "bd69e9e0-7306-4fd3-8c06-4100a6d5fae2",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 11,
+            "page_end": 11,
+            "quote": "PAGE 11 Original lecture content: TERMS IN LEXICAL ANALYSIS Token: A pair consisting of token name and an optional attribute value."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "3d94cfe7-cb53-4769-a174-c9cbef00af4a"
+      },
+      "treatment_initial_draft": {
+        "answer": "The characters **s**, **c**, **o**, **r**, **e** are the actual letters seen in the source code for the identifier. [2] [4]\n\nDownstream the lexical analyzer provides a token whose category (token name) is **id**, indicating an identifier. [3] [4]\n\nThe token can also carry an optional attribute value that stores the original lexeme \"score\" as metadata. [2]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 2,
+            "quote": "Lexeme: It is an actual stream of characters (in the source program) that matches the pattern and is identified by the lexical analyzer as an instance of that token."
+          },
+          {
+            "marker": 4,
+            "quote": "PAGE 12 Original lecture content: Consider the following C statement: printf('Total= %d\\n', score); LEXICAL ANALYSIS Lexeme Token i- printf keyword ii- score id iii- 'Total=%d\\n' literal CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS"
+          },
+          {
+            "marker": 3,
+            "quote": "Rows: if | characters i,f | if; else | characters e,l,s,e | else; comparison | < or > or <= or >= or == or != | <=, !=; id | letter followed by letters and digits | pi, score, D2; number | numeric constant | 3.14159, 0, 6.02e23; literal | characters surrounded by double quotes | \"core dumped\"."
+          },
+          {
+            "marker": 2,
+            "quote": "PAGE 11 Original lecture content: TERMS IN LEXICAL ANALYSIS Token: A pair consisting of token name and an optional attribute value."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 22727.956599992467,
+      "after_ms": 14274.532300012652,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false
+      },
+      "before_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.6666666666666666,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 0.5
+      },
+      "after_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.6666666666666666,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 0.5
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 1,
+        "after_correctness_0_to_2": 1,
+        "notes": "Both identify letters and id category but substitute lexeme-string metadata for the reference's symbol-table pointer; missing the required metadata explanation.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-006",
+      "question": "If the programmer writes `fi` where they intended `if`, why might the first compiler phase accept it rather than diagnosing a misspelled keyword?",
+      "answerable": true,
+      "reference_answer": "`fi` matches an identifier pattern; the lexical analyzer returns an id token and leaves any contextual error to the parser or another phase.",
+      "required_facts": [
+        "`fi` matches an identifier pattern; the lexical analyzer returns an id token and leaves any contextual error to the parser or another phase."
+      ],
+      "before": {
+        "answer": "The lexical analyzer often cannot detect misspelled keywords because it treats the character sequence as a valid lexeme for some token type and therefore returns that token to the parser for further analysis. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 19,
+            "page_end": 19,
+            "quote": "For example: if the source-code (in C language) HANDLING LEXICAL ERRORS encounters 'fi', the lexical analyzer will not detect it as an error and can't tell whether it is a misspelled keyword or an undeclared literal."
+          },
+          {
+            "marker": 1,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 19,
+            "page_end": 19,
+            "quote": "Since fi is a valid lexeme for the token id, the lexical analyzer must return the token id to the parser and let some other phases (probably the parser in this case) handle an error due to the transposition of letters."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "bc3b8fdc-318c-4ee2-9286-64dbc5722477"
+      },
+      "after": {
+        "answer": "The lexical analyzer does not flag `fi` as an error because `fi` matches a valid token pattern, so it treats it as a legitimate lexeme and passes the token to the parser, which must later detect the misspelling. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 19,
+            "page_end": 19,
+            "quote": "For example: if the source-code (in C language) HANDLING LEXICAL ERRORS encounters 'fi', the lexical analyzer will not detect it as an error and can't tell whether it is a misspelled keyword or an undeclared literal."
+          },
+          {
+            "marker": 1,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 19,
+            "page_end": 19,
+            "quote": "Since fi is a valid lexeme for the token id, the lexical analyzer must return the token id to the parser and let some other phases (probably the parser in this case) handle an error due to the transposition of letters."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "1aeef6c8-65f6-46fb-b5eb-638d34d895e4"
+      },
+      "treatment_initial_draft": {
+        "answer": "The lexical analyzer does not flag `fi` as an error because `fi` matches a valid token pattern, so it treats it as a legitimate lexeme and passes the token to the parser, which must later detect the misspelling. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "For example: if the source-code (in C language) HANDLING LEXICAL ERRORS encounters 'fi', the lexical analyzer will not detect it as an error and can't tell whether it is a misspelled keyword or an undeclared literal."
+          },
+          {
+            "marker": 1,
+            "quote": "Since fi is a valid lexeme for the token id, the lexical analyzer must return the token id to the parser and let some other phases (probably the parser in this case) handle an error due to the transposition of letters."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 26171.046899980865,
+      "after_ms": 1374.6989000064787,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.5,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.5,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 1,
+        "after_correctness_0_to_2": 1,
+        "notes": "Both give the valid-pattern explanation but do not explicitly identify fi as an identifier/id token. Treatment also overstates that the parser must detect the misspelling; detection depends on context.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-007",
+      "question": "Which exact DFA minimization algorithm, including every partition-refinement step, is mandated by this lecturer for the transition diagrams?",
+      "answerable": false,
+      "reference_answer": "NOT IN SOURCE. The outline names DFA minimization, but the provided Topic 2 pages do not specify a step-by-step minimization algorithm.",
+      "required_facts": [
+        "NOT IN SOURCE. The outline names DFA minimization, but the provided Topic 2 pages do not specify a step-by-step minimization algorithm."
+      ],
+      "before": {
+        "answer": "The supplied lecture material does not specify any particular DFA minimization algorithm or its partition‑refinement steps.",
+        "citations": [],
+        "grounded": false,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "9eab6545-b9ea-4151-a204-41a10a7e2af1"
+      },
+      "after": {
+        "answer": "The supplied material does not specify which DFA minimization algorithm, including its partition‑refinement steps, the lecturer mandates for the transition diagrams.",
+        "citations": [],
+        "grounded": false,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "12094d08-96cd-4b96-9d32-70273fa7ad43"
+      },
+      "treatment_initial_draft": {
+        "answer": "The supplied material does not specify which DFA minimization algorithm, including its partition‑refinement steps, the lecturer mandates for the transition diagrams.",
+        "grounded": false,
+        "citations": [],
+        "uncovered": null
+      },
+      "before_ms": 19007.35599998734,
+      "after_ms": 2371.673000016017,
+      "rewrite": {
+        "enabled": true,
+        "accepted": false,
+        "attempted": true,
+        "original_query": "Which exact DFA minimization algorithm, including every partition-refinement step, is mandated by this lecturer for the transition diagrams?",
+        "first_chunk_ids": [
+          "2d10b611-13d5-4ea3-9379-de667d7f522e",
+          "f05d0c0a-1eb8-4ee5-aa35-976f6cc4bb3a",
+          "56ae5edd-2b9a-45b2-a940-f6c18599692a",
+          "09a563c9-3f9e-40c8-bf4b-76ad7af5accf",
+          "1143150b-a2a6-403a-bbc3-53b7ea77b7a1"
+        ],
+        "retry_chunk_ids": [
+          "2d10b611-13d5-4ea3-9379-de667d7f522e",
+          "b6bc9391-9f2b-4db9-96d4-a6ed7f2ecc3a",
+          "c0e7ba3f-97d9-42d2-929d-4cb18f000e59",
+          "cc3efd94-4357-4620-9be0-47832e861dcc",
+          "569e355b-ae41-4f59-b44e-ade9188ab936"
+        ],
+        "rewritten_query": "lecture notes DFA minimization algorithm partition-refinement steps mandated by lecturer",
+        "extra_latency_ms": 1729.6337000152562,
+        "first_source_pages": [
+          56,
+          61,
+          60,
+          66,
+          62
+        ],
+        "retry_source_pages": [
+          56,
+          7,
+          10,
+          4,
+          14
+        ],
+        "retry_grounding_problems": []
+      },
+      "before_retrieval": null,
+      "after_retrieval": null,
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 2,
+        "after_correctness_0_to_2": 2,
+        "notes": "Appropriate source-limited refusal in both. Rewriting tried different pages but adopted no replacement.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-008",
+      "question": "A sequence `aabba` and the set `{a,b}` play different roles in language specification. What is the distinction?",
+      "answerable": true,
+      "reference_answer": "`{a,b}` can be an alphabet (available symbols); `aabba` is a string (ordered finite sequence over that alphabet).",
+      "required_facts": [
+        "`{a,b}` can be an alphabet (available symbols); `aabba` is a string (ordered finite sequence over that alphabet)."
+      ],
+      "before": {
+        "answer": "The set {a,b} is the alphabet, i.e., the collection of characters that may appear, while aabba is a string, a finite sequence of characters drawn from that alphabet. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 39,
+            "page_end": 39,
+            "quote": "An alphabet ∑ is a set of characters Example: ∑ = {a, b}"
+          },
+          {
+            "marker": 1,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 39,
+            "page_end": 39,
+            "quote": "A string over ∑ is a finite sequence of elements from ∑ Example: aabba"
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "885baa8d-e28f-4893-af50-ead0e1a2d3fa"
+      },
+      "after": {
+        "answer": "The set {a,b} is an alphabet, i.e., the collection of characters that may be used in the language. [1]\n\nThe sequence aabba is a string, a finite ordered list of symbols taken from that alphabet. [1]\n\nThus, the alphabet defines the possible symbols, while a string is a concrete instance built from those symbols. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 39,
+            "page_end": 39,
+            "quote": "An alphabet ∑ is a set of characters Example: ∑ = {a, b}"
+          },
+          {
+            "marker": 1,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 39,
+            "page_end": 39,
+            "quote": "A string over ∑ is a finite sequence of elements from ∑ Example: aabba"
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "1f5c38f6-3826-4acb-bba2-264ae738ee61"
+      },
+      "treatment_initial_draft": {
+        "answer": "The set {a,b} is an alphabet, i.e., the collection of characters that may be used in the language. [1]\n\nThe sequence aabba is a string, a finite ordered list of symbols taken from that alphabet. [1]\n\nThus, the alphabet defines the possible symbols, while a string is a concrete instance built from those symbols. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "An alphabet ∑ is a set of characters Example: ∑ = {a, b}"
+          },
+          {
+            "marker": 1,
+            "quote": "A string over ∑ is a finite sequence of elements from ∑ Example: aabba"
+          },
+          {
+            "marker": 1,
+            "quote": "An alphabet ∑ is a set of characters Example: ∑ = {a, b}"
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 20580.936799990013,
+      "after_ms": 1464.2651000176556,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 2,
+        "after_correctness_0_to_2": 2,
+        "notes": "Both distinguish alphabet from finite ordered string.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-009",
+      "question": "A parser is becoming cluttered with blank spaces and comments. Which earlier processing responsibility could be relocated, and what broader design benefit does the lecture claim?",
+      "answerable": true,
+      "reference_answer": "Scanning can remove comments and compact whitespace before tokenization, simplifying the parser; separating lexical analysis also improves portability and efficiency.",
+      "required_facts": [
+        "Scanning can remove comments and compact whitespace before tokenization, simplifying the parser; separating lexical analysis also improves portability and efficiency."
+      ],
+      "before": {
+        "answer": "The removal of blank spaces and comments should be handled by the scanner’s simple scanning phase rather than the parser. [2]\n\nDoing so leads to a simpler parser design because unnecessary tokens are eliminated earlier. [1]",
+        "citations": [
+          {
+            "marker": 2,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 9,
+            "page_end": 9,
+            "quote": "Scanning · the simple processes · do not require tokenization of the input · e.g."
+          },
+          {
+            "marker": 1,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 8,
+            "page_end": 8,
+            "quote": "Simpler Design - This separation leads to simpler design of parser as unnecessary tokens (comments & whitespaces) are eliminated by the scanner already."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "c0cef635-f063-4e76-b9c1-12e9f649bb67"
+      },
+      "after": {
+        "answer": "The removal of blank spaces and comments should be handled by the scanner’s simple scanning phase rather than the parser. [2]\n\nDoing so leads to a simpler parser design because unnecessary tokens are eliminated earlier. [1]",
+        "citations": [
+          {
+            "marker": 2,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 9,
+            "page_end": 9,
+            "quote": "Scanning · the simple processes · do not require tokenization of the input · e.g."
+          },
+          {
+            "marker": 1,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 8,
+            "page_end": 8,
+            "quote": "Simpler Design - This separation leads to simpler design of parser as unnecessary tokens (comments & whitespaces) are eliminated by the scanner already."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "b35e2ff4-3874-41c1-b9d8-b781d95aef3e"
+      },
+      "treatment_initial_draft": {
+        "answer": "The removal of blank spaces and comments should be handled by the scanner’s simple scanning phase rather than the parser. [2]\n\nDoing so leads to a simpler parser design because unnecessary tokens are eliminated earlier. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 2,
+            "quote": "Scanning · the simple processes · do not require tokenization of the input · e.g."
+          },
+          {
+            "marker": 1,
+            "quote": "Simpler Design - This separation leads to simpler design of parser as unnecessary tokens (comments & whitespaces) are eliminated by the scanner already."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 7072.44200000423,
+      "after_ms": 2001.064000010956,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 1,
+        "after_correctness_0_to_2": 1,
+        "notes": "Both explain scanner responsibility and parser simplification; both omit portability and efficiency from the strict required facts.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-010",
+      "question": "A system repeatedly pauses token recognition whenever its only character buffer is refilled. Which lecture design reduces that interruption and by what mechanism?",
+      "answerable": true,
+      "reference_answer": "The two-buffer approach processes one buffer while loading the other with the next chunk, alternately refilling the two buffers.",
+      "required_facts": [
+        "The two-buffer approach processes one buffer while loading the other with the next chunk, alternately refilling the two buffers."
+      ],
+      "before": {
+        "answer": "Using a double‑buffer (two‑buffer) arrangement reduces the pause caused by refilling the only buffer. [1]\n\nIn this design the second buffer is loaded with the next characters while the lexical analyzer continues processing the first buffer, so processing can continue uninterrupted as buffers are swapped. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "3fbdfacd-8d73-4480-990e-10dd6713aae9",
+            "course_id": "a4853ec4-ab7e-4346-b087-e7dfb4d52e89",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 25,
+            "page_end": 25,
+            "quote": "The second buffer is simultaneously loaded character by character to detect tokens."
+          },
+          {
+            "marker": 1,
+            "file_id": "3fbdfacd-8d73-4480-990e-10dd6713aae9",
+            "course_id": "a4853ec4-ab7e-4346-b087-e7dfb4d52e89",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 25,
+            "page_end": 25,
+            "quote": "This concurrent processing and reading ensure a steady stream of characters and minimizes wait times."
+          },
+          {
+            "marker": 1,
+            "file_id": "3fbdfacd-8d73-4480-990e-10dd6713aae9",
+            "course_id": "a4853ec4-ab7e-4346-b087-e7dfb4d52e89",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 25,
+            "page_end": 25,
+            "quote": "This approach can be inefficient as it requires processing to halt each time the buffer is replenished."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "580b484a-2451-43cc-ba4e-ae8ac6492190"
+      },
+      "after": {
+        "answer": "Using a two‑buffer (double‑buffer) arrangement eliminates the pause that occurs when a single buffer must be refilled. [1]\n\nIn this design the second buffer is loaded concurrently while the first is being scanned, and a sentinel character (eof) at the end of each half signals when the other buffer must be reloaded, allowing seamless continuation of token recognition. [2]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 25,
+            "page_end": 25,
+            "quote": "This concurrent processing and reading ensure a steady stream of characters and minimizes wait times."
+          },
+          {
+            "marker": 1,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 25,
+            "page_end": 25,
+            "quote": "This approach can be inefficient as it requires processing to halt each time the buffer is replenished."
+          },
+          {
+            "marker": 2,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 30,
+            "page_end": 30,
+            "quote": "The buffer end test can be combined with the test for the current character if we extend each buffer to hold a sentinel character at the end."
+          },
+          {
+            "marker": 2,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 30,
+            "page_end": 30,
+            "quote": "Sentinel is the special character that cannot be a part of the source program and the natural choice is eof."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "26ac7cbe-5472-46c2-9581-5f522994c250"
+      },
+      "treatment_initial_draft": {
+        "answer": "Using a two‑buffer (double‑buffer) arrangement eliminates the pause that occurs when a single buffer must be refilled. [1]\n\nIn this design the second buffer is loaded concurrently while the first is being scanned, and a sentinel character (eof) at the end of each half signals when the other buffer must be reloaded, allowing seamless continuation of token recognition. [2]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "This concurrent processing and reading ensure a steady stream of characters and minimizes wait times."
+          },
+          {
+            "marker": 1,
+            "quote": "This approach can be inefficient as it requires processing to halt each time the buffer is replenished."
+          },
+          {
+            "marker": 2,
+            "quote": "The buffer end test can be combined with the test for the current character if we extend each buffer to hold a sentinel character at the end."
+          },
+          {
+            "marker": 2,
+            "quote": "Sentinel is the special character that cannot be a part of the source program and the natural choice is eof."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 1357.8599999891594,
+      "after_ms": 1863.9129999792203,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 2,
+        "after_correctness_0_to_2": 2,
+        "notes": "Both describe two buffers and loading one while processing the other, matching the supplied reference. Baseline uses the declared provider-failure retest.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-011",
+      "question": "A proposed recognizer accepts strings of length exactly two over `{a,b}`. How can the lecture’s notation express that set without listing every word?",
+      "answerable": true,
+      "reference_answer": "`(a|b)(a|b)`; it produces aa, ab, ba, bb.",
+      "required_facts": [
+        "`(a|b)(a|b)`; it produces aa, ab, ba, bb."
+      ],
+      "before": {
+        "answer": "The set of all strings of length exactly two over the alphabet {a,b} can be expressed with the regular expression (a|b)(a|b). [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "3fbdfacd-8d73-4480-990e-10dd6713aae9",
+            "course_id": "a4853ec4-ab7e-4346-b087-e7dfb4d52e89",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 49,
+            "page_end": 49,
+            "quote": "(a|b)(a |b) : Denotes {aa, ab, ba, bb}, the language of all strings of length 2 over the alphabet ∑."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "14fe21a6-1a3c-43d8-9901-eac284927d3c"
+      },
+      "after": {
+        "answer": "The set of all strings of length exactly two over the alphabet {a,b} can be expressed as the regular expression (a|b)(a|b). [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 49,
+            "page_end": 49,
+            "quote": "(a|b)(a |b) : Denotes {aa, ab, ba, bb}, the language of all strings of length 2 over the alphabet ∑."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "71019291-8084-49ff-bc60-3f5bf09fa3d0"
+      },
+      "treatment_initial_draft": {
+        "answer": "The set of all strings of length exactly two over the alphabet {a,b} can be expressed as the regular expression (a|b)(a|b). [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "(a|b)(a |b) : Denotes {aa, ab, ba, bb}, the language of all strings of length 2 over the alphabet ∑."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 850.5826999899,
+      "after_ms": 934.0096000232734,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.5,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.5,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 2,
+        "after_correctness_0_to_2": 2,
+        "notes": "Both give the correct expression (a|b)(a|b). The four strings follow directly; listing them was not requested. Baseline uses the declared provider-failure retest.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-012",
+      "question": "Under the relational-operator machine drawn in the slides, how are `<=`, `<>`, and `>=` distinguished even though they are all two-character inputs?",
+      "answerable": true,
+      "reference_answer": "They lead to distinct final token outputs: LE for <=, NE for <>, and GE for >=.",
+      "required_facts": [
+        "They lead to distinct final token outputs: LE for <=, NE for <>, and GE for >=."
+      ],
+      "before": {
+        "answer": "The relational‑operator machine reads the first character and then looks ahead one position; if the second character is ‘=’ it returns the LE token for ‘<=’, if it is ‘>’ it returns the NE token for ‘<>’, and otherwise it retracts the extra character and returns the LT token for ‘<’. The same look‑ahead and possible retraction is used for ‘>’ to distinguish ‘>=’ (returning GE) from ‘>’ (returning GT). [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 61,
+            "page_end": 61,
+            "quote": "Original lecture content: TRANSITION DIAGRAM FOR RELOP relop = < | <= | = | <> | > | >= = return(relop,LE) return(relop,NE) > < start other * = return(relop,LT) return(relop,EQ) > = return(relop,GE) other * return(relop,GT) * indicates retract the input one position CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS Diagram representation / semantic relationships: [UNVERIFIED VISUAL RELATIONSHIP: Exact state IDs, transition labels and accepting states in the relational-operator transition diagram require manual verification against the slide.]"
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "d3d1fb67-42c0-47e5-a9a7-efead764bdd8"
+      },
+      "after": {
+        "answer": "The machine reads the first character and then looks at the next character to decide which two‑character relational operator it is: if the first character is ‘<’ and the second is ‘=’ it returns the token LE (≤); if the first is ‘<’ and the second is ‘>’ it returns the token NE (<>); if the first is ‘>’ and the second is ‘=’ it returns the token GE (≥). Single‑character operators are handled by retracting the extra input character when the second character does not form a two‑character operator. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 61,
+            "page_end": 61,
+            "quote": "Original lecture content: TRANSITION DIAGRAM FOR RELOP relop = < | <= | = | <> | > | >= = return(relop,LE) return(relop,NE) > < start other * = return(relop,LT) return(relop,EQ) > = return(relop,GE) other * return(relop,GT) * indicates retract the input one position CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS Diagram representation / semantic relationships: [UNVERIFIED VISUAL RELATIONSHIP: Exact state IDs, transition labels and accepting states in the relational-operator transition diagram require manual verification against the slide.]"
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "361aa4d5-7e7f-4705-aa48-1fa79f9922f6"
+      },
+      "treatment_initial_draft": {
+        "answer": "The machine reads the first character and then looks at the next character to decide which two‑character relational operator it is: if the first character is ‘<’ and the second is ‘=’ it returns the token LE (≤); if the first is ‘<’ and the second is ‘>’ it returns the token NE (<>); if the first is ‘>’ and the second is ‘=’ it returns the token GE (≥). Single‑character operators are handled by retracting the extra input character when the second character does not form a two‑character operator. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "Original lecture content: TRANSITION DIAGRAM FOR RELOP relop = < | <= | = | <> | > | >= = return(relop,LE) return(relop,NE) > < start other * = return(relop,LT) return(relop,EQ) > = return(relop,GE) other * return(relop,GT) * indicates retract the input one position CPT316 PROGRAMMING LANGUAGE IMPLEMENTATION AND PARADIGMS Diagram representation / semantic relationships: [UNVERIFIED VISUAL RELATIONSHIP: Exact state IDs, transition labels and accepting states in the relational-operator transition diagram require manual verification against the slide.]"
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 21859.482200001366,
+      "after_ms": 1343.588699994143,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 2,
+        "after_correctness_0_to_2": 2,
+        "notes": "Both correctly map <= to LE, <> to NE, and >= to GE.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-013",
+      "question": "According to this lecture, what numerical benchmark proves the two-buffer technique is 37% faster than a single buffer?",
+      "answerable": false,
+      "reference_answer": "NOT IN SOURCE. No measured percentage or benchmark is given; only qualitative efficiency arguments.",
+      "required_facts": [
+        "NOT IN SOURCE. No measured percentage or benchmark is given; only qualitative efficiency arguments."
+      ],
+      "before": {
+        "answer": "The supplied lecture material does not provide a numerical benchmark showing that the two‑buffer technique is 37% faster than a single buffer.",
+        "citations": [],
+        "grounded": false,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "3fbf257a-b557-47ef-b5d1-bb21644646e2"
+      },
+      "after": {
+        "answer": "The supplied lecture material does not provide a numerical benchmark showing that the two‑buffer technique is 37% faster than a single buffer.",
+        "citations": [],
+        "grounded": false,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "046f4b97-4762-4220-9961-3b777da1bc50"
+      },
+      "treatment_initial_draft": {
+        "answer": "The supplied lecture material does not provide a numerical benchmark showing that the two‑buffer technique is 37% faster than a single buffer.",
+        "grounded": false,
+        "citations": [],
+        "uncovered": null
+      },
+      "before_ms": 7571.6233999992255,
+      "after_ms": 2862.3049999878276,
+      "rewrite": {
+        "enabled": true,
+        "accepted": false,
+        "attempted": true,
+        "original_query": "According to this lecture, what numerical benchmark proves the two-buffer technique is 37% faster than a single buffer?",
+        "first_chunk_ids": [
+          "07cc51ad-29ab-49e5-9ace-a6b6bbdc9321",
+          "85c4f79e-69a9-41dc-93d6-30d918a009d8",
+          "5be0ab39-92ca-499f-9963-18be7cbb3071",
+          "9baa6492-cea8-49c3-95a8-a0c229223b0e",
+          "9500f5f0-6589-497f-a581-ab0c4bf590cb"
+        ],
+        "retry_chunk_ids": [
+          "07cc51ad-29ab-49e5-9ace-a6b6bbdc9321",
+          "85c4f79e-69a9-41dc-93d6-30d918a009d8",
+          "9500f5f0-6589-497f-a581-ab0c4bf590cb",
+          "9baa6492-cea8-49c3-95a8-a0c229223b0e",
+          "5be0ab39-92ca-499f-9963-18be7cbb3071"
+        ],
+        "rewritten_query": "lecture two-buffer technique 37% faster benchmark",
+        "extra_latency_ms": 2257.260300015332,
+        "first_source_pages": [
+          25,
+          26,
+          27,
+          30,
+          23
+        ],
+        "retry_source_pages": [
+          25,
+          26,
+          23,
+          30,
+          27
+        ],
+        "retry_grounding_problems": []
+      },
+      "before_retrieval": null,
+      "after_retrieval": null,
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 2,
+        "after_correctness_0_to_2": 2,
+        "notes": "Both correctly decline to invent a 37% benchmark. Rewrite produces no adopted answer.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-014",
+      "question": "Two names, `pi` and `score`, are different spellings but may still produce the same token name. Why is that not a contradiction?",
+      "answerable": true,
+      "reference_answer": "Lexemes are concrete character sequences; a shared pattern/token category such as id can match different lexemes, with attributes distinguishing entries.",
+      "required_facts": [
+        "Lexemes are concrete character sequences; a shared pattern/token category such as id can match different lexemes, with attributes distinguishing entries."
+      ],
+      "before": {
+        "answer": "A token consists of a token name and an optional attribute value, while a lexeme is the actual character sequence that matches the token’s pattern. [1]\n\nBoth `pi` and `score` match the pattern for identifiers, so the lexical analyzer classifies each as the token name `<id>` with different attribute values (e.g., pointers to their symbol‑table entries). [3]\n\nThus, having different spellings produce the same token name is not a contradiction because the token name denotes the category (identifier), and the differing spellings are captured by the attribute values of that token. [1] [3]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 11,
+            "page_end": 11,
+            "quote": "PAGE 11 Original lecture content: TERMS IN LEXICAL ANALYSIS Token: A pair consisting of token name and an optional attribute value."
+          },
+          {
+            "marker": 1,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 11,
+            "page_end": 11,
+            "quote": "Lexeme: It is an actual stream of characters (in the source program) that matches the pattern and is identified by the lexical analyzer as an instance of that token."
+          },
+          {
+            "marker": 3,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 13,
+            "page_end": 13,
+            "quote": "Rows: if | characters i,f | if; else | characters e,l,s,e | else; comparison | < or > or <= or >= or == or != | <=, !=; id | letter followed by letters and digits | pi, score, D2; number | numeric constant | 3.14159, 0, 6.02e23; literal | characters surrounded by double quotes | \"core dumped\"."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "fc586f3e-5cca-46c7-ab63-e439043c06ae"
+      },
+      "after": {
+        "answer": "A token is defined by its token name, while the actual characters that appear in the source program are called lexemes. [1]\n\nDifferent spellings such as `pi` and `score` are distinct lexemes, but both match the pattern for the token named *identifier*, so the lexical analyzer assigns them the same token name. [3]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 11,
+            "page_end": 11,
+            "quote": "PAGE 11 Original lecture content: TERMS IN LEXICAL ANALYSIS Token: A pair consisting of token name and an optional attribute value."
+          },
+          {
+            "marker": 1,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 11,
+            "page_end": 11,
+            "quote": "Lexeme: It is an actual stream of characters (in the source program) that matches the pattern and is identified by the lexical analyzer as an instance of that token."
+          },
+          {
+            "marker": 3,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 13,
+            "page_end": 13,
+            "quote": "Rows: if | characters i,f | if; else | characters e,l,s,e | else; comparison | < or > or <= or >= or == or != | <=, !=; id | letter followed by letters and digits | pi, score, D2; number | numeric constant | 3.14159, 0, 6.02e23; literal | characters surrounded by double quotes | \"core dumped\"."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "3a888d79-4160-4b38-af2f-b60313c5234c"
+      },
+      "treatment_initial_draft": {
+        "answer": "A token is defined by its token name, while the actual characters that appear in the source program are called lexemes. [1]\n\nDifferent spellings such as `pi` and `score` are distinct lexemes, but both match the pattern for the token named *identifier*, so the lexical analyzer assigns them the same token name. [3]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "PAGE 11 Original lecture content: TERMS IN LEXICAL ANALYSIS Token: A pair consisting of token name and an optional attribute value."
+          },
+          {
+            "marker": 1,
+            "quote": "Lexeme: It is an actual stream of characters (in the source program) that matches the pattern and is identified by the lexical analyzer as an instance of that token."
+          },
+          {
+            "marker": 3,
+            "quote": "Rows: if | characters i,f | if; else | characters e,l,s,e | else; comparison | < or > or <= or >= or == or != | <=, !=; id | letter followed by letters and digits | pi, score, D2; number | numeric constant | 3.14159, 0, 6.02e23; literal | characters surrounded by double quotes | \"core dumped\"."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 21191.948699997738,
+      "after_ms": 991.279099980602,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.6666666666666666,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.6666666666666666,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 2,
+        "after_correctness_0_to_2": 1,
+        "notes": "Both distinguish spelling from token category; only baseline explains how attributes distinguish symbol-table entries. Treatment omits that required fact. No rewrite triggered.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    },
+    {
+      "question_id": "t2-015",
+      "question": "What kind of malformed input can stop the scanner itself, rather than simply produce a valid token that later proves misplaced?",
+      "answerable": true,
+      "reference_answer": "A remaining input prefix that matches none of the available token patterns can be recognized as a lexical error.",
+      "required_facts": [
+        "A remaining input prefix that matches none of the available token patterns can be recognized as a lexical error."
+      ],
+      "before": {
+        "answer": "Input that does not match any token pattern—i.e., when no token pattern matches a prefix of the remaining input—can halt the scanner itself. [2]",
+        "citations": [
+          {
+            "marker": 2,
+            "file_id": "3f1e575c-1428-4679-b403-f318b8cffd13",
+            "course_id": "c14a2760-b6b3-4637-80f0-bf219ee70d37",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 20,
+            "page_end": 20,
+            "quote": "HANDLING LEXICAL ERRORS When none of the patterns for tokens matches a prefix of remaining input."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "38e5defc-9e25-4b87-ba13-e7288f58a96e"
+      },
+      "after": {
+        "answer": "Input where no token pattern matches the next characters—i.e., a prefix of the remaining input that fits none of the defined token patterns—can halt the scanner itself. [2]",
+        "citations": [
+          {
+            "marker": 2,
+            "file_id": "ce0f3210-4ff0-40a3-8cf2-37858398b4c8",
+            "course_id": "1e790f7f-d716-46bc-a2e7-edd009e1e581",
+            "filename": "CPT316_Topic2_Lexical_Semantic_Text.pdf",
+            "page": 20,
+            "page_end": 20,
+            "quote": "HANDLING LEXICAL ERRORS When none of the patterns for tokens matches a prefix of remaining input."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "99d06b0d-101b-4c66-89b7-8cf4eb13e4af"
+      },
+      "treatment_initial_draft": {
+        "answer": "Input where no token pattern matches the next characters—i.e., a prefix of the remaining input that fits none of the defined token patterns—can halt the scanner itself. [2]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 2,
+            "quote": "HANDLING LEXICAL ERRORS When none of the patterns for tokens matches a prefix of remaining input."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 21140.10319998488,
+      "after_ms": 1913.249100005487,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false
+      },
+      "before_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 0.0,
+        "hit@5": 0.0,
+        "evidence_recall@5": 0.0,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 0.0
+      },
+      "after_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 0.0,
+        "hit@5": 0.0,
+        "evidence_recall@5": 0.0,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 0.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "before_correctness_0_to_2": 2,
+        "after_correctness_0_to_2": 2,
+        "notes": "Both identify a remaining prefix matching no token pattern as a lexical error.",
+        "reviewer": "Codex AI reference-based review, 2026-11-10"
+      }
+    }
+  ]
+}

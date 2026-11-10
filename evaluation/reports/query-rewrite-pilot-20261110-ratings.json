@@ -1,0 +1,21 @@
+{
+  "reviewer": "Codex AI reference-based review, 2026-11-10",
+  "status": "provisional AI review; not human verified; strict required-fact completeness",
+  "reviews": {
+    "t2-001": {"before_correctness_0_to_2": 1, "after_correctness_0_to_2": 1, "notes": "Both name the right component and grouping operation but omit returning an identifier token to the parser, required by the reference. This is a strict completeness deduction, not a wrong component."},
+    "t2-002": {"before_correctness_0_to_2": 2, "after_correctness_0_to_2": 2, "notes": "Both explain lookahead and efficient buffering."},
+    "t2-003": {"before_correctness_0_to_2": 1, "after_correctness_0_to_2": 1, "notes": "Baseline drops one concatenated letter when interpreting the ungrouped pattern. Treatment correctly parses the second pattern but ambiguously/incorrectly describes what the first star repeats; its final comparison is correct. Conservatively partial for internal inconsistency. No rewrite triggered."},
+    "t2-004": {"before_correctness_0_to_2": 2, "after_correctness_0_to_2": 1, "notes": "Both explain retraction, but treatment introduces << rather than the lecture's <> relational operator. Unsupported example prevents full credit. No rewrite triggered."},
+    "t2-005": {"before_correctness_0_to_2": 1, "after_correctness_0_to_2": 1, "notes": "Both identify letters and id category but substitute lexeme-string metadata for the reference's symbol-table pointer; missing the required metadata explanation."},
+    "t2-006": {"before_correctness_0_to_2": 1, "after_correctness_0_to_2": 1, "notes": "Both give the valid-pattern explanation but do not explicitly identify fi as an identifier/id token. Treatment also overstates that the parser must detect the misspelling; detection depends on context."},
+    "t2-007": {"before_correctness_0_to_2": 2, "after_correctness_0_to_2": 2, "notes": "Appropriate source-limited refusal in both. Rewriting tried different pages but adopted no replacement."},
+    "t2-008": {"before_correctness_0_to_2": 2, "after_correctness_0_to_2": 2, "notes": "Both distinguish alphabet from finite ordered string."},
+    "t2-009": {"before_correctness_0_to_2": 1, "after_correctness_0_to_2": 1, "notes": "Both explain scanner responsibility and parser simplification; both omit portability and efficiency from the strict required facts."},
+    "t2-010": {"before_correctness_0_to_2": 2, "after_correctness_0_to_2": 2, "notes": "Both describe two buffers and loading one while processing the other, matching the supplied reference. Baseline uses the declared provider-failure retest."},
+    "t2-011": {"before_correctness_0_to_2": 2, "after_correctness_0_to_2": 2, "notes": "Both give the correct expression (a|b)(a|b). The four strings follow directly; listing them was not requested. Baseline uses the declared provider-failure retest."},
+    "t2-012": {"before_correctness_0_to_2": 2, "after_correctness_0_to_2": 2, "notes": "Both correctly map <= to LE, <> to NE, and >= to GE."},
+    "t2-013": {"before_correctness_0_to_2": 2, "after_correctness_0_to_2": 2, "notes": "Both correctly decline to invent a 37% benchmark. Rewrite produces no adopted answer."},
+    "t2-014": {"before_correctness_0_to_2": 2, "after_correctness_0_to_2": 1, "notes": "Both distinguish spelling from token category; only baseline explains how attributes distinguish symbol-table entries. Treatment omits that required fact. No rewrite triggered."},
+    "t2-015": {"before_correctness_0_to_2": 2, "after_correctness_0_to_2": 2, "notes": "Both identify a remaining prefix matching no token pattern as a lexical error."}
+  }
+}

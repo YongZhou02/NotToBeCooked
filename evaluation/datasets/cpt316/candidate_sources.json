@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "status": "candidate corpus; not yet added to the frozen Topic 1 benchmark",
+  "scope": "User-supplied semantic text PDFs; original-image transcription accuracy is unverified",
+  "documents": [
+    {
+      "id": "cpt316-topic2-lexical",
+      "path": "documents/CPT316_Topic2_Lexical_Semantic_Text.pdf",
+      "sha256": "a778718b1791bd73134a53c2a77606afaec0edcfed50b5e4270f45f0309f704d",
+      "pages": 67,
+      "pages_with_native_text": 67,
+      "unverified_marker_pages": [61, 62, 66]
+    },
+    {
+      "id": "cpt316-topic3-student",
+      "path": "documents/CPT316_Topic3_Student_Semantic_Text.pdf",
+      "sha256": "28be51a1c69be182626149c5913ad0d87cb15d8456f05ea7a4263414809ba972",
+      "pages": 77,
+      "pages_with_native_text": 77,
+      "unverified_marker_pages": [26, 70, 75],
+      "variant_group": "topic3",
+      "relationship_to_other_variant": "not yet established; do not silently merge or supersede"
+    },
+    {
+      "id": "cpt316-topic3-updated",
+      "path": "documents/CPT316_Topic3_Updated_Semantic_Text.pdf",
+      "sha256": "714d4f285e16b6dd4e4c676a2b3b1fe1dbbfe1a84f9db0c8064ad3d190c15cec",
+      "pages": 65,
+      "pages_with_native_text": 65,
+      "unverified_marker_pages": [1, 13, 27, 46, 54, 65],
+      "variant_group": "topic3",
+      "relationship_to_other_variant": "not yet established; updated filename alone is not authority"
+    }
+  ]
+}

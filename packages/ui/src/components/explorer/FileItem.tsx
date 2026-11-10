@@ -6,6 +6,7 @@ import {
   FolderInput,
   MoreVertical,
   Play,
+  RefreshCw,
   Trash2,
 } from "lucide-react"
 
@@ -22,6 +23,7 @@ import { DeleteFileDialog } from "./DeleteFileDialog"
 import { IndexingFailureDialog } from "./IndexingFailureDialog"
 import { RenameFileDialog } from "./RenameFileDialog"
 import { MoveFileDialog } from "./MoveFileDialog"
+import { ReplaceFileDialog } from "./ReplaceFileDialog"
 
 interface FileItemProps {
   file: MockDocumentFile
@@ -35,6 +37,7 @@ interface FileItemProps {
   ) => Promise<void> | void
   onRetryIndexing: (fileId: string) => Promise<void> | void
   onDeleteFile: (fileId: string) => Promise<void> | void
+  onReplaceFile?: (fileId: string, file: File) => Promise<void>
 }
 
 export function getFileExtension(filename: string): string {
@@ -236,11 +239,13 @@ export function FileItem({
   onMoveFile,
   onRetryIndexing,
   onDeleteFile,
+  onReplaceFile,
 }: FileItemProps) {
   const [isRenameOpen, setIsRenameOpen] = useState(false)
   const [isMoveOpen, setIsMoveOpen] = useState(false)
   const [isFailureOpen, setIsFailureOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [isReplaceOpen, setIsReplaceOpen] = useState(false)
 
   return (
     <>
@@ -303,6 +308,16 @@ export function FileItem({
                 View failure details
               </DropdownMenuItem>
             )}
+            {onReplaceFile && (
+              <DropdownMenuItem
+                disabled={file.status === "processing"}
+                onClick={() => setIsReplaceOpen(true)}
+                className="cursor-pointer text-xs"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Replace file…
+              </DropdownMenuItem>
+            )}
             {file.status === "uploaded" && (
               <DropdownMenuItem
                 onClick={() => void onRetryIndexing(file.id)}
@@ -330,6 +345,13 @@ export function FileItem({
           fileName={file.name}
           onOpenChange={setIsRenameOpen}
           onRename={(newFileName) => onRenameFile(file.id, newFileName)}
+        />
+      )}
+      {isReplaceOpen && onReplaceFile && (
+        <ReplaceFileDialog
+          fileName={file.name}
+          onOpenChange={setIsReplaceOpen}
+          onReplace={(replacement) => onReplaceFile(file.id, replacement)}
         />
       )}
       {isMoveOpen && (

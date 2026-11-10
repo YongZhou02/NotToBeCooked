@@ -1,0 +1,731 @@
+[
+  {
+    "id": "t2-001",
+    "answerable": true,
+    "reference_answer": "The scanner groups raw input characters into lexemes, which are then used to produce a sequence of tokens.",
+    "required_facts": [
+      "The lexical analyzer reads input characters of the source program and groups them into lexemes.",
+      "It produces a sequence of tokens as output."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 5,
+        "quote": "To read the input characters of the source program produce as output a group them into sequence of tokens lexemes for each lexeme in the source program."
+      }
+    ],
+    "reason": "The lecture explains that the lexical analyzer reads source characters and groups them into lexemes to produce tokens."
+  },
+  {
+    "id": "t2-002",
+    "answerable": true,
+    "reference_answer": "It creates the need for the lexical analyzer to look one or more characters beyond the next lexeme.",
+    "required_facts": [
+      "The lexical analyzer often needs to look one or more characters beyond the next lexeme to be sure of the right lexeme."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 23,
+        "quote": "Lexical Analyzer often needs to look one or more characters beyond the next lexeme before we can be sure we have the right lexeme."
+      }
+    ],
+    "reason": "Explicitly covered in the input buffering section."
+  },
+  {
+    "id": "t2-003",
+    "answerable": true,
+    "reference_answer": "Because of operator precedence rules in regular expressions where concatenation and alternation have different binding strengths.",
+    "required_facts": [
+      "Regular expression operators have a defined precedence where concatenation sits in the middle and alternation has the lowest precedence."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 48,
+        "quote": "PRECEDENCE FOR RE OPERATORS"
+      }
+    ],
+    "reason": "Operator precedence affects how regular expressions are evaluated."
+  },
+  {
+    "id": "t2-004",
+    "answerable": true,
+    "reference_answer": "It may need to retract one position when the next character read does not match a multi-character operator like <= or <>.",
+    "required_facts": [
+      "An asterisk in the transition diagram indicates retracting the input one position."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 61,
+        "quote": "* indicates retract the input one position"
+      }
+    ],
+    "reason": "The relop diagram uses an asterisk to indicate retraction when looking ahead."
+  },
+  {
+    "id": "t2-005",
+    "answerable": true,
+    "reference_answer": "The actual source letters are 'score', the token category passed downstream is 'id', and the metadata is a pointer to the symbol table entry.",
+    "required_facts": [
+      "The lexeme is 'score'.",
+      "It is classified with the token name 'id' and an attribute pointing to its symbol table entry."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 12,
+        "quote": "ii- score id"
+      },
+      {
+        "pdf_page": 15,
+        "quote": "<id, pointer to symbol table entry for E>"
+      }
+    ],
+    "reason": "Identifiers are paired with pointers to the symbol table."
+  },
+  {
+    "id": "t2-006",
+    "answerable": true,
+    "reference_answer": "Because 'fi' is a valid lexeme for an identifier, the scanner returns it as an identifier token rather than treating it as a lexical error.",
+    "required_facts": [
+      "fi is a valid lexeme for the token id.",
+      "The lexical analyzer returns the token id and lets later phases handle the error."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 19,
+        "quote": "Since fi is a valid lexeme for the token id, the lexical analyzer must return the token id to the parser and let some other phases (probably the parser in this case) handle an error due to the transposition of letters."
+      }
+    ],
+    "reason": "Directly explained in the handling lexical errors section."
+  },
+  {
+    "id": "t2-007",
+    "answerable": false,
+    "reference_answer": "The supplied material does not cover this question.",
+    "required_facts": [],
+    "evidence": [],
+    "reason": "The slides mention DFA minimization as a topic heading but provide no algorithm steps."
+  },
+  {
+    "id": "t2-008",
+    "answerable": true,
+    "reference_answer": "A sequence 'aabba' is a finite string of symbols from an alphabet, whereas {a,b} is an alphabet (a set of characters).",
+    "required_facts": [
+      "An alphabet is a set of characters such as {a, b}.",
+      "A string is a finite sequence of elements from the alphabet, such as aabba."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 39,
+        "quote": "An alphabet Sigma is a set of characters Example: Sigma = {a, b} A string over Sigma is a finite sequence of elements from Sigma Example: aabba"
+      }
+    ],
+    "reason": "The summary slide distinguishes alphabets from strings."
+  },
+  {
+    "id": "t2-009",
+    "answerable": true,
+    "reference_answer": "Comments and whitespaces can be eliminated by the scanner, leading to a simpler parser design.",
+    "required_facts": [
+      "Unnecessary tokens like comments and whitespaces are eliminated by the scanner already.",
+      "This separation leads to a simpler design of the parser."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 8,
+        "quote": "Simpler Design – This separation leads to simpler design of parser as unnecessary tokens (comments & whitespaces) are eliminated by the scanner already."
+      }
+    ],
+    "reason": "Covered under lexical analysis versus parsing."
+  },
+  {
+    "id": "t2-010",
+    "answerable": true,
+    "reference_answer": "The two-buffer scheme reduces interruption by simultaneously loading the second buffer with the next set of characters while the first is processed.",
+    "required_facts": [
+      "The two-buffer scheme processes characters from one buffer while the second buffer is simultaneously loaded."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 25,
+        "quote": "The lexical analyzer processes characters from one buffer. The second buffer is simultaneously loaded with the next set of characters from the source file."
+      }
+    ],
+    "reason": "Explained in the single vs two-buffer comparison."
+  },
+  {
+    "id": "t2-011",
+    "answerable": true,
+    "reference_answer": "Using a regular expression such as (a|b)(a|b) or (a|b)^2.",
+    "required_facts": [
+      "(a|b)(a|b) denotes all strings of length 2 over the alphabet."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 49,
+        "quote": "(a|b)(a |b) : Denotes {aa, ab, ba, bb}, the language of all strings of length 2 over the alphabet Sigma."
+      }
+    ],
+    "reason": "Regular expression notation describes strings of length 2."
+  },
+  {
+    "id": "t2-012",
+    "answerable": true,
+    "reference_answer": "They are distinguished by checking the second character using directed branches in the transition diagram.",
+    "required_facts": [
+      "The transition diagram uses directed edges labeled by symbols to branch based on subsequent characters."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 61,
+        "quote": "relop = < | <= | = | <> | > | >="
+      }
+    ],
+    "reason": "The relop transition diagram branches on characters like '=', '>', and others."
+  },
+  {
+    "id": "t2-013",
+    "answerable": false,
+    "reference_answer": "The supplied material does not cover this question.",
+    "required_facts": [],
+    "evidence": [],
+    "reason": "No numerical benchmarks are given in the lecture text."
+  },
+  {
+    "id": "t2-014",
+    "answerable": true,
+    "reference_answer": "Because different lexemes can map to the same token name (like `id`) while carrying different attribute values pointing to their symbol table entries.",
+    "required_facts": [
+      "Tokens consist of a token name and an optional attribute value."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 11,
+        "quote": "Token: A pair consisting of token name and an optional attribute value."
+      }
+    ],
+    "reason": "Tokens group different lexemes under a common name with distinct attributes."
+  },
+  {
+    "id": "t2-015",
+    "answerable": true,
+    "reference_answer": "Input where none of the patterns for tokens matches a prefix of the remaining input.",
+    "required_facts": [
+      "Lexical errors occur when none of the patterns for tokens matches a prefix of remaining input."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 20,
+        "quote": "When none of the patterns for tokens matches a prefix of remaining input."
+      }
+    ],
+    "reason": "The lecture defines recognizable lexical errors this way."
+  },
+  {
+    "id": "t2-016",
+    "answerable": true,
+    "reference_answer": "It is a legitimate string because a string is a finite sequence of symbols, and the empty string has zero length denoted by epsilon.",
+    "required_facts": [
+      "The empty string denoted by epsilon has zero length."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 36,
+        "quote": "The empty string denoted by ‘ɛ’ has Zero length."
+      }
+    ],
+    "reason": "Discussed in the strings and languages section."
+  },
+  {
+    "id": "t2-017",
+    "answerable": true,
+    "reference_answer": "The separation of lexical analysis versus parsing.",
+    "required_facts": [
+      "A separate lexical analyzer allows specialized buffering techniques for reading input characters."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 8,
+        "quote": "A separate lexical analyzer allows us to apply specialized techniques that serve only the lexical task, not the job of parsing."
+      }
+    ],
+    "reason": "Separation of concerns allows independent optimization of the scanner."
+  },
+  {
+    "id": "t2-018",
+    "answerable": true,
+    "reference_answer": "Because a block-sized read allows reading N characters into the buffer using one system read command rather than one system call per character.",
+    "required_facts": [
+      "Using one system read command, we can read N characters into the buffer, rather than using one system call per character."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 27,
+        "quote": "Using one system read command, we can read N characters into the buffer, rather than using one system call per character."
+      }
+    ],
+    "reason": "Directly explained in the input buffering slides."
+  },
+  {
+    "id": "t2-019",
+    "answerable": false,
+    "reference_answer": "The supplied material does not cover this question.",
+    "required_facts": [],
+    "evidence": [],
+    "reason": "Unicode version and character count for 2026 are not specified in the text."
+  },
+  {
+    "id": "t2-020",
+    "answerable": true,
+    "reference_answer": "(a|b)*",
+    "required_facts": [
+      "(a|b)* denotes all strings of zero or more a's or b's."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 49,
+        "quote": "(a|b)* : Denotes all strings consisting of zero or more a’s or b’s."
+      }
+    ],
+    "reason": "Regular expression for zero or more repetitions of a or b."
+  },
+  {
+    "id": "t2-021",
+    "answerable": true,
+    "reference_answer": "After a first letter, the recognizer loops on letters or digits, and a non-letter/digit terminates the token via retraction.",
+    "required_facts": [
+      "Identifier recognition loops on letters and digits.",
+      "A non-letter/digit triggers retraction and returns the id."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 62,
+        "quote": "ID = letter(letter | digit) *"
+      },
+      {
+        "pdf_page": 63,
+        "quote": "retract(1); insert(id);"
+      }
+    ],
+    "reason": "Identifier transition diagrams loop on letters/digits and retract on other characters."
+  },
+  {
+    "id": "t2-022",
+    "answerable": true,
+    "reference_answer": "They retain pointers to their symbol table entries, or specific operator/value attributes.",
+    "required_facts": [
+      "Identifiers have pointers to symbol table entries.",
+      "Numbers have values like integer 2."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 15,
+        "quote": "<id, pointer to symbol table entry for E> <assign-op> <id, pointer ……….. For M> <mult-op> <id, pointer……… for C> <exp-op> <number, integer value 2>"
+      }
+    ],
+    "reason": "Attributes are stored alongside token names."
+  },
+  {
+    "id": "t2-023",
+    "answerable": true,
+    "reference_answer": "It deletes successive characters from the remaining input until it can find a well-formed token.",
+    "required_facts": [
+      "Delete successive characters from the remaining input until analyzer can find a well-formed token."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 20,
+        "quote": "Delete the successive characters from the remaining input until analyzer can find a well-formed token."
+      }
+    ],
+    "reason": "Panic mode error recovery deletes characters until a valid token is found."
+  },
+  {
+    "id": "t2-024",
+    "answerable": true,
+    "reference_answer": "No, a set of complete strings forms a language, whereas the ordered characters of a single string form an individual word or sequence.",
+    "required_facts": [
+      "A string is a finite sequence of symbols drawn from an alphabet.",
+      "A language is a countable set of strings over some fixed alphabet."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 36,
+        "quote": "A string over an alphabet is a finite sequence of symbols drawn from that alphabet."
+      },
+      {
+        "pdf_page": 38,
+        "quote": "A countable set of strings over some fixed alphabet."
+      }
+    ],
+    "reason": "Languages are sets of strings, while strings are sequences of symbols."
+  },
+  {
+    "id": "t2-025",
+    "answerable": false,
+    "reference_answer": "The supplied material does not cover this question.",
+    "required_facts": [],
+    "evidence": [],
+    "reason": "No specific regex engine or command-line flags are required or mentioned in the text."
+  },
+  {
+    "id": "t2-026",
+    "answerable": true,
+    "reference_answer": "No, comment disappearance is a scanning process (simple deletion), whereas recognizing `count` is lexical analysis producing a token.",
+    "required_facts": [
+      "Scanning involves simple processes like deletion of comments.",
+      "Lexical analysis produces tokens from the output of the scanner."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 9,
+        "quote": "Scanning • the simple processes • do not require tokenization of the input • e.g. deletion of comments Lexical analysis • the more complex portion • produces tokens"
+      }
+    ],
+    "reason": "Scanning and lexical analysis are distinguished as separate steps."
+  },
+  {
+    "id": "t2-027",
+    "answerable": true,
+    "reference_answer": "lexemeBegin records where it started, and forward advances to find its end.",
+    "required_facts": [
+      "lexemeBegin marks the beginning of the current lexeme.",
+      "forward scans ahead until a pattern match is found."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 28,
+        "quote": "lexemeBegin – marks the beginning of the current lexeme. forward – scans ahead until a pattern match is found."
+      }
+    ],
+    "reason": "Directly stated in the input buffering pointer definitions."
+  },
+  {
+    "id": "t2-028",
+    "answerable": true,
+    "reference_answer": "(a|c)b*",
+    "required_facts": [
+      "(a|c)b* matches words starting with a or c followed by any number of b's."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 50,
+        "quote": "RE will be: ( a | c ) b* or ( a + c ) b*"
+      }
+    ],
+    "reason": "Regular expression given for words starting with a or c followed by b's."
+  },
+  {
+    "id": "t2-029",
+    "answerable": true,
+    "reference_answer": "State numbers act as case labels in a switch statement, and labeled arrows dictate the state transitions based on characters.",
+    "required_facts": [
+      "Transition diagrams consist of states and directed edges labeled by symbols."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 60,
+        "quote": "Consists of: 1. A collection of nodes or circles, called states. 2. Edges are directed from one state of the transition diagram to another."
+      },
+      {
+        "pdf_page": 63,
+        "quote": "switch (state) { case 9: ... }"
+      }
+    ],
+    "reason": "States map directly to switch cases in C code implementation."
+  },
+  {
+    "id": "t2-030",
+    "answerable": true,
+    "reference_answer": "Because `**` is an exponentiation operator and `2` is a number constant, which have distinct token categories and roles.",
+    "required_facts": [
+      "Different substrings are classified according to their role into distinct tokens like operators and numbers."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 15,
+        "quote": "<exp-op> <number, integer value 2>"
+      }
+    ],
+    "reason": "Operators and numbers are separate token types."
+  },
+  {
+    "id": "t2-031",
+    "answerable": false,
+    "reference_answer": "The supplied material does not cover this question.",
+    "required_facts": [],
+    "evidence": [],
+    "reason": "The exact token ID or behavior for the character '@' is not specified in the slides."
+  },
+  {
+    "id": "t2-032",
+    "answerable": true,
+    "reference_answer": "Error recovery actions attempt to fix the input (such as replacing or transposing characters), whereas panic mode deletes successive characters until a valid token is found.",
+    "required_facts": [
+      "Possible error recovery actions include replacing or transposing two adjacent characters.",
+      "Panic mode deletes successive characters from remaining input until a well-formed token is found."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 20,
+        "quote": "Delete the successive characters from the remaining input until analyzer can find a well-formed token."
+      },
+      {
+        "pdf_page": 21,
+        "quote": "Replacing or transposing two adjacent characters"
+      }
+    ],
+    "reason": "The lecture lists specific error recovery actions alongside panic mode."
+  },
+  {
+    "id": "t2-033",
+    "answerable": true,
+    "reference_answer": "L union D represents either a letter or a digit, while LD represents a letter followed by a digit.",
+    "required_facts": [
+      "Union represents alternation (r | s).",
+      "Concatenation represents r followed by s."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 43,
+        "quote": "a) L ∪ D b) LD"
+      },
+      {
+        "pdf_page": 47,
+        "quote": "(r | s) denotes L(r) ∪L(s) r or s (alternation) (rs) denotes L(r)L(s) r followed by s (concatenation)"
+      }
+    ],
+    "reason": "Union and concatenation operations combine character sets differently."
+  },
+  {
+    "id": "t2-034",
+    "answerable": true,
+    "reference_answer": "Because lexical analysis is separated from parsing, allowing specialized input buffering and character-handling improvements without altering parser design.",
+    "required_facts": [
+      "Separation of lexical analysis improves portability and isolates machine-specific characters."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 8,
+        "quote": "Improved Portability – The compiler's portability is enhanced as specialized symbols and characters (machine and language specific) are isolated during this phase."
+      }
+    ],
+    "reason": "Portability and separation of concerns isolate machine-dependent code."
+  },
+  {
+    "id": "t2-035",
+    "answerable": true,
+    "reference_answer": "lexemeBegin is set to the character immediately after the lexeme just found.",
+    "required_facts": [
+      "lexemeBegin is set to the character immediately after the lexeme just found."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 28,
+        "quote": "lexemeBegin is set to the character immediately after the lexeme just found."
+      }
+    ],
+    "reason": "Directly stated in the two-pointer buffer mechanism description."
+  },
+  {
+    "id": "t2-036",
+    "answerable": true,
+    "reference_answer": "Because regular definitions allow names to be given to regular expressions, which can then be used in subsequent expressions as if they were symbols.",
+    "required_facts": [
+      "Regular definitions allow names to be given to certain regular expressions for use in subsequent expressions."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 52,
+        "quote": "Regular definitions allow names to be given to certain regular expressions. These names can then be used in subsequent expressions as if they were symbols."
+      }
+    ],
+    "reason": "Regular definitions give shorthand names to smaller patterns."
+  },
+  {
+    "id": "t2-037",
+    "answerable": false,
+    "reference_answer": "The supplied material does not cover this question.",
+    "required_facts": [],
+    "evidence": [],
+    "reason": "No specific memory addresses are assigned to identifiers in the slides."
+  },
+  {
+    "id": "t2-038",
+    "answerable": true,
+    "reference_answer": "By installing reserved words in the symbol table initially with a field indicating they are never ordinary identifiers.",
+    "required_facts": [
+      "Install the reserved words in the symbol table initially.",
+      "A field indicates these strings are never ordinary identifiers and tells which token they represent."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 65,
+        "quote": "▪Install the reserved words in the symbol table initially. ▪A field of the symbol-table entry indicates that these strings are never ordinary identifiers, and tells which token they represent."
+      }
+    ],
+    "reason": "Reserved words are recognized by pre-loading them into the symbol table."
+  },
+  {
+    "id": "t2-039",
+    "answerable": true,
+    "reference_answer": "The token category is number and the specific value is floating point 3.1416.",
+    "required_facts": [
+      "Tokens consist of a token name and an attribute value.",
+      "Numbers can carry numeric values like floating point 3.1416."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 17,
+        "quote": "<number, floating point 3.1416>"
+      }
+    ],
+    "reason": "Tokens are represented as pairs of name and attribute."
+  },
+  {
+    "id": "t2-040",
+    "answerable": true,
+    "reference_answer": "No, the lexical analyzer is usually not able to detect source-code errors on its own, such as misspelled keywords like `fi`.",
+    "required_facts": [
+      "Most of the times, the lexical analyzer is not able to detect source-code errors.",
+      "For example, if `fi` is encountered, the lexical analyzer will not detect it as an error."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 19,
+        "quote": "Most of the times, the lexical analyzer is not able to detect source-code errors. ... encounters ‘fi’, the lexical analyzer will not detect it as an error"
+      }
+    ],
+    "reason": "Lexical analyzers do not catch all errors, such as transposed letters in keywords."
+  },
+  {
+    "id": "t2-041",
+    "answerable": true,
+    "reference_answer": "D+ denotes one or more occurrences of digits, while L* denotes zero or more occurrences of letters.",
+    "required_facts": [
+      "(+) denotes one or more occurrences.",
+      "(*) denotes zero or more occurrences."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 47,
+        "quote": "(r*) denotes (L(r))* Zero or more occurrences of r (+) denotes (L(r))+ One or more occurrences of r"
+      }
+    ],
+    "reason": "Closure operators define repetition counts."
+  },
+  {
+    "id": "t2-042",
+    "answerable": true,
+    "reference_answer": "To combine the buffer end test with the test for the current character by extending each buffer to hold a sentinel character.",
+    "required_facts": [
+      "The buffer end test can be combined with the test for the current character if we extend each buffer to hold a sentinel character at the end."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 30,
+        "quote": "The buffer end test can be combined with the test for the current character if we extend each buffer to hold a sentinel character at the end."
+      }
+    ],
+    "reason": "Sentinels optimize buffer-boundary checks."
+  },
+  {
+    "id": "t2-043",
+    "answerable": false,
+    "reference_answer": "The supplied material does not cover this question.",
+    "required_facts": [],
+    "evidence": [],
+    "reason": "The exact NFA state count for `(a|c)b*` is not constructed or counted in the slides."
+  },
+  {
+    "id": "t2-044",
+    "answerable": true,
+    "reference_answer": "Examples include 5280, 0.01234, 6.336E4, and 1.89E-4.",
+    "required_facts": [
+      "Unsigned numbers include integer or floating point strings such as 5280, 0.01234, 6.336E4, or 1.89E-4."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 54,
+        "quote": "Unsigned numbers (integer or floating point) are strings such as 5280, 0.01234, 6.336E4, or 1.89E-4."
+      }
+    ],
+    "reason": "Unsigned number examples show integer, floating-point, and exponent variations."
+  },
+  {
+    "id": "t2-045",
+    "answerable": false,
+    "reference_answer": "The supplied material does not cover this question.",
+    "required_facts": [],
+    "evidence": [],
+    "reason": "The visual details of the number-recognition diagram outcomes are not described in text."
+  },
+  {
+    "id": "t2-046",
+    "answerable": true,
+    "reference_answer": "Installing reserved words in the symbol table initially enables distinguishing keywords from user-defined names.",
+    "required_facts": [
+      "Install the reserved words in the symbol table initially."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 65,
+        "quote": "Install the reserved words in the symbol table initially."
+      }
+    ],
+    "reason": "Reserved words are distinguished by pre-installing them in the symbol table."
+  },
+  {
+    "id": "t2-047",
+    "answerable": true,
+    "reference_answer": "Because the Kleene closure allows zero repetitions (matching the empty string), whereas positive closure requires at least one repetition.",
+    "required_facts": [
+      "(r*) denotes zero or more occurrences.",
+      "(+) denotes one or more occurrences."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 47,
+        "quote": "(r*) denotes (L(r))* Zero or more occurrences of r (+) denotes (L(r))+ One or more occurrences of r"
+      }
+    ],
+    "reason": "Kleene star includes zero occurrences while positive closure does not."
+  },
+  {
+    "id": "t2-048",
+    "answerable": true,
+    "reference_answer": "No, because any EOF that appears other than at the end of the buffer means the input is at an end, whereas buffer-end EOF triggers a reload.",
+    "required_facts": [
+      "Any eof that appears other than at the end of buffer means that the input is at an end."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 31,
+        "quote": "Any eof that appears other than at the end of buffer means that the input is at an end."
+      }
+    ],
+    "reason": "EOF placement determines whether it marks a buffer boundary or true end of file."
+  },
+  {
+    "id": "t2-049",
+    "answerable": false,
+    "reference_answer": "The supplied material does not cover this question.",
+    "required_facts": [],
+    "evidence": [],
+    "reason": "No Python tokenization library or version requirements are mentioned in the lecture."
+  },
+  {
+    "id": "t2-050",
+    "answerable": true,
+    "reference_answer": "A pattern is a description of the form lexemes may take, whereas a lexeme is the actual stream of characters matching that pattern.",
+    "required_facts": [
+      "Pattern is an informal description of a form that lexemes may take.",
+      "Lexeme is an actual stream of characters in the source program that matches the pattern."
+    ],
+    "evidence": [
+      {
+        "pdf_page": 11,
+        "quote": "Pattern: An informal description of a form that lexemes of a token may take. Lexeme: It is an actual stream of characters (in the source program) that matches the pattern"
+      }
+    ],
+    "reason": "Patterns describe rules while lexemes are the actual character sequences."
+  }
+]

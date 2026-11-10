@@ -47,6 +47,8 @@ class Settings(BaseSettings):
     EMBEDDINGS_DIM: int = 1024
     MODEL_TYPE: str = "jinaai/jina-embeddings-v5-text-small"
     CHUNKER_VERSION: str = "chunker-1"
+    # Local vision enrichment for supported charts; disable for text-only benchmarks.
+    CHART_EXTRACTION_ENABLED: bool = True
 
     # File Storage Settings
     #
@@ -66,8 +68,44 @@ class Settings(BaseSettings):
     GEMINI_API_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta"
     GEMINI_API_TIMEOUT_SECONDS: float = 30.0
 
+    # Groq Settings (OpenAI-compatible chat completions)
+    GROQ_API_KEY: SecretStr = SecretStr("")
+    GROQ_MODEL_NAME: str = "openai/gpt-oss-120b"
+    GROQ_API_BASE_URL: str = "https://api.groq.com/openai/v1"
+    GROQ_API_TIMEOUT_SECONDS: float = 60.0
+    # Free tier is ~8K tokens/minute, so a 429 is routine: wait the server's
+    # retry-after (capped) this many times before giving up.
+    GROQ_MAX_RETRIES: int = 3
+
     # LLM Calls Settings
     LLM_FAKE_MODE: bool = Field(default=True)
+    # Opt-in: one rewrite/retrieval/generation pass after a source-free refusal.
+    QUERY_REWRITE_ENABLED: bool = False
+    RETRIEVAL_DECOMPOSITION_ENABLED: bool = False
+    ANSWER_DECOMPOSITION_ENABLED: bool = False
+    QUERY_REWRITE_TIMEOUT_SECONDS: float = Field(default=15.0, gt=0)
+    RETRIEVAL_DECOMPOSITION_MAX_QUESTIONS: int = Field(default=3, ge=2, le=4)
+    # Calibrated on Topic 2 development-query similarities. This is a routing
+    # signal, not a probability that the answer is correct.
+    QUERY_REWRITE_CONFIDENCE_THRESHOLD: float = Field(default=0.50, ge=0, le=1)
+
+    @property
+    def llm_provider(self) -> str | None:
+        """Which real provider is configured: Gemini wins when both keys exist."""
+        if self.GEMINI_API_KEY.get_secret_value():
+            return "gemini"
+        if self.GROQ_API_KEY.get_secret_value():
+            return "groq"
+        return None
+
+    @property
+    def llm_model_name(self) -> str | None:
+        provider = self.llm_provider
+        if provider == "gemini":
+            return self.GEMINI_MODEL_NAME
+        if provider == "groq":
+            return self.GROQ_MODEL_NAME
+        return None
 
     # Load from .env file automatically
     model_config = SettingsConfigDict(

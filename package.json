@@ -6,6 +6,7 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "dev:web": "turbo --filter web dev",
+    "dev:evaluation": "turbo --filter evaluation dev",
     "dev:desktop": "pnpm --filter desktop tauri dev",
     "dev:android": "pnpm --filter desktop tauri android dev",
     "dev:concept": "pnpm --filter concept dev",

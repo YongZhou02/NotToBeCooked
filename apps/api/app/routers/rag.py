@@ -8,7 +8,10 @@ itself is not evidence.
 
 import asyncio
 import logging
+import re
 from datetime import UTC, datetime
+from time import perf_counter
+from typing import Any
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -17,7 +20,12 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import settings
 from app.db.database import get_session
-from app.db.vector_ops import SearchConfig, _vector_similarity_search, hybrid_search
+from app.db.vector_ops import (
+    SearchConfig,
+    _vector_similarity_search,
+    hybrid_search,
+    keyword_search,
+)
 from app.dependencies.auth import get_current_user
 from app.schemas.chat import ChatRole, Message
 from app.schemas.chunk import Chunk
@@ -38,6 +46,7 @@ from app.services.chat import get_or_create_conversation
 from app.services.embeddings import embed_query
 from app.services.grounding import (
     check_grounding,
+    drop_duplicate_citations,
     drop_unreferenced,
     drop_unverified,
     extract_markers,
@@ -51,6 +60,8 @@ from app.services.llm import (
     generate_answer,
 )
 from app.services.prompt import HISTORY_TURNS, build_context, render_history
+from app.services.query_rewrite import rewrite_query
+from app.services.question_decomposition import decompose_question
 
 logger = logging.getLogger(__name__)
 
@@ -104,6 +115,7 @@ async def _retrieve(
     session: AsyncSession,
     user_id: UUID,
     query_vector: list[float] | None = None,
+    search_config: SearchConfig | None = None,
 ) -> list[RetrievedChunk]:
     """Retrieval for one turn -- Gantt r48, the caller `hybrid_search` never had.
 
@@ -145,7 +157,7 @@ async def _retrieve(
         course_id=None,
         session=session,
         file_ids=file_ids,
-        config=SearchConfig(final_limit=request.top_k),
+        config=search_config or SearchConfig(final_limit=request.top_k),
     )
 
 
@@ -335,6 +347,226 @@ def _interleave(
 # Chinese PDFs and scanned PDFs were not measured. A wrong call costs the
 # order, not the results: both lists are still interleaved.
 STANDS_ALONE_SIMILARITY = 0.5
+RELEVANT_CHUNK_SIMILARITY = 0.48
+CONFIDENCE_FLOOR = 0.35
+CONFIDENCE_CEILING = 0.65
+CONFIDENCE_SUPPORT_TARGET = 3
+ANCHOR_STOPWORDS = {
+    "about",
+    "according",
+    "after",
+    "before",
+    "becomes",
+    "could",
+    "does",
+    "from",
+    "into",
+    "lecture",
+    "material",
+    "operation",
+    "question",
+    "same",
+    "source",
+    "their",
+    "these",
+    "they",
+    "this",
+    "what",
+    "when",
+    "whereas",
+    "which",
+    "while",
+    "with",
+    "would",
+}
+
+
+def _clamp01(value: float) -> float:
+    return max(0.0, min(1.0, value))
+
+
+def _confidence_from_similarities(similarities: list[float]) -> dict[str, Any]:
+    """Explainable retrieval routing score; not answer-correctness probability."""
+    ordered = sorted(similarities, reverse=True)
+    best = ordered[0] if ordered else 0.0
+    strong_count = sum(score >= RELEVANT_CHUNK_SIMILARITY for score in ordered)
+    peak = _clamp01((best - CONFIDENCE_FLOOR) / (CONFIDENCE_CEILING - CONFIDENCE_FLOOR))
+    support = _clamp01(strong_count / CONFIDENCE_SUPPORT_TARGET)
+    score = 0.7 * peak + 0.3 * support
+    return {
+        "score": score,
+        "best_similarity": best,
+        "strong_chunk_count": strong_count,
+        "top_similarities": ordered,
+        "peak_component": peak,
+        "support_component": support,
+    }
+
+
+async def _retrieval_confidence(
+    request: RagQueryRequest,
+    query_vector: list[float],
+    session: AsyncSession,
+    user_id: UUID,
+) -> dict[str, Any]:
+    file_ids = await _scope_file_ids(request, session, user_id)
+    if not file_ids:
+        return _confidence_from_similarities([])
+    rows = await _vector_similarity_search(
+        query_vector, session, None, file_ids, top_k=request.top_k
+    )
+    return _confidence_from_similarities([1 - float(row[2]) for row in rows])
+
+
+def _rrf_merge(
+    original: list[RetrievedChunk], rewritten: list[RetrievedChunk], limit: int
+) -> list[RetrievedChunk]:
+    """Fuse two ranked lists without trusting incomparable provider scores."""
+    return _rrf_merge_many([original, rewritten], limit)
+
+
+def _rrf_merge_many(
+    rankings: list[list[RetrievedChunk]],
+    limit: int,
+    *,
+    dedupe_pages: bool = False,
+    dedupe_similar: bool = False,
+) -> list[RetrievedChunk]:
+    """Fuse original + auxiliary rankings; auxiliary queries get a discovery bonus."""
+    by_id: dict[UUID, RetrievedChunk] = {}
+    fused: dict[UUID, float] = {}
+    for list_index, ranked in enumerate(rankings):
+        # A small discovery bonus keeps a new rewrite-only passage from being
+        # crowded out by four chunks duplicated across both lists.
+        weight = 1.0 if list_index == 0 else 1.2
+        for rank, chunk in enumerate(ranked, 1):
+            by_id[chunk.chunk_id] = chunk
+            fused[chunk.chunk_id] = fused.get(chunk.chunk_id, 0.0) + weight / (60 + rank)
+    ordered = sorted(fused, key=lambda chunk_id: fused[chunk_id], reverse=True)
+    merged: list[RetrievedChunk] = []
+    seen_pages: set[tuple[UUID, int | None, int | None]] = set()
+    seen_content: list[tuple[UUID, set[str]]] = []
+    for chunk_id in ordered:
+        chunk = by_id[chunk_id]
+        page_key = (chunk.file_id, chunk.page_start, chunk.page_end)
+        if dedupe_pages and chunk.page_start is not None and page_key in seen_pages:
+            continue
+        content_terms = _content_terms(chunk.content)
+        if dedupe_similar and any(
+            chunk.file_id == file_id
+            and content_terms
+            and len(content_terms & previous_terms) / len(content_terms | previous_terms) >= 0.35
+            for file_id, previous_terms in seen_content
+        ):
+            continue
+        seen_pages.add(page_key)
+        seen_content.append((chunk.file_id, content_terms))
+        merged.append(chunk.model_copy(update={"score": fused[chunk_id]}))
+        if len(merged) == limit:
+            break
+    return merged
+
+
+def _content_terms(content: str) -> set[str]:
+    """Return stable lexical features for cheap, local near-duplicate detection."""
+    stopwords = {
+        "about",
+        "after",
+        "also",
+        "and",
+        "are",
+        "before",
+        "for",
+        "from",
+        "into",
+        "that",
+        "the",
+        "their",
+        "then",
+        "this",
+        "through",
+        "using",
+        "with",
+    }
+    return {
+        term
+        for term in re.findall(r"[a-z][a-z0-9_-]{2,}", content.casefold())
+        if term not in stopwords
+    }
+
+
+def _should_decompose(question: str) -> bool:
+    """Conservative, local router: false positives cost an LLM call and retrievals."""
+    text = " ".join(question.casefold().split())
+    if len(re.findall(r"\b\w+\b", text)) < 10:
+        return False
+    if text.count("?") > 1:
+        return True
+    comparison_markers = (
+        " compare ",
+        " difference ",
+        " differ ",
+        " whereas ",
+        " relationship between ",
+        " the same ",
+        " respectively",
+    )
+    if any(marker in f" {text} " for marker in comparison_markers):
+        return True
+    multi_stage_markers = (
+        "progress from",
+        "from source",
+        "before and after",
+        "before parsing",
+        "then finally",
+        "and why",
+    )
+    return any(marker in text for marker in multi_stage_markers)
+
+
+def _anchor_terms(question: str, limit: int = 8) -> list[str]:
+    """Distinct content words for one-term full-text probes."""
+    terms: list[str] = []
+    for term in re.findall(r"[A-Za-z][A-Za-z0-9_-]{3,}", question.casefold()):
+        if term not in ANCHOR_STOPWORDS and term not in terms:
+            terms.append(term)
+    return terms[:limit]
+
+
+async def _keyword_anchor_retrieve(
+    request: RagQueryRequest, session: AsyncSession, user_id: UUID
+) -> list[RetrievedChunk]:
+    """Take the best exact-term hit per content word, preserving request scope."""
+    file_ids = await _scope_file_ids(request, session, user_id)
+    if not file_ids:
+        return []
+    # AsyncSession does not support concurrent operations on the same session.
+    rows_by_term = []
+    for term in _anchor_terms(request.question):
+        rows_by_term.append(await keyword_search(term, session, None, file_ids, top_k=1))
+    found: list[RetrievedChunk] = []
+    seen: set[UUID] = set()
+    for rows in rows_by_term:
+        if not rows:
+            continue
+        chunk, file, rank = rows[0]
+        if chunk.id in seen:
+            continue
+        seen.add(chunk.id)
+        found.append(
+            RetrievedChunk(
+                chunk_id=chunk.id,
+                file_id=chunk.file_id,
+                course_id=chunk.course_id,
+                filename=file.filename,
+                page_start=chunk.page_start,
+                page_end=chunk.page_end,
+                heading=chunk.heading,
+                content=chunk.content,
+                score=float(rank),
+            )
+        )
+    return found
 
 
 async def _best_similarity(
@@ -362,6 +594,7 @@ async def _retrieve_follow_up(
     previous_question: str | None,
     session: AsyncSession,
     user_id: UUID,
+    query_vector: list[float] | None = None,
 ) -> list[RetrievedChunk]:
     """Search for the question alone and for it joined to the previous one. US-14.
 
@@ -381,9 +614,10 @@ async def _retrieve_follow_up(
     reuses the first embedding.
     """
     if not previous_question:
-        return await _retrieve(request, session, user_id)
+        return await _retrieve(request, session, user_id, query_vector=query_vector)
+    if query_vector is None:
+        query_vector = await asyncio.to_thread(embed_query, request.question)
 
-    query_vector = await asyncio.to_thread(embed_query, request.question)
     alone = await _retrieve(request, session, user_id, query_vector=query_vector)
     joined_question = " ".join(f"{previous_question} {request.question}".split())
     joined = await _retrieve(
@@ -462,6 +696,14 @@ async def query(
     clean_rag_query = " ".join(request.question.split()).strip()
     rag_request = request.model_copy(update={"question": clean_rag_query})
 
+    rewrite_trace: dict[str, Any] = {
+        "enabled": settings.QUERY_REWRITE_ENABLED,
+        "attempted": False,
+    }
+    decomposition_trace: dict[str, Any] = {
+        "enabled": settings.RETRIEVAL_DECOMPOSITION_ENABLED,
+        "attempted": False,
+    }
     if rag_request.intent == RagIntent.DOCUMENT_SUMMARY:
         chunks = await _retrieve_document_chunks(
             rag_request,
@@ -469,12 +711,162 @@ async def query(
             UUID(str(user_id)),
         )
     else:
+        decomposition_candidate = (
+            settings.RETRIEVAL_DECOMPOSITION_ENABLED
+            and not settings.LLM_FAKE_MODE
+            and _should_decompose(clean_rag_query)
+        )
+        auxiliary_retrieval_enabled = (
+            settings.QUERY_REWRITE_ENABLED or settings.RETRIEVAL_DECOMPOSITION_ENABLED
+        ) and not settings.LLM_FAKE_MODE
+        query_vector = (
+            await asyncio.to_thread(embed_query, clean_rag_query)
+            if auxiliary_retrieval_enabled
+            else None
+        )
         chunks = await _retrieve_follow_up(
             rag_request,
             turns[-1][0] if turns else None,
             session,
             UUID(str(user_id)),
+            query_vector=query_vector,
         )
+        if (
+            settings.QUERY_REWRITE_ENABLED
+            and not settings.LLM_FAKE_MODE
+            and not decomposition_candidate
+        ):
+            assert query_vector is not None
+            confidence = await _retrieval_confidence(
+                rag_request, query_vector, session, UUID(str(user_id))
+            )
+            rewrite_trace["initial_confidence"] = confidence
+            rewrite_trace["threshold"] = settings.QUERY_REWRITE_CONFIDENCE_THRESHOLD
+        else:
+            confidence = None
+        if decomposition_candidate:
+            started = perf_counter()
+            decomposition_trace.update(
+                attempted=True,
+                original_query=clean_rag_query,
+                first_chunk_ids=[str(c.chunk_id) for c in chunks],
+            )
+            try:
+                sub_questions = await decompose_question(
+                    clean_rag_query, [chunk.content for chunk in chunks[:5]]
+                )
+                decomposition_trace["sub_questions"] = sub_questions
+                rankings = [chunks]
+                subquery_sources: list[dict[str, Any]] = []
+                for sub_question in sub_questions:
+                    sub_request = rag_request.model_copy(
+                        update={"question": sub_question, "top_k": min(5, rag_request.top_k)}
+                    )
+                    sub_chunks = await _retrieve(
+                        sub_request,
+                        session,
+                        UUID(str(user_id)),
+                        search_config=SearchConfig(final_limit=min(5, rag_request.top_k)),
+                    )
+                    rankings.append(sub_chunks)
+                    subquery_sources.append(
+                        {
+                            "question": sub_question,
+                            "chunk_ids": [str(c.chunk_id) for c in sub_chunks],
+                            "pages": [c.page_start for c in sub_chunks],
+                        }
+                    )
+                merged = _rrf_merge_many(
+                    rankings,
+                    rag_request.top_k,
+                    dedupe_pages=False,
+                    dedupe_similar=True,
+                )
+
+                candidate_map = {
+                    str(c.chunk_id): c
+                    for ranked in rankings
+                    for c in ranked
+                }
+                selected_ids = {str(c.chunk_id) for c in merged}
+                decomposition_trace["candidate_count"] = len(candidate_map)
+                decomposition_trace["selected_pages"] = [
+                    c.page_start for c in merged
+                ]
+                decomposition_trace["dropped_candidate_pages"] = sorted({
+                    c.page_start
+                    for cid, c in candidate_map.items()
+                    if cid not in selected_ids and c.page_start is not None
+                })
+                decomposition_trace["subquery_sources"] = subquery_sources
+                decomposition_trace["merged_chunk_ids"] = [str(c.chunk_id) for c in merged]
+                decomposition_trace["accepted"] = merged != chunks
+                chunks = merged
+            except Exception as exc:
+                decomposition_trace["error_type"] = type(exc).__name__
+                logger.exception("question decomposition failed: conversation_id=%s", conv_id)
+            decomposition_trace["extra_latency_ms"] = (perf_counter() - started) * 1000
+            decomposition_trace.setdefault("accepted", False)
+            logger.info(
+                "selective question decomposition: conversation_id=%s trace=%s",
+                conv_id,
+                decomposition_trace,
+            )
+        elif confidence and confidence["score"] < settings.QUERY_REWRITE_CONFIDENCE_THRESHOLD:
+            started = perf_counter()
+            rewrite_trace.update(
+                attempted=True,
+                original_query=clean_rag_query,
+                first_source_pages=[c.page_start for c in chunks],
+                first_chunk_ids=[str(c.chunk_id) for c in chunks],
+            )
+            try:
+                rewritten = await rewrite_query(clean_rag_query, turns[-1][0] if turns else None)
+                rewrite_trace["rewritten_query"] = rewritten
+                if rewritten.casefold() == clean_rag_query.casefold():
+                    rewrite_trace["skip_reason"] = "unchanged_query"
+                else:
+                    rewritten_request = rag_request.model_copy(update={"question": rewritten})
+                    rewritten_vector = await asyncio.to_thread(embed_query, rewritten)
+                    retry_chunks = await _retrieve(
+                        rewritten_request,
+                        session,
+                        UUID(str(user_id)),
+                        query_vector=rewritten_vector,
+                        search_config=SearchConfig(
+                            keyword_weight=2.0,
+                            vector_weight=1.0,
+                            final_limit=rag_request.top_k,
+                        ),
+                    )
+                    anchor_chunks = await _keyword_anchor_retrieve(
+                        rag_request, session, UUID(str(user_id))
+                    )
+                    expanded_chunks = _interleave(anchor_chunks, retry_chunks, rag_request.top_k)
+                    rewrite_trace["rewritten_confidence"] = await _retrieval_confidence(
+                        rewritten_request,
+                        rewritten_vector,
+                        session,
+                        UUID(str(user_id)),
+                    )
+                    rewrite_trace["retry_source_pages"] = [c.page_start for c in retry_chunks]
+                    rewrite_trace["retry_chunk_ids"] = [str(c.chunk_id) for c in retry_chunks]
+                    rewrite_trace["anchor_terms"] = _anchor_terms(clean_rag_query)
+                    rewrite_trace["anchor_source_pages"] = [c.page_start for c in anchor_chunks]
+                    merged = _rrf_merge(chunks, expanded_chunks, rag_request.top_k)
+                    rewrite_trace["merged_chunk_ids"] = [str(c.chunk_id) for c in merged]
+                    rewrite_trace["accepted"] = merged != chunks
+                    chunks = merged
+            except Exception as exc:
+                rewrite_trace["error_type"] = type(exc).__name__
+                logger.exception("query rewrite failed: conversation_id=%s", conv_id)
+            rewrite_trace["extra_latency_ms"] = (perf_counter() - started) * 1000
+            rewrite_trace.setdefault("accepted", False)
+            logger.info(
+                "retrieval confidence rewrite: conversation_id=%s trace=%s",
+                conv_id,
+                rewrite_trace,
+            )
     if not chunks and settings.LLM_FAKE_MODE and rag_request.intent == RagIntent.QUESTION:
         chunks = _placeholder_sources(rag_request, conversation.course_id)
 
@@ -508,6 +900,13 @@ async def query(
     #    something: the model's own claim is an input to the decision, never the
     #    decision itself.
     citations = _resolve_citations(draft.citations, selected)
+    citations, duplicates = drop_duplicate_citations(citations)
+    if duplicates:
+        logger.info(
+            "dropped duplicate citations: conversation_id=%s markers=%s",
+            conv_id,
+            [citation.marker for citation in duplicates],
+        )
     citations, dropped = drop_unreferenced(draft.answer, citations)
     if dropped:
         logger.info(
@@ -568,6 +967,8 @@ async def query(
         retrieved_chunk_ids=[c.chunk_id for c in chunks],
         used_chunk_ids=[c.chunk_id for c in selected],
         embedding_model=settings.MODEL_TYPE,
+        query_rewrite=rewrite_trace,
+        question_decomposition=decomposition_trace,
     )
 
     session.add(

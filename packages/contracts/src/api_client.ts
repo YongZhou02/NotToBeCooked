@@ -1,3 +1,4 @@
+import { resolveApiBaseUrl } from "./api-base-url.js"
 import {
     type LoginRequest,
     type RegisterRequest,
@@ -20,6 +21,8 @@ import {
     type ConversationDetail,
     type RagAnswer,
     type RagQueryRequest,
+    type AnswerFeedbackRead,
+    type AnswerFeedbackUpsert,
     type MilestoneRead,
     type MilestoneCreate,
     type MilestoneUpdate,
@@ -102,7 +105,10 @@ export class ApiClient {
             }
         ).env
 
-        return env?.VITE_API_URL || "http://localhost:8000"
+        return resolveApiBaseUrl(
+            env?.VITE_API_URL,
+            typeof window === "undefined" ? undefined : window.location.origin
+        )
     }
 
     /** The error shapes this client throws, from a parsed error body. */
@@ -236,11 +242,22 @@ const isFormData =
             headers["Authorization"] = `Bearer ${token}`
         }
 
-        const response = await fetch(`${this.baseUrl}${endpoint}`, {
-            ...init,
-            credentials: "include",
-            headers,
-        })
+        let response: Response
+        try {
+            response = await fetch(`${this.baseUrl}${endpoint}`, {
+                ...init,
+                credentials: "include",
+                headers,
+            })
+        } catch (error) {
+            if (error instanceof Error && error.name === "AbortError") {
+                throw error
+            }
+            throw {
+                code: "NETWORK_ERROR",
+                message: "Cannot connect to the server. Check your connection and make sure the API is running.",
+            } satisfies ApiClientError
+        }
 
         if (
             response.status === 401 &&
@@ -404,6 +421,14 @@ const isFormData =
 
     // File Endpoints
     public files = {
+        replace: (fileId: string, file: File): Promise<FileRead> => {
+            const body = new FormData()
+            body.append("upload", file)
+            return this.request<FileRead>(`/files/${encodeURIComponent(fileId)}/content`, {
+                method: "PUT",
+                body,
+            })
+        },
         upload: (
             folderId: string,
             file: File,
@@ -555,6 +580,26 @@ const isFormData =
                 method: "POST",
                 body: JSON.stringify(payload)
             })
+        },
+
+        feedback: (
+            message_id: string,
+            payload: AnswerFeedbackUpsert
+        ): Promise<AnswerFeedbackRead> => {
+            return this.request<AnswerFeedbackRead>(
+                `/chat/messages/${encodeURIComponent(message_id)}/feedback`,
+                {
+                    method: "PUT",
+                    body: JSON.stringify(payload)
+                }
+            )
+        },
+
+        get_feedback: (message_id: string): Promise<AnswerFeedbackRead> => {
+            return this.request<AnswerFeedbackRead>(
+                `/chat/messages/${encodeURIComponent(message_id)}/feedback`,
+                { method: "GET" }
+            )
         }
     }
 }

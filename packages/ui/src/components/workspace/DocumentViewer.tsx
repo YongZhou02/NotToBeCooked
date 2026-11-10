@@ -167,7 +167,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = React.memo(
         </div>
 
         {/* Document Canvas Content Area */}
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-(--bg-canvas,#161F29) p-6 md:p-8 lg:p-10">
+        {/* Reserve scrollbar space even when the fitted page just fits.
+            Otherwise its appearance changes the width observed by PdfViewer,
+            making the page alternately fit and overflow on every redraw. */}
+        <div
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-(--bg-canvas,#161F29) p-6 md:p-8 lg:p-10"
+          style={{ scrollbarGutter: "stable" }}
+        >
           {previewState === "text" ? (
             <TextPreview
               fileId={document.id}

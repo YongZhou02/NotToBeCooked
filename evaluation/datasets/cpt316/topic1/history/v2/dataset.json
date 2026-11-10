@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "name": "CPT316 Topic 1 semantic-text RAG pilot",
+  "annotation_status": "draft: assistant source-checked; owner review pending",
+  "scope": "single supplied text-transcribed Topic 1 PDF; not original-image understanding",
+  "chart_extraction": false,
+  "ocr": true,
+  "chunk_max_tokens": 350,
+  "top_k": 5,
+  "candidate_limit": 50,
+  "rrf_k": 60
+}
