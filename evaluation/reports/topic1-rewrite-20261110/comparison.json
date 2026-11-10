@@ -1,0 +1,1914 @@
+{
+  "baseline": "evaluation\\runs\\20261110T111410606527Z",
+  "baseline_provider_failure_retest": null,
+  "treatment": "evaluation\\runs\\20261110T112048228857Z",
+  "treatment_prefix": null,
+  "summary": {
+    "questions": 15,
+    "answerable": 15,
+    "rewrite_attempted": 3,
+    "rewrite_accepted": 2,
+    "independent_model_runs": true,
+    "before": {
+      "grounded_rate_NOT_accuracy": 1,
+      "mean_generation_ms": 14384.58503333192,
+      "generation_errors": 0,
+      "answerable_evidence_recall@5": 0.9444444444444444
+    },
+    "after": {
+      "grounded_rate_NOT_accuracy": 1,
+      "mean_generation_ms": 12827.757619994614,
+      "generation_errors": 0,
+      "answerable_evidence_recall@5": 0.9444444444444444
+    }
+  },
+  "questions": [
+    {
+      "question_id": "t1-001",
+      "question": "What three kinds of translator are named in Topic 1?",
+      "answerable": true,
+      "reference_answer": "Compiler, interpreter, and assembler.",
+      "required_facts": [
+        "(1) Compiler, (2) Interpreter, (3) Assembler."
+      ],
+      "before": {
+        "answer": "The three kinds of translator named are Compiler, Interpreter, and Assembler. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 4,
+            "page_end": 4,
+            "quote": "The numbered list names 3 kinds of translators: (1) Compiler, (2) Interpreter, (3) Assembler."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "50d13221-3621-48fa-bd04-ea3f394e7ec3"
+      },
+      "after": {
+        "answer": "The three kinds of translator named are Compiler, Interpreter, and Assembler. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 4,
+            "page_end": 4,
+            "quote": "The numbered list names 3 kinds of translators: (1) Compiler, (2) Interpreter, (3) Assembler."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "299b8f95-90dc-4792-b9c0-bedf51eab937"
+      },
+      "treatment_initial_draft": {
+        "answer": "The three kinds of translator named are Compiler, Interpreter, and Assembler. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "The numbered list names 3 kinds of translators: (1) Compiler, (2) Interpreter, (3) Assembler."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 1143.057300010696,
+      "after_ms": 1960.4235000151675,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false,
+        "threshold": 0.5,
+        "initial_confidence": {
+          "score": 0.5481775919596353,
+          "peak_component": 0.6402537027994791,
+          "best_similarity": 0.5420761108398438,
+          "top_similarities": [
+            0.5420761108398438,
+            0.42038813707899303,
+            0.38419724200980476,
+            0.3774910496169961,
+            0.37017983198165894
+          ],
+          "support_component": 0.3333333333333333,
+          "strong_chunk_count": 1
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-002",
+      "question": "What is a pass in the course's compiler model?",
+      "answerable": true,
+      "reference_answer": "One complete scan through the program.",
+      "required_facts": [
+        "Definition: a \"pass\" is one complete scan through the program."
+      ],
+      "before": {
+        "answer": "In the course's compiler model, a pass is defined as one complete scan through the program. [4]",
+        "citations": [
+          {
+            "marker": 4,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 34,
+            "page_end": 34,
+            "quote": "[PASS STRUCTURE / TEMPORAL ORDER] Definition: a \"pass\" is one complete scan through the program."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "9a2a4756-df61-4f3c-93e5-a5845043b3bf"
+      },
+      "after": {
+        "answer": "In the course's compiler model, a pass is defined as one complete scan through the program. [4]",
+        "citations": [
+          {
+            "marker": 4,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 34,
+            "page_end": 34,
+            "quote": "[PASS STRUCTURE / TEMPORAL ORDER] Definition: a \"pass\" is one complete scan through the program."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "85056712-8ea2-45a2-a6c9-8494e1bbca94"
+      },
+      "treatment_initial_draft": {
+        "answer": "In the course's compiler model, a pass is defined as one complete scan through the program. [4]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 4,
+            "quote": "[PASS STRUCTURE / TEMPORAL ORDER] Definition: a \"pass\" is one complete scan through the program."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 1443.095299997367,
+      "after_ms": 1621.0961999895517,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false,
+        "threshold": 0.5,
+        "initial_confidence": {
+          "score": 0.8386695994532585,
+          "peak_component": 0.7695279992189407,
+          "best_similarity": 0.5808583997656822,
+          "top_similarities": [
+            0.5808583997656822,
+            0.5760800151729566,
+            0.509543656165164,
+            0.4879980988503645,
+            0.46694836217472857
+          ],
+          "support_component": 1.0,
+          "strong_chunk_count": 4
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 0.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 0.25
+      },
+      "after_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 0.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 0.25
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-003",
+      "question": "What is a forward reference?",
+      "answerable": true,
+      "reference_answer": "A use before a later definition in source order.",
+      "required_facts": [
+        "A forward reference means a use appears BEFORE a later definition in the source order."
+      ],
+      "before": {
+        "answer": "A forward reference is when a use appears before its later definition in the source order. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 35,
+            "page_end": 35,
+            "quote": "[TWO-PASS SOLUTION TO FORWARD REFERENCES] A forward reference means a use appears BEFORE a later definition in the source order."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "8d3430d4-6c8f-40ed-bd9d-3fc9a67e8f81"
+      },
+      "after": {
+        "answer": "A forward reference is when a use appears before its later definition in the source order. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 35,
+            "page_end": 35,
+            "quote": "[TWO-PASS SOLUTION TO FORWARD REFERENCES] A forward reference means a use appears BEFORE a later definition in the source order."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "dd0ae8aa-8a94-4944-8e72-d35ddfe0a588"
+      },
+      "treatment_initial_draft": {
+        "answer": "A forward reference is when a use appears before its later definition in the source order. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "[TWO-PASS SOLUTION TO FORWARD REFERENCES] A forward reference means a use appears BEFORE a later definition in the source order."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 2552.413900004467,
+      "after_ms": 1186.0635999764781,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false,
+        "threshold": 0.5,
+        "initial_confidence": {
+          "score": 0.8999999999999999,
+          "peak_component": 1.0,
+          "best_similarity": 0.667299985772375,
+          "top_similarities": [
+            0.667299985772375,
+            0.4841528861249301,
+            0.24829907735597345,
+            0.2412693582830434,
+            0.23618623861320565
+          ],
+          "support_component": 0.6666666666666666,
+          "strong_chunk_count": 2
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-011",
+      "question": "Which identifier is mapped to id3 in the lexical example?",
+      "answerable": true,
+      "reference_answer": "rate maps to id3.",
+      "required_facts": [
+        "Position -> id1; initial -> id2; rate -> id3."
+      ],
+      "before": {
+        "answer": "The identifier **rate** is mapped to id3 in the lexical example. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 13,
+            "page_end": 13,
+            "quote": "Position -> id1; initial -> id2; rate -> id3."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "7e7ffcf9-55b5-469d-b4c9-d5a9a1a4f5f0"
+      },
+      "after": {
+        "answer": "The identifier **rate** is mapped to id3 in the lexical example. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 13,
+            "page_end": 13,
+            "quote": "Position -> id1; initial -> id2; rate -> id3."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "f9cd9514-f83a-4817-97e1-02891601ca14"
+      },
+      "treatment_initial_draft": {
+        "answer": "The identifier **rate** is mapped to id3 in the lexical example. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "Position -> id1; initial -> id2; rate -> id3."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 19249.579399998765,
+      "after_ms": 9370.822900003986,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false,
+        "threshold": 0.5,
+        "initial_confidence": {
+          "score": 0.8607720971107482,
+          "peak_component": 0.8011029958724976,
+          "best_similarity": 0.5903308987617493,
+          "top_similarities": [
+            0.5903308987617493,
+            0.49605509638786316,
+            0.48930907313173666,
+            0.429642800710035,
+            0.40763670206069946
+          ],
+          "support_component": 1.0,
+          "strong_chunk_count": 3
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-012",
+      "question": "What are the seven token classes in the Position example, in order?",
+      "answerable": true,
+      "reference_answer": "Identifier, assignment, identifier, plus, identifier, multiplication, number.",
+      "required_facts": [
+        "identifier | assignment symbol | identifier | plus symbol | identifier | multiplication symbol | number."
+      ],
+      "before": {
+        "answer": "The seven token classes in the Position example, in order, are: identifier, assignment symbol, identifier, plus symbol, identifier, multiplication symbol, number. [5]",
+        "citations": [
+          {
+            "marker": 5,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 13,
+            "page_end": 13,
+            "quote": "identifier | assignment symbol | identifier | plus symbol | identifier | multiplication symbol | number."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "8218c54d-fa9c-48d6-aae9-dff677a83f27"
+      },
+      "after": {
+        "answer": "The seven token classes in the Position example, in order, are: identifier, assignment symbol, identifier, plus symbol, identifier, multiplication symbol, number. [3]",
+        "citations": [
+          {
+            "marker": 3,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 13,
+            "page_end": 13,
+            "quote": "identifier | assignment symbol | identifier | plus symbol | identifier | multiplication symbol | number."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "f8462b7d-0138-4eb7-8d54-f489ed41fad3"
+      },
+      "treatment_initial_draft": {
+        "answer": "The seven token classes in the Position example, in order, are: identifier, assignment symbol, identifier, plus symbol, identifier, multiplication symbol, number. [3]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 3,
+            "quote": "identifier | assignment symbol | identifier | plus symbol | identifier | multiplication symbol | number."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 17219.877900002757,
+      "after_ms": 20110.30890000984,
+      "rewrite": {
+        "enabled": true,
+        "accepted": true,
+        "attempted": true,
+        "threshold": 0.5,
+        "anchor_terms": [
+          "seven",
+          "token",
+          "classes",
+          "position",
+          "example",
+          "order"
+        ],
+        "original_query": "What are the seven token classes in the Position example, in order?",
+        "first_chunk_ids": [
+          "6323dd2e-0d84-42a5-b1ea-f491c6c0fa53",
+          "7cd50eb3-62cb-4dd5-b971-c3530f35756f",
+          "985956a4-563a-4b27-b9a8-6f1eb99f0fd4",
+          "a1ce42d1-2416-431e-8b4d-fcbf5f9321a5",
+          "fdf782a3-3a69-45af-9e8f-2a7811b9892b"
+        ],
+        "retry_chunk_ids": [
+          "985956a4-563a-4b27-b9a8-6f1eb99f0fd4",
+          "6323dd2e-0d84-42a5-b1ea-f491c6c0fa53",
+          "92a5e0ed-5cf3-4098-9da6-3eb6ab967cf6",
+          "1a9cbc2c-55fe-4bfd-a901-3204877e94a6",
+          "324a9ac4-782f-4da4-9ebb-9a2197cc2a65"
+        ],
+        "rewritten_query": "Position example lexical token classes order seven token types",
+        "extra_latency_ms": 2076.516900007846,
+        "merged_chunk_ids": [
+          "985956a4-563a-4b27-b9a8-6f1eb99f0fd4",
+          "6323dd2e-0d84-42a5-b1ea-f491c6c0fa53",
+          "fdf782a3-3a69-45af-9e8f-2a7811b9892b",
+          "a1ce42d1-2416-431e-8b4d-fcbf5f9321a5",
+          "92a5e0ed-5cf3-4098-9da6-3eb6ab967cf6"
+        ],
+        "first_source_pages": [
+          13,
+          36,
+          15,
+          16,
+          13
+        ],
+        "initial_confidence": {
+          "score": 0.26685119766884047,
+          "peak_component": 0.38121599666977213,
+          "best_similarity": 0.46436479900093164,
+          "top_similarities": [
+            0.46436479900093164,
+            0.44862833619117737,
+            0.4410756230354309,
+            0.41947034001350403,
+            0.41086915135383606
+          ],
+          "support_component": 0.0,
+          "strong_chunk_count": 0
+        },
+        "retry_source_pages": [
+          15,
+          13,
+          14,
+          19,
+          24
+        ],
+        "anchor_source_pages": [
+          15,
+          13,
+          13,
+          16,
+          2
+        ],
+        "rewritten_confidence": {
+          "score": 0.28579633037249247,
+          "peak_component": 0.40828047196070355,
+          "best_similarity": 0.47248414158821106,
+          "top_similarities": [
+            0.47248414158821106,
+            0.46968019008636475,
+            0.4671947956085205,
+            0.44984716176986694,
+            0.44917750358581543
+          ],
+          "support_component": 0.0,
+          "strong_chunk_count": 0
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 0.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 0.2
+      },
+      "after_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 0.3333333333333333
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-013",
+      "question": "Why is the integer literal 60 converted to real before multiplication by id3?",
+      "answerable": true,
+      "reference_answer": "Because 60 is an integer literal while id3 is real-valued, so semantic analysis converts 60 to real before multiplication.",
+      "required_facts": [
+        "Given: id1, id2, and id3 are REAL-valued identifiers.",
+        "Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+      ],
+      "before": {
+        "answer": "Because id3 is a REAL‑typed identifier while the literal 60 is an INTEGER, semantic analysis inserts a conversion node to change the integer literal to a real before the multiplication so that the operand types match. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 17,
+            "page_end": 17,
+            "quote": "Semantic analysis inserts a conversion node above the literal in the multiplication branch: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  inttoreal | 60 Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "a26f8b4f-8272-4e9f-9ac0-b195b33f1391"
+      },
+      "after": {
+        "answer": "The literal 60 is an integer but id3 is a real‑valued identifier, so semantic analysis inserts a conversion node to change 60 to a real before the multiplication. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 17,
+            "page_end": 17,
+            "quote": "Semantic analysis inserts a conversion node above the literal in the multiplication branch: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  inttoreal | 60 Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "e62304d5-282a-4abe-ac9a-4fdb14b55702"
+      },
+      "treatment_initial_draft": {
+        "answer": "The literal 60 is an integer but id3 is a real‑valued identifier, so semantic analysis inserts a conversion node to change 60 to a real before the multiplication. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "Semantic analysis inserts a conversion node above the literal in the multiplication branch: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  inttoreal | 60 Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 21075.706399977207,
+      "after_ms": 19511.41540001845,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false,
+        "threshold": 0.5,
+        "initial_confidence": {
+          "score": 0.7581084082792113,
+          "peak_component": 0.6544405832560162,
+          "best_similarity": 0.5463321749768049,
+          "top_similarities": [
+            0.5463321749768049,
+            0.5351454573696306,
+            0.48394790387464226,
+            0.4183056105193139,
+            0.3787775707973504
+          ],
+          "support_component": 1.0,
+          "strong_chunk_count": 3
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-021",
+      "question": "What intermediate artifact lets the front part of translation hand work to the construction part?",
+      "answerable": true,
+      "reference_answer": "Intermediate representation connects analysis to synthesis.",
+      "required_facts": [
+        "Output of analysis = Intermediate Representation.",
+        "Input to synthesis = Intermediate Representation."
+      ],
+      "before": {
+        "answer": "The intermediate representation is the artifact that passes the work from the front (analysis) part of translation to the construction (synthesis) part. [3] [4]",
+        "citations": [
+          {
+            "marker": 3,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 9,
+            "page_end": 9,
+            "quote": "The intermediate representation is a bridge: analysis extracts/structures meaning; synthesis constructs output."
+          },
+          {
+            "marker": 4,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 10,
+            "page_end": 10,
+            "quote": "Semantic analysis Output of analysis = Intermediate Representation."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "67c9ddd8-c3a8-463f-84cb-e1f72e584fda"
+      },
+      "after": {
+        "answer": "The front‑end passes its results to the back‑end via the Intermediate Representation (often called intermediate code). [2] [4]",
+        "citations": [
+          {
+            "marker": 2,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 10,
+            "page_end": 10,
+            "quote": "Semantic analysis Output of analysis = Intermediate Representation."
+          },
+          {
+            "marker": 4,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 24,
+            "page_end": 24,
+            "quote": "[WHOLE COMPILER / DIRECTED PROCESS FLOW] Source program -> Lexical analysis             [Analysis Phase] -> Syntax analysis              [Analysis Phase] -> Semantic analysis            [Analysis Phase] -> Intermediate code            [IR boundary] -> Code optimization            [Synthesis Phase] -> Code generation              [Synthesis Phase] -> Target Program [CROSS-CUTTING CONNECTIONS, NOT SEQUENTIAL STAGES] Symbol table is connected by drawn edges to EVERY central stage: lexical, syntax, semantic, intermediate, optimization, generation."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "1cf82efd-6779-49e2-8c85-1c15e044574d"
+      },
+      "treatment_initial_draft": {
+        "answer": "The front‑end passes its results to the back‑end via the Intermediate Representation (often called intermediate code). [2] [4]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 2,
+            "quote": "Semantic analysis Output of analysis = Intermediate Representation."
+          },
+          {
+            "marker": 4,
+            "quote": "[WHOLE COMPILER / DIRECTED PROCESS FLOW] Source program -> Lexical analysis             [Analysis Phase] -> Syntax analysis              [Analysis Phase] -> Semantic analysis            [Analysis Phase] -> Intermediate code            [IR boundary] -> Code optimization            [Synthesis Phase] -> Code generation              [Synthesis Phase] -> Target Program [CROSS-CUTTING CONNECTIONS, NOT SEQUENTIAL STAGES] Symbol table is connected by drawn edges to EVERY central stage: lexical, syntax, semantic, intermediate, optimization, generation."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 17118.730999995023,
+      "after_ms": 13361.821699974826,
+      "rewrite": {
+        "enabled": true,
+        "accepted": true,
+        "attempted": true,
+        "threshold": 0.5,
+        "anchor_terms": [
+          "intermediate",
+          "artifact",
+          "lets",
+          "front",
+          "part",
+          "translation",
+          "hand",
+          "work"
+        ],
+        "original_query": "What intermediate artifact lets the front part of translation hand work to the construction part?",
+        "first_chunk_ids": [
+          "0f2f00f1-515e-4183-9fff-9fe5a5d6aa5a",
+          "0b722db2-5d55-4d90-8e4e-421a50d39ebf",
+          "8b34de99-af54-421d-8f5e-36105368376a",
+          "6601b6c7-b60d-4ff4-9706-92fb01d9a825",
+          "1a3f07ff-c31b-4716-80e6-5187b5520691"
+        ],
+        "retry_chunk_ids": [
+          "0f2f00f1-515e-4183-9fff-9fe5a5d6aa5a",
+          "324a9ac4-782f-4da4-9ebb-9a2197cc2a65",
+          "6601b6c7-b60d-4ff4-9706-92fb01d9a825",
+          "1a9cbc2c-55fe-4bfd-a901-3204877e94a6",
+          "92a5e0ed-5cf3-4098-9da6-3eb6ab967cf6"
+        ],
+        "rewritten_query": "compiler front end back end intermediate representation IR three-address code abstract syntax tree",
+        "extra_latency_ms": 1389.41450000857,
+        "merged_chunk_ids": [
+          "0f2f00f1-515e-4183-9fff-9fe5a5d6aa5a",
+          "6601b6c7-b60d-4ff4-9706-92fb01d9a825",
+          "3c581c45-922b-497a-8e09-abd9f02f79a2",
+          "324a9ac4-782f-4da4-9ebb-9a2197cc2a65",
+          "5341dd32-a610-43da-9741-476db67bb07d"
+        ],
+        "first_source_pages": [
+          25,
+          4,
+          9,
+          10,
+          18
+        ],
+        "initial_confidence": {
+          "score": 0.14155519729191854,
+          "peak_component": 0.2022217104170265,
+          "best_similarity": 0.41066651312510793,
+          "top_similarities": [
+            0.41066651312510793,
+            0.40775409890686953,
+            0.3971354724684083,
+            0.3777936842687506,
+            0.3688600517678199
+          ],
+          "support_component": 0.0,
+          "strong_chunk_count": 0
+        },
+        "retry_source_pages": [
+          25,
+          24,
+          10,
+          19,
+          14
+        ],
+        "anchor_source_pages": [
+          26,
+          25,
+          27,
+          4
+        ],
+        "rewritten_confidence": {
+          "score": 0.9420598822452597,
+          "peak_component": 0.9172284032075139,
+          "best_similarity": 0.6251685209622542,
+          "top_similarities": [
+            0.6251685209622542,
+            0.5641359090805054,
+            0.557211697101593,
+            0.5519014267980211,
+            0.5451025637923153
+          ],
+          "support_component": 1.0,
+          "strong_chunk_count": 5
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 0.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 0.25
+      },
+      "after_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 0.5
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-022",
+      "question": "Why can generating output immediately be difficult when a name is declared later?",
+      "answerable": true,
+      "reference_answer": "A forward reference means the referenced definition may not yet be known.",
+      "required_facts": [
+        "A forward reference can make immediate one-pass code generation difficult, because a referenced definition may not be known yet."
+      ],
+      "before": {
+        "answer": "Generating output immediately is hard when a name is used before its definition because the compiler may not yet know the referenced definition. [1]\n\nSuch a situation is called a forward reference, where a use appears before a later definition in the source order. [5]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 34,
+            "page_end": 34,
+            "quote": "ONE-PASS structure: read/analyze source statement -> synthesize corresponding output (for each statement in the same pass) TWO-PASS structure: Pass 1: analysis -> intermediate information Pass 2: use intermediate information -> target output A forward reference can make immediate one-pass code generation difficult, because a referenced definition may not be known yet."
+          },
+          {
+            "marker": 5,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 35,
+            "page_end": 35,
+            "quote": "[TWO-PASS SOLUTION TO FORWARD REFERENCES] A forward reference means a use appears BEFORE a later definition in the source order."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "eeed1311-5e42-4027-b6d5-3e9569fd5c96"
+      },
+      "after": {
+        "answer": "Generating output immediately is difficult when a name is declared later because a forward reference means the referenced definition may not be known yet. [1] [5]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 34,
+            "page_end": 34,
+            "quote": "ONE-PASS structure: read/analyze source statement -> synthesize corresponding output (for each statement in the same pass) TWO-PASS structure: Pass 1: analysis -> intermediate information Pass 2: use intermediate information -> target output A forward reference can make immediate one-pass code generation difficult, because a referenced definition may not be known yet."
+          },
+          {
+            "marker": 5,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 35,
+            "page_end": 35,
+            "quote": "[TWO-PASS SOLUTION TO FORWARD REFERENCES] A forward reference means a use appears BEFORE a later definition in the source order."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "575d60c9-f534-4f48-a1d0-6f796cee7527"
+      },
+      "treatment_initial_draft": {
+        "answer": "Generating output immediately is difficult when a name is declared later because a forward reference means the referenced definition may not be known yet. [1] [5]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "ONE-PASS structure: read/analyze source statement -> synthesize corresponding output (for each statement in the same pass) TWO-PASS structure: Pass 1: analysis -> intermediate information Pass 2: use intermediate information -> target output A forward reference can make immediate one-pass code generation difficult, because a referenced definition may not be known yet."
+          },
+          {
+            "marker": 5,
+            "quote": "[TWO-PASS SOLUTION TO FORWARD REFERENCES] A forward reference means a use appears BEFORE a later definition in the source order."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 19264.464300009422,
+      "after_ms": 19399.633299995912,
+      "rewrite": {
+        "enabled": true,
+        "accepted": false,
+        "attempted": true,
+        "threshold": 0.5,
+        "error_type": "HTTPStatusError",
+        "original_query": "Why can generating output immediately be difficult when a name is declared later?",
+        "first_chunk_ids": [
+          "a1554ea5-922e-4b0b-8061-450c4b0d5dbf",
+          "1a3f07ff-c31b-4716-80e6-5187b5520691",
+          "6601b6c7-b60d-4ff4-9706-92fb01d9a825",
+          "ed4f61e4-0432-4ae8-b1e3-f70bac63af18",
+          "e82b172a-5e87-49a7-b5be-6e75d5ccefa4"
+        ],
+        "extra_latency_ms": 257.2916999924928,
+        "first_source_pages": [
+          34,
+          18,
+          10,
+          12,
+          35
+        ],
+        "initial_confidence": {
+          "score": 0.0,
+          "peak_component": 0.0,
+          "best_similarity": 0.3132006263970214,
+          "top_similarities": [
+            0.3132006263970214,
+            0.31250882521113954,
+            0.3108933608126596,
+            0.2957545586071213,
+            0.28507691203631214
+          ],
+          "support_component": 0.0,
+          "strong_chunk_count": 0
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-023",
+      "question": "According to the diagram, does the interpreter process the source program line by line?",
+      "answerable": true,
+      "reference_answer": "Yes. The diagram says the interpreter handles the source program line by line.",
+      "required_facts": [
+        "The phrase line by line qualifies how the interpreter handles source code."
+      ],
+      "before": {
+        "answer": "Yes, the interpreter processes the source program line by line. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 6,
+            "page_end": 6,
+            "quote": "[INTERPRETER DIAGRAM - DIRECTED FLOW] Source Program --> [Interpreter] --> Target Program | +--> Error Messages (If any) The phrase \"line by line\" appears OVER the rightward processing connection."
+          },
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 6,
+            "page_end": 6,
+            "quote": "It qualifies how the interpreter handles source code."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "1dd849b9-aa49-4a29-80de-4650d1ed5589"
+      },
+      "after": {
+        "answer": "The interpreter processes the source program line by line. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 6,
+            "page_end": 6,
+            "quote": "[INTERPRETER DIAGRAM - DIRECTED FLOW] Source Program --> [Interpreter] --> Target Program | +--> Error Messages (If any) The phrase \"line by line\" appears OVER the rightward processing connection."
+          },
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 6,
+            "page_end": 6,
+            "quote": "It qualifies how the interpreter handles source code."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "c6671ee2-e888-456c-a44d-181bd05d42b5"
+      },
+      "treatment_initial_draft": {
+        "answer": "The interpreter processes the source program line by line. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "[INTERPRETER DIAGRAM - DIRECTED FLOW] Source Program --> [Interpreter] --> Target Program | +--> Error Messages (If any) The phrase \"line by line\" appears OVER the rightward processing connection."
+          },
+          {
+            "marker": 1,
+            "quote": "It qualifies how the interpreter handles source code."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 21223.052999994252,
+      "after_ms": 22073.85250000516,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false,
+        "threshold": 0.5,
+        "initial_confidence": {
+          "score": 1.0,
+          "peak_component": 1.0,
+          "best_similarity": 0.8354920744895935,
+          "top_similarities": [
+            0.8354920744895935,
+            0.6258178353309631,
+            0.6227452754974365,
+            0.5967561842944523,
+            0.587283730506897
+          ],
+          "support_component": 1.0,
+          "strong_chunk_count": 5
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-031",
+      "question": "In the syntax tree, which operands are grouped by multiplication?",
+      "answerable": true,
+      "reference_answer": "id3 and 60, before addition with id2.",
+      "required_facts": [
+        "multiplication (*) groups id3 with 60 BEFORE addition (+)."
+      ],
+      "before": {
+        "answer": "In the syntax tree, the multiplication operator groups the operand id3 with the literal 60. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 15,
+            "page_end": 15,
+            "quote": "[SYNTAX ANALYSIS / TREE CONSTRUCTION] Input token expression: v Abstract syntax / expression tree: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  60 Parent-child edges preserve operator precedence: multiplication (*) groups id3 with 60 BEFORE addition (+)."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "59bfc45e-36c6-4fe9-ac9e-99b190460cc5"
+      },
+      "after": {
+        "answer": "The multiplication operator groups the operands id3 and 60 together. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 15,
+            "page_end": 15,
+            "quote": "[SYNTAX ANALYSIS / TREE CONSTRUCTION] Input token expression: v Abstract syntax / expression tree: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  60 Parent-child edges preserve operator precedence: multiplication (*) groups id3 with 60 BEFORE addition (+)."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "77252300-f8e2-4b76-b3a4-c34bad3ac16b"
+      },
+      "treatment_initial_draft": {
+        "answer": "The multiplication operator groups the operands id3 and 60 together. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "[SYNTAX ANALYSIS / TREE CONSTRUCTION] Input token expression: v Abstract syntax / expression tree: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  60 Parent-child edges preserve operator precedence: multiplication (*) groups id3 with 60 BEFORE addition (+)."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 21350.451600010274,
+      "after_ms": 22344.88279998186,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false,
+        "threshold": 0.5,
+        "initial_confidence": {
+          "score": 1.0,
+          "peak_component": 1.0,
+          "best_similarity": 0.6982477487178012,
+          "top_similarities": [
+            0.6982477487178012,
+            0.5826567908934605,
+            0.5219827579270159,
+            0.5182320762734377,
+            0.4671631773016951
+          ],
+          "support_component": 1.0,
+          "strong_chunk_count": 4
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-032",
+      "question": "Where is the conversion node inserted during semantic analysis?",
+      "answerable": true,
+      "reference_answer": "Above literal 60 in the multiplication branch.",
+      "required_facts": [
+        "conversion node above the literal in the multiplication branch:"
+      ],
+      "before": {
+        "answer": "The conversion node is inserted above the integer literal 60 in the multiplication branch of the parse tree during semantic analysis. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 17,
+            "page_end": 17,
+            "quote": "Semantic analysis inserts a conversion node above the literal in the multiplication branch: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  inttoreal | 60 Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "1be9849b-c5fc-4a5c-a6f5-34766b5a8073"
+      },
+      "after": {
+        "answer": "The conversion node is inserted above the integer literal 60 in the multiplication branch of the parse tree during semantic analysis. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 17,
+            "page_end": 17,
+            "quote": "Semantic analysis inserts a conversion node above the literal in the multiplication branch: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  inttoreal | 60 Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "dfcfe7e5-c032-40b5-99a2-9c649948ec24"
+      },
+      "treatment_initial_draft": {
+        "answer": "The conversion node is inserted above the integer literal 60 in the multiplication branch of the parse tree during semantic analysis. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "Semantic analysis inserts a conversion node above the literal in the multiplication branch: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  inttoreal | 60 Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 18132.34119999106,
+      "after_ms": 18343.50180000183,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false,
+        "threshold": 0.5,
+        "initial_confidence": {
+          "score": 0.7979578029339851,
+          "peak_component": 0.711368289905693,
+          "best_similarity": 0.5634104869717079,
+          "top_similarities": [
+            0.5634104869717079,
+            0.5361966490745544,
+            0.5143628120422363,
+            0.49760201587665076,
+            0.47055131372503634
+          ],
+          "support_component": 1.0,
+          "strong_chunk_count": 4
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-033",
+      "question": "Does the libraries box receive output from the linker or feed into it?",
+      "answerable": true,
+      "reference_answer": "It feeds into Linker / Loader from the left.",
+      "required_facts": [
+        "The Libraries & Object Files box feeds INTO the Linker / Loader FROM THE LEFT (it is not produced by it)."
+      ],
+      "before": {
+        "answer": "The Libraries & Object Files box feeds into the Linker / Loader rather than receiving output from it. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 28,
+            "page_end": 28,
+            "quote": "The Libraries & Object Files box feeds INTO the Linker / Loader FROM THE LEFT (it is not produced by it)."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "ded4c8e6-0a8e-4786-b280-51ffcb51ed3e"
+      },
+      "after": {
+        "answer": "The Libraries & Object Files box feeds into the Linker / Loader rather than receiving output from it. [1]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 28,
+            "page_end": 28,
+            "quote": "The Libraries & Object Files box feeds INTO the Linker / Loader FROM THE LEFT (it is not produced by it)."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "e1ca40a6-425d-4b36-84d0-e7beaf42b0fe"
+      },
+      "treatment_initial_draft": {
+        "answer": "The Libraries & Object Files box feeds into the Linker / Loader rather than receiving output from it. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "The Libraries & Object Files box feeds INTO the Linker / Loader FROM THE LEFT (it is not produced by it)."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 4115.993099985644,
+      "after_ms": 4280.4031999839935,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false,
+        "threshold": 0.5,
+        "initial_confidence": {
+          "score": 0.6564405910443555,
+          "peak_component": 0.6520579872062222,
+          "best_similarity": 0.5456173961618667,
+          "top_similarities": [
+            0.5456173961618667,
+            0.5284803194713411,
+            0.4031482098610284,
+            0.39595726752535965,
+            0.38797030520616205
+          ],
+          "support_component": 0.6666666666666666,
+          "strong_chunk_count": 2
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-041",
+      "question": "How do analysis and synthesis differ in their relationship to intermediate representation?",
+      "answerable": true,
+      "reference_answer": "Analysis outputs IR; synthesis takes it as input and constructs output.",
+      "required_facts": [
+        "analysis extracts/structures meaning; synthesis constructs output.",
+        "Input to synthesis = Intermediate Representation."
+      ],
+      "before": {
+        "answer": "The analysis phase creates the intermediate representation as its output. [1]\n\nThe synthesis phase takes the intermediate representation as its input. [1]\n\nThus the intermediate representation serves as a bridge: it is produced by analysis and then used by synthesis to construct the target program. [1] [2]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 10,
+            "page_end": 10,
+            "quote": "Semantic analysis Output of analysis = Intermediate Representation."
+          },
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 10,
+            "page_end": 10,
+            "quote": "Code generation Input to synthesis = Intermediate Representation."
+          },
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 10,
+            "page_end": 10,
+            "quote": "Relationship: Source program -> Analysis -> Intermediate representation -> Synthesis -> Target program."
+          },
+          {
+            "marker": 2,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 9,
+            "page_end": 9,
+            "quote": "The intermediate representation is a bridge: analysis extracts/structures meaning; synthesis constructs output."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "d89b173f-2a75-42dc-b516-272a23b1ada6"
+      },
+      "after": {
+        "answer": "The analysis phase creates the intermediate representation as its output. [1]\n\nThe synthesis phase receives the intermediate representation as its input. [1]\n\nThus the intermediate representation serves as a bridge that links analysis to synthesis. [2]",
+        "citations": [
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 10,
+            "page_end": 10,
+            "quote": "Semantic analysis Output of analysis = Intermediate Representation."
+          },
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 10,
+            "page_end": 10,
+            "quote": "Code generation Input to synthesis = Intermediate Representation."
+          },
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 10,
+            "page_end": 10,
+            "quote": "Relationship: Source program -> Analysis -> Intermediate representation -> Synthesis -> Target program."
+          },
+          {
+            "marker": 2,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 9,
+            "page_end": 9,
+            "quote": "The intermediate representation is a bridge: analysis extracts/structures meaning; synthesis constructs output."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "5211ee3a-52b9-40f7-a23b-879edcaeb30a"
+      },
+      "treatment_initial_draft": {
+        "answer": "The analysis phase creates the intermediate representation as its output. [1]\n\nThe synthesis phase receives the intermediate representation as its input. [1]\n\nThus the intermediate representation serves as a bridge that links analysis to synthesis. [2]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 1,
+            "quote": "Semantic analysis Output of analysis = Intermediate Representation."
+          },
+          {
+            "marker": 1,
+            "quote": "Code generation Input to synthesis = Intermediate Representation."
+          },
+          {
+            "marker": 1,
+            "quote": "Relationship: Source program -> Analysis -> Intermediate representation -> Synthesis -> Target program."
+          },
+          {
+            "marker": 2,
+            "quote": "The intermediate representation is a bridge: analysis extracts/structures meaning; synthesis constructs output."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 6446.302700001979,
+      "after_ms": 6206.1058999970555,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false,
+        "threshold": 0.5,
+        "initial_confidence": {
+          "score": 1.0,
+          "peak_component": 1.0,
+          "best_similarity": 0.7190797663831989,
+          "top_similarities": [
+            0.7190797663831989,
+            0.5832141886225837,
+            0.5601747560292774,
+            0.5439755268126099,
+            0.5331458727630463
+          ],
+          "support_component": 1.0,
+          "strong_chunk_count": 5
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "after_retrieval": {
+        "hit@1": 1.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 1.0,
+        "complete_evidence@5": 1.0,
+        "mrr@5": 1.0
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-042",
+      "question": "How does the example progress from source identifiers to a tree with type conversion?",
+      "answerable": true,
+      "reference_answer": "Identifiers become id1/id2/id3; syntax groups multiplication; semantic analysis converts 60 to real.",
+      "required_facts": [
+        "Position -> id1; initial -> id2; rate -> id3.",
+        "The RHS is id2 + (id3 * 60), then assigned to id1.",
+        "Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+      ],
+      "before": {
+        "answer": "The source program’s identifiers are mapped as Position → id1, initial → id2, and rate → id3, with the token order Position = initial + rate * 60. [5]\n\nBefore semantic analysis, the parse tree reflects the original operators: an assignment node (=) with left child id1 and right child a plus node (+) whose left child is id2 and right child a multiplication node (*) with children id3 and the integer literal 60. [3]\n\nDuring semantic analysis, because id1, id2, and id3 are REAL‑typed while the literal 60 is INTEGER, a type‑conversion node inttoreal is inserted above the literal in the multiplication branch, yielding the tree id1 = id2 + (id3 * inttoreal(60)). [3]\n\nThe resulting typed expression tree is then ready for further intermediate‑code generation, as shown by the three‑address code decomposition with temporaries t1 = inttoreal(60), t2 = id3 * t1, t3 = t2 + id2, and id1 = t3. [1]",
+        "citations": [
+          {
+            "marker": 5,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 13,
+            "page_end": 13,
+            "quote": "Position -> id1; initial -> id2; rate -> id3."
+          },
+          {
+            "marker": 5,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 13,
+            "page_end": 13,
+            "quote": "Token boundaries in source order: Position | = | initial | + | rate | * | 60"
+          },
+          {
+            "marker": 3,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 17,
+            "page_end": 17,
+            "quote": "[SEMANTIC ANALYSIS / TYPE COERCION IN TREE] Before semantic analysis, the parse tree is: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  60 Given: id1, id2, and id3 are REAL-valued identifiers."
+          },
+          {
+            "marker": 3,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 17,
+            "page_end": 17,
+            "quote": "Semantic analysis inserts a conversion node above the literal in the multiplication branch: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  inttoreal | 60 Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+          },
+          {
+            "marker": 1,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 19,
+            "page_end": 19,
+            "quote": "[INTERMEDIATE CODE / TREE-TO-THREE-ADDRESS FLOW] Typed expression tree from slide 17 has structure: id1 = id2 + (id3 * inttoreal(60)) Post-order decomposition into temporary results: t1 = inttoreal(60)     [conversion of literal] t2 = id3 * t1         [multiplication result] t3 = t2 + id2         [addition result] id1 = t3              [assignment result] Dependencies: 60 -> inttoreal -> t1 (id3, t1) -> multiply -> t2 (t2, id2) -> add -> t3 t3 -> assign -> id1 The colored boxes t1, t2, t3 denote names for intermediate results, not extra source-language variables."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "17aa4da8-0459-498a-90ce-4b6381e62f45"
+      },
+      "after": {
+        "answer": "The source expression \"Position = initial + rate * 60\" maps the identifiers Position, initial, and rate to the internal names id1, id2, and id3 respectively. [5]\n\nBefore semantic analysis the parse tree has an assignment node with id1 on the left and an addition node whose right child is a multiplication node combining id3 and the integer literal 60. [3]\n\nBecause id1, id2, and id3 are declared as REAL while the literal 60 is an INTEGER, semantic analysis inserts a conversion node (inttoreal) above the literal in the multiplication branch. [3]\n\nThe final typed expression tree therefore becomes id1 = id2 + (id3 * inttoreal(60)), which is later decomposed into three‑address code temporaries. [1]",
+        "citations": [
+          {
+            "marker": 5,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 13,
+            "page_end": 13,
+            "quote": "Position -> id1; initial -> id2; rate -> id3."
+          },
+          {
+            "marker": 3,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 17,
+            "page_end": 17,
+            "quote": "[SEMANTIC ANALYSIS / TYPE COERCION IN TREE] Before semantic analysis, the parse tree is: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  60 Given: id1, id2, and id3 are REAL-valued identifiers."
+          },
+          {
+            "marker": 3,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 17,
+            "page_end": 17,
+            "quote": "Semantic analysis inserts a conversion node above the literal in the multiplication branch: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  inttoreal | 60 Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+          },
+          {
+            "marker": 1,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 19,
+            "page_end": 19,
+            "quote": "[INTERMEDIATE CODE / TREE-TO-THREE-ADDRESS FLOW] Typed expression tree from slide 17 has structure: id1 = id2 + (id3 * inttoreal(60)) Post-order decomposition into temporary results: t1 = inttoreal(60)     [conversion of literal] t2 = id3 * t1         [multiplication result] t3 = t2 + id2         [addition result] id1 = t3              [assignment result] Dependencies: 60 -> inttoreal -> t1 (id3, t1) -> multiply -> t2 (t2, id2) -> add -> t3 t3 -> assign -> id1 The colored boxes t1, t2, t3 denote names for intermediate results, not extra source-language variables."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "b079e784-b222-4763-bbac-f26d8dbc467d"
+      },
+      "treatment_initial_draft": {
+        "answer": "The source expression \"Position = initial + rate * 60\" maps the identifiers Position, initial, and rate to the internal names id1, id2, and id3 respectively. [5]\n\nBefore semantic analysis the parse tree has an assignment node with id1 on the left and an addition node whose right child is a multiplication node combining id3 and the integer literal 60. [3]\n\nBecause id1, id2, and id3 are declared as REAL while the literal 60 is an INTEGER, semantic analysis inserts a conversion node (inttoreal) above the literal in the multiplication branch. [3]\n\nThe final typed expression tree therefore becomes id1 = id2 + (id3 * inttoreal(60)), which is later decomposed into three‑address code temporaries. [1]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 5,
+            "quote": "Position -> id1; initial -> id2; rate -> id3."
+          },
+          {
+            "marker": 3,
+            "quote": "[SEMANTIC ANALYSIS / TYPE COERCION IN TREE] Before semantic analysis, the parse tree is: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  60 Given: id1, id2, and id3 are REAL-valued identifiers."
+          },
+          {
+            "marker": 3,
+            "quote": "Semantic analysis inserts a conversion node above the literal in the multiplication branch: (=) /   \\ id1   (+) /  \\ id2   (*) / \\ id3  inttoreal | 60 Meaning: convert integer literal 60 to real before multiplying by the real-typed id3."
+          },
+          {
+            "marker": 1,
+            "quote": "[INTERMEDIATE CODE / TREE-TO-THREE-ADDRESS FLOW] Typed expression tree from slide 17 has structure: id1 = id2 + (id3 * inttoreal(60)) Post-order decomposition into temporary results: t1 = inttoreal(60)     [conversion of literal] t2 = id3 * t1         [multiplication result] t3 = t2 + id2         [addition result] id1 = t3              [assignment result] Dependencies: 60 -> inttoreal -> t1 (id3, t1) -> multiply -> t2 (t2, id2) -> add -> t3 t3 -> assign -> id1 The colored boxes t1, t2, t3 denote names for intermediate results, not extra source-language variables."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 22843.056499987142,
+      "after_ms": 23590.81329999026,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false,
+        "threshold": 0.5,
+        "initial_confidence": {
+          "score": 0.7284442001117533,
+          "peak_component": 0.6120631430167903,
+          "best_similarity": 0.5336189429050371,
+          "top_similarities": [
+            0.5336189429050371,
+            0.5261488117619997,
+            0.49575169371818606,
+            0.4916821869706476,
+            0.47902546760515796
+          ],
+          "support_component": 1.0,
+          "strong_chunk_count": 4
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.6666666666666666,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 0.3333333333333333
+      },
+      "after_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.6666666666666666,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 0.3333333333333333
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    },
+    {
+      "question_id": "t1-043",
+      "question": "How does the optimized literal differ from the original source literal, and why?",
+      "answerable": true,
+      "reference_answer": "Source uses integer 60; semantic analysis requires real conversion and optimization uses 60.0.",
+      "required_facts": [
+        "Position = initial + rate * 60",
+        "Optimization replaces integer-to-real conversion with the real literal 60.0"
+      ],
+      "before": {
+        "answer": "The optimizer changes the literal from an integer that must be converted to a real at run‑time to a real literal (60.0) that is already in the correct type. [2]\n\nThis replacement removes the integer‑to‑real conversion and some temporary variables while still preserving the expression’s result under the given assumptions. [2]",
+        "citations": [
+          {
+            "marker": 2,
+            "file_id": "95d1c6ae-8825-4b6c-85d0-cc57df3b6c0d",
+            "course_id": "11591862-8f87-4eb3-b482-6826e40a48e3",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 21,
+            "page_end": 21,
+            "quote": "Optimization replaces integer-to-real conversion with the real literal 60.0, removes some temporaries, and preserves the expression's result under the example's assumptions."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "7c170a2a-e76e-43aa-b850-00227c383e00"
+      },
+      "after": {
+        "answer": "The optimizer changes the original integer literal that would be converted to a real at run‑time into a real literal 60.0 in the generated code. [2]\n\nThis replacement removes the need for an integer‑to‑real conversion operation and some temporary variables, while still producing the same numeric result under the given assumptions. [2]",
+        "citations": [
+          {
+            "marker": 2,
+            "file_id": "21ce4e2f-7fc3-4f96-98e5-fbf8a22e32e2",
+            "course_id": "4b159dca-0f69-457c-970f-c66aad9034cf",
+            "filename": "CPT316_Topic1_Semantic_Text_Only.pdf",
+            "page": 21,
+            "page_end": 21,
+            "quote": "Optimization replaces integer-to-real conversion with the real literal 60.0, removes some temporaries, and preserves the expression's result under the example's assumptions."
+          }
+        ],
+        "grounded": true,
+        "uncovered": null,
+        "used_chunks": 5,
+        "conversation_id": "addc76c0-e45f-4046-abdc-c56bdaa0c26c"
+      },
+      "treatment_initial_draft": {
+        "answer": "The optimizer changes the original integer literal that would be converted to a real at run‑time into a real literal 60.0 in the generated code. [2]\n\nThis replacement removes the need for an integer‑to‑real conversion operation and some temporary variables, while still producing the same numeric result under the given assumptions. [2]",
+        "grounded": true,
+        "citations": [
+          {
+            "marker": 2,
+            "quote": "Optimization replaces integer-to-real conversion with the real literal 60.0, removes some temporaries, and preserves the expression's result under the example's assumptions."
+          },
+          {
+            "marker": 2,
+            "quote": "Optimization replaces integer-to-real conversion with the real literal 60.0, removes some temporaries, and preserves the expression's result under the example's assumptions."
+          }
+        ],
+        "uncovered": null
+      },
+      "before_ms": 22590.651900012745,
+      "after_ms": 9055.219299974851,
+      "rewrite": {
+        "enabled": true,
+        "attempted": false,
+        "threshold": 0.5,
+        "initial_confidence": {
+          "score": 0.7044436005089545,
+          "peak_component": 0.8634908578699351,
+          "best_similarity": 0.6090472573609805,
+          "top_similarities": [
+            0.6090472573609805,
+            0.34378338791231045,
+            0.3314589462925259,
+            0.3286332292179335,
+            0.3218341373850675
+          ],
+          "support_component": 0.3333333333333333,
+          "strong_chunk_count": 1
+        }
+      },
+      "before_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.5,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 0.5
+      },
+      "after_retrieval": {
+        "hit@1": 0.0,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "evidence_recall@5": 0.5,
+        "complete_evidence@5": 0.0,
+        "mrr@5": 0.5
+      },
+      "before_error": null,
+      "after_error": null,
+      "review": {
+        "reviewer": null,
+        "before_correctness_0_to_2": null,
+        "after_correctness_0_to_2": null,
+        "notes": ""
+      }
+    }
+  ]
+}

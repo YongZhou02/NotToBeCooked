@@ -203,6 +203,9 @@ the source numbers that support that claim. The server renders those numbers as
 catalogue; never write or paraphrase a quote. The server resolves that ID back
 to the exact source text. For a refusal, return one plain claim with an empty
 markers array, set grounded to false, and leave citations empty.
+
+IMPORTANT: If `grounded` is true, every claim MUST have at least one integer
+in its `markers` array. Never return `grounded: true` with empty markers.
 """.strip()
 
 REFUSAL = "The supplied material does not cover this question."
@@ -363,7 +366,7 @@ async def _generate_groq(
     The free tier is token-per-minute limited, so a 429 is expected: honour
     `retry-after` (capped at 30 s) a bounded number of times.
     """
-    payload = {
+    payload: dict[str, Any] = {
         "model": settings.GROQ_MODEL_NAME,
         "temperature": 0,
         "messages": [
@@ -384,28 +387,43 @@ async def _generate_groq(
     headers = {"Authorization": f"Bearer {settings.GROQ_API_KEY.get_secret_value()}"}
     url = f"{settings.GROQ_API_BASE_URL}/chat/completions"
 
+    protocol_retry = False
     async with httpx.AsyncClient(timeout=settings.GROQ_API_TIMEOUT_SECONDS) as client:
-        attempt = 0
         while True:
-            response = await client.post(url, headers=headers, json=payload)
-            if response.status_code != 429 or attempt >= settings.GROQ_MAX_RETRIES:
-                break
-            attempt += 1
+            attempt = 0
+            while True:
+                response = await client.post(url, headers=headers, json=payload)
+                if response.status_code != 429 or attempt >= settings.GROQ_MAX_RETRIES:
+                    break
+                attempt += 1
+                try:
+                    wait = float(response.headers.get("retry-after", "5"))
+                except ValueError:
+                    wait = 5.0
+                await asyncio.sleep(min(max(wait, 1.0), 30.0))
+
+            if response.status_code != 200:
+                raise RuntimeError(f"Groq {response.status_code}: {response.text}")
+
+            body = response.json()
             try:
-                wait = float(response.headers.get("retry-after", "5"))
-            except ValueError:
-                wait = 5.0
-            await asyncio.sleep(min(max(wait, 1.0), 30.0))
-
-    if response.status_code != 200:
-        raise RuntimeError(f"Groq {response.status_code}: {response.text}")
-
-    body = response.json()
-    try:
-        text = body["choices"][0]["message"]["content"]
-    except (KeyError, IndexError, TypeError) as exc:
-        raise RuntimeError(f"Groq returned no choice: {body}") from exc
-    return GroqAnswer.model_validate(json.loads(text)).render(evidence)
+                text = body["choices"][0]["message"]["content"]
+            except (KeyError, IndexError, TypeError) as exc:
+                raise RuntimeError(f"Groq returned no choice: {body}") from exc
+            try:
+                return GroqAnswer.model_validate(json.loads(text)).render(evidence)
+            except ValueError as exc:
+                if protocol_retry or "needs a source marker" not in str(exc):
+                    raise
+                protocol_retry = True
+                payload["messages"].append({
+                    "role": "user",
+                    "content": (
+                        "Your previous JSON was invalid. Every grounded claim "
+                        "must include at least one valid source number in "
+                        "markers. Return corrected JSON only."
+                    ),
+                })
 
 
 async def _generate_gemini(system_instruction: str, user_turn: str) -> LlmAnswer:

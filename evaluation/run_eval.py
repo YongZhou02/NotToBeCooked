@@ -20,7 +20,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from time import perf_counter
 from typing import Any
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 from uuid import uuid4
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,11 +47,10 @@ from app.schemas.rag import RagQueryRequest, RetrievedChunk
 from app.schemas.user import User
 from app.services.embeddings import embed_query, embed_text
 from app.services.ingestion import create_chunk, extract_text, ingest_document
-from sqlmodel import col, select
-from sqlmodel.ext.asyncio.session import AsyncSession
-
 from scorers.pipeline import token_fidelity, vector_valid
 from scorers.retrieval import covered_groups, normalize, retrieval_metrics
+from sqlmodel import col, select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 DATASET = EVALUATION / "datasets/cpt316/all"
 METHODS = ("vector", "keyword", "hybrid_rrf")
@@ -72,6 +71,7 @@ def traced_generation(trace: dict) -> ExitStack:
             trace["generation_error"] = repr(error)[:500]
             raise
         trace["draft"] = draft.model_dump(mode="json")
+        trace.setdefault("drafts", []).append(trace["draft"])
         return draft
 
     def check(*args: Any, **kwargs: Any) -> Any:
@@ -491,20 +491,33 @@ def summary(rows: list[dict], checks: dict, out: Path) -> None:
 
 
 async def main(args: argparse.Namespace) -> None:
+    if args.query_rewrite and (
+        not args.generate or args.generation_method != "hybrid_rrf"
+    ):
+        raise ValueError(
+            "--query-rewrite requires --generate --generation-method hybrid_rrf"
+        )
+    settings.QUERY_REWRITE_ENABLED = args.query_rewrite
     folder = args.dataset.resolve()
     manifest, questions, answers, evidence = load_dataset(folder)
     if args.split != "all":
-        questions = [question for question in questions if question["split"] == args.split]
+        questions = [
+            question for question in questions if question["split"] == args.split
+        ]
     if args.question_id:
         requested = set(args.question_id)
         questions = [question for question in questions if question["id"] in requested]
         missing = requested - {question["id"] for question in questions}
         if missing:
-            raise ValueError(f"Question IDs not selected by this dataset/split: {sorted(missing)}")
+            raise ValueError(
+                f"Question IDs not selected by this dataset/split: {sorted(missing)}"
+            )
     if args.split != "all" or args.question_id:
         selected_ids = {question["id"] for question in questions}
         answers = {key: value for key, value in answers.items() if key in selected_ids}
-        evidence = {key: value for key, value in evidence.items() if key in selected_ids}
+        evidence = {
+            key: value for key, value in evidence.items() if key in selected_ids
+        }
         if not questions:
             raise ValueError("No questions selected")
     if args.generate and (settings.LLM_FAKE_MODE or settings.llm_provider is None):
@@ -553,6 +566,7 @@ async def main(args: argparse.Namespace) -> None:
                 ROOT / "apps/api/app/db/vector_ops.py",
                 ROOT / "apps/api/app/services/prompt.py",
                 ROOT / "apps/api/app/services/llm.py",
+                ROOT / "apps/api/app/services/query_rewrite.py",
                 ROOT / "apps/api/app/routers/rag.py",
             ]
         },
@@ -563,6 +577,7 @@ async def main(args: argparse.Namespace) -> None:
         "embedding_dimension": settings.EMBEDDINGS_DIM,
         "generation_model": settings.llm_model_name if args.generate else None,
         "generation_method": args.generation_method,
+        "query_rewrite_enabled": args.query_rewrite,
         "question_split": args.split,
         "question_ids": args.question_id or None,
         "repeats": args.repeats,
@@ -719,11 +734,60 @@ async def main(args: argparse.Namespace) -> None:
                             # Standalone adapter swaps ONLY retrieval results. The production
                             # route assembles context, calls Gemini, verifies citations and stores messages.
                             trace_record: dict[str, Any] = {}
+                            production_retrieve = rag_route._retrieve
+                            production_anchor_retrieve = (
+                                rag_route._keyword_anchor_retrieve
+                            )
+                            retrieval_calls = 0
+                            candidate_chunks = {
+                                str(chunk.chunk_id): chunk for chunk in sources
+                            }
+
+                            async def generation_retrieve(
+                                *call_args: Any,
+                                _sources: Any = sources,
+                                _retrieve: Any = production_retrieve,
+                                _candidates: Any = candidate_chunks,
+                                **call_kwargs: Any,
+                            ) -> Any:
+                                nonlocal retrieval_calls
+                                retrieval_calls += 1
+                                if retrieval_calls == 1:
+                                    return _sources
+                                retry_sources = await _retrieve(
+                                    *call_args, **call_kwargs
+                                )
+                                _candidates.update(
+                                    (str(chunk.chunk_id), chunk)
+                                    for chunk in retry_sources
+                                )
+                                return retry_sources
+
+                            async def generation_anchor_retrieve(
+                                *call_args: Any,
+                                _retrieve: Any = production_anchor_retrieve,
+                                _candidates: Any = candidate_chunks,
+                                **call_kwargs: Any,
+                            ) -> Any:
+                                anchor_sources = await _retrieve(
+                                    *call_args, **call_kwargs
+                                )
+                                _candidates.update(
+                                    (str(chunk.chunk_id), chunk)
+                                    for chunk in anchor_sources
+                                )
+                                return anchor_sources
+
                             with (
                                 patch.object(
                                     rag_route,
                                     "_retrieve",
-                                    AsyncMock(return_value=sources),
+                                    generation_retrieve,
+                                ),
+                                patch.object(
+                                    rag_route,
+                                    "_keyword_anchor_retrieve",
+                                    generation_anchor_retrieve,
                                 ),
                                 traced_generation(trace_record),
                             ):
@@ -751,6 +815,41 @@ async def main(args: argparse.Namespace) -> None:
                             row["scope_snapshots"] = [
                                 m.scope_snapshot for m in messages
                             ]
+                            rewrite_snapshots = [
+                                snapshot.get("query_rewrite", {})
+                                for snapshot in row["scope_snapshots"]
+                                if snapshot
+                            ]
+                            merged_ids = next(
+                                (
+                                    snapshot.get("merged_chunk_ids", [])
+                                    for snapshot in reversed(rewrite_snapshots)
+                                    if snapshot.get("merged_chunk_ids")
+                                ),
+                                [],
+                            )
+                            if merged_ids:
+                                final_sources = [
+                                    candidate_chunks[chunk_id]
+                                    for chunk_id in merged_ids
+                                    if chunk_id in candidate_chunks
+                                ]
+                                trace_record["retry_sources"] = [
+                                    {
+                                        **chunk.model_dump(mode="json"),
+                                        "document_id": reverse_files[chunk.file_id],
+                                        "rank": rank,
+                                    }
+                                    for rank, chunk in enumerate(final_sources, 1)
+                                ]
+                                trace_record["retry_retrieval_metrics"] = (
+                                    retrieval_metrics(
+                                        trace_record["retry_sources"],
+                                        evidence[q["id"]]["groups"],
+                                    )
+                                    if q["answerable"]
+                                    else None
+                                )
                             generated_answers.append(
                                 {
                                     "question_id": q["id"],
@@ -830,6 +929,14 @@ if __name__ == "__main__":
         help="With --generate, answer every question, not only the review set",
     )
     parser.add_argument("--generation-method", choices=METHODS, default="hybrid_rrf")
+    parser.add_argument(
+        "--query-rewrite",
+        action="store_true",
+        help=(
+            "Retry low-confidence retrieval using a rewritten query and keyword anchors "
+            "(hybrid generation only)"
+        ),
+    )
     parser.add_argument(
         "--split",
         choices=("all", "dev", "test", "stress"),

@@ -5,6 +5,7 @@ any change to that shape needs agreement from AI-1.
 """
 
 from enum import StrEnum
+from typing import Any
 from uuid import UUID
 
 from sqlmodel import Field, SQLModel
@@ -155,6 +156,8 @@ class ScopeSnapshot(SQLModel):
     """
 
     model_config = {"extra": "forbid"}
+
+    query_rewrite: dict[str, Any] | None = None
 
     scope_course_id: UUID | None = Field(
         default=None,
