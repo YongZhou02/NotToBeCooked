@@ -61,6 +61,7 @@ from app.services.llm import (
 )
 from app.services.prompt import HISTORY_TURNS, build_context, render_history
 from app.services.query_rewrite import rewrite_query
+from app.services.question_decomposition import decompose_question
 
 logger = logging.getLogger(__name__)
 
@@ -421,9 +422,20 @@ def _rrf_merge(
     original: list[RetrievedChunk], rewritten: list[RetrievedChunk], limit: int
 ) -> list[RetrievedChunk]:
     """Fuse two ranked lists without trusting incomparable provider scores."""
+    return _rrf_merge_many([original, rewritten], limit)
+
+
+def _rrf_merge_many(
+    rankings: list[list[RetrievedChunk]],
+    limit: int,
+    *,
+    dedupe_pages: bool = False,
+    dedupe_similar: bool = False,
+) -> list[RetrievedChunk]:
+    """Fuse original + auxiliary rankings; auxiliary queries get a discovery bonus."""
     by_id: dict[UUID, RetrievedChunk] = {}
     fused: dict[UUID, float] = {}
-    for list_index, ranked in enumerate((original, rewritten)):
+    for list_index, ranked in enumerate(rankings):
         # A small discovery bonus keeps a new rewrite-only passage from being
         # crowded out by four chunks duplicated across both lists.
         weight = 1.0 if list_index == 0 else 1.2
@@ -431,10 +443,85 @@ def _rrf_merge(
             by_id[chunk.chunk_id] = chunk
             fused[chunk.chunk_id] = fused.get(chunk.chunk_id, 0.0) + weight / (60 + rank)
     ordered = sorted(fused, key=lambda chunk_id: fused[chunk_id], reverse=True)
-    return [
-        by_id[chunk_id].model_copy(update={"score": fused[chunk_id]})
-        for chunk_id in ordered[:limit]
-    ]
+    merged: list[RetrievedChunk] = []
+    seen_pages: set[tuple[UUID, int | None, int | None]] = set()
+    seen_content: list[tuple[UUID, set[str]]] = []
+    for chunk_id in ordered:
+        chunk = by_id[chunk_id]
+        page_key = (chunk.file_id, chunk.page_start, chunk.page_end)
+        if dedupe_pages and chunk.page_start is not None and page_key in seen_pages:
+            continue
+        content_terms = _content_terms(chunk.content)
+        if dedupe_similar and any(
+            chunk.file_id == file_id
+            and content_terms
+            and len(content_terms & previous_terms) / len(content_terms | previous_terms) >= 0.35
+            for file_id, previous_terms in seen_content
+        ):
+            continue
+        seen_pages.add(page_key)
+        seen_content.append((chunk.file_id, content_terms))
+        merged.append(chunk.model_copy(update={"score": fused[chunk_id]}))
+        if len(merged) == limit:
+            break
+    return merged
+
+
+def _content_terms(content: str) -> set[str]:
+    """Return stable lexical features for cheap, local near-duplicate detection."""
+    stopwords = {
+        "about",
+        "after",
+        "also",
+        "and",
+        "are",
+        "before",
+        "for",
+        "from",
+        "into",
+        "that",
+        "the",
+        "their",
+        "then",
+        "this",
+        "through",
+        "using",
+        "with",
+    }
+    return {
+        term
+        for term in re.findall(r"[a-z][a-z0-9_-]{2,}", content.casefold())
+        if term not in stopwords
+    }
+
+
+def _should_decompose(question: str) -> bool:
+    """Conservative, local router: false positives cost an LLM call and retrievals."""
+    text = " ".join(question.casefold().split())
+    if len(re.findall(r"\b\w+\b", text)) < 10:
+        return False
+    if text.count("?") > 1:
+        return True
+    comparison_markers = (
+        " compare ",
+        " difference ",
+        " differ ",
+        " whereas ",
+        " relationship between ",
+        " the same ",
+        " respectively",
+    )
+    if any(marker in f" {text} " for marker in comparison_markers):
+        return True
+    multi_stage_markers = (
+        "progress from",
+        "from source",
+        "before and after",
+        "before parsing",
+        "then finally",
+        "and why",
+    )
+    return any(marker in text for marker in multi_stage_markers)
 
 
 def _anchor_terms(question: str, limit: int = 8) -> list[str]:
@@ -613,6 +700,10 @@ async def query(
         "enabled": settings.QUERY_REWRITE_ENABLED,
         "attempted": False,
     }
+    decomposition_trace: dict[str, Any] = {
+        "enabled": settings.RETRIEVAL_DECOMPOSITION_ENABLED,
+        "attempted": False,
+    }
     if rag_request.intent == RagIntent.DOCUMENT_SUMMARY:
         chunks = await _retrieve_document_chunks(
             rag_request,
@@ -620,9 +711,17 @@ async def query(
             UUID(str(user_id)),
         )
     else:
+        decomposition_candidate = (
+            settings.RETRIEVAL_DECOMPOSITION_ENABLED
+            and not settings.LLM_FAKE_MODE
+            and _should_decompose(clean_rag_query)
+        )
+        auxiliary_retrieval_enabled = (
+            settings.QUERY_REWRITE_ENABLED or settings.RETRIEVAL_DECOMPOSITION_ENABLED
+        ) and not settings.LLM_FAKE_MODE
         query_vector = (
             await asyncio.to_thread(embed_query, clean_rag_query)
-            if settings.QUERY_REWRITE_ENABLED and not settings.LLM_FAKE_MODE
+            if auxiliary_retrieval_enabled
             else None
         )
         chunks = await _retrieve_follow_up(
@@ -632,7 +731,11 @@ async def query(
             UUID(str(user_id)),
             query_vector=query_vector,
         )
-        if settings.QUERY_REWRITE_ENABLED and not settings.LLM_FAKE_MODE:
+        if (
+            settings.QUERY_REWRITE_ENABLED
+            and not settings.LLM_FAKE_MODE
+            and not decomposition_candidate
+        ):
             assert query_vector is not None
             confidence = await _retrieval_confidence(
                 rag_request, query_vector, session, UUID(str(user_id))
@@ -641,7 +744,75 @@ async def query(
             rewrite_trace["threshold"] = settings.QUERY_REWRITE_CONFIDENCE_THRESHOLD
         else:
             confidence = None
-        if confidence and confidence["score"] < settings.QUERY_REWRITE_CONFIDENCE_THRESHOLD:
+        if decomposition_candidate:
+            started = perf_counter()
+            decomposition_trace.update(
+                attempted=True,
+                original_query=clean_rag_query,
+                first_chunk_ids=[str(c.chunk_id) for c in chunks],
+            )
+            try:
+                sub_questions = await decompose_question(
+                    clean_rag_query, [chunk.content for chunk in chunks[:5]]
+                )
+                decomposition_trace["sub_questions"] = sub_questions
+                rankings = [chunks]
+                subquery_sources: list[dict[str, Any]] = []
+                for sub_question in sub_questions:
+                    sub_request = rag_request.model_copy(
+                        update={"question": sub_question, "top_k": min(5, rag_request.top_k)}
+                    )
+                    sub_chunks = await _retrieve(
+                        sub_request,
+                        session,
+                        UUID(str(user_id)),
+                        search_config=SearchConfig(final_limit=min(5, rag_request.top_k)),
+                    )
+                    rankings.append(sub_chunks)
+                    subquery_sources.append(
+                        {
+                            "question": sub_question,
+                            "chunk_ids": [str(c.chunk_id) for c in sub_chunks],
+                            "pages": [c.page_start for c in sub_chunks],
+                        }
+                    )
+                merged = _rrf_merge_many(
+                    rankings,
+                    rag_request.top_k,
+                    dedupe_pages=False,
+                    dedupe_similar=True,
+                )
+
+                candidate_map = {
+                    str(c.chunk_id): c
+                    for ranked in rankings
+                    for c in ranked
+                }
+                selected_ids = {str(c.chunk_id) for c in merged}
+                decomposition_trace["candidate_count"] = len(candidate_map)
+                decomposition_trace["selected_pages"] = [
+                    c.page_start for c in merged
+                ]
+                decomposition_trace["dropped_candidate_pages"] = sorted({
+                    c.page_start
+                    for cid, c in candidate_map.items()
+                    if cid not in selected_ids and c.page_start is not None
+                })
+                decomposition_trace["subquery_sources"] = subquery_sources
+                decomposition_trace["merged_chunk_ids"] = [str(c.chunk_id) for c in merged]
+                decomposition_trace["accepted"] = merged != chunks
+                chunks = merged
+            except Exception as exc:
+                decomposition_trace["error_type"] = type(exc).__name__
+                logger.exception("question decomposition failed: conversation_id=%s", conv_id)
+            decomposition_trace["extra_latency_ms"] = (perf_counter() - started) * 1000
+            decomposition_trace.setdefault("accepted", False)
+            logger.info(
+                "selective question decomposition: conversation_id=%s trace=%s",
+                conv_id,
+                decomposition_trace,
+            )
+        elif confidence and confidence["score"] < settings.QUERY_REWRITE_CONFIDENCE_THRESHOLD:
             started = perf_counter()
             rewrite_trace.update(
                 attempted=True,
@@ -797,6 +968,7 @@ async def query(
         used_chunk_ids=[c.chunk_id for c in selected],
         embedding_model=settings.MODEL_TYPE,
         query_rewrite=rewrite_trace,
+        question_decomposition=decomposition_trace,
     )
 
     session.add(

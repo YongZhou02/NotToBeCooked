@@ -110,10 +110,124 @@ def test_rrf_merge_rewards_chunks_found_by_both_queries():
     ]
 
 
+def test_decomposition_merge_keeps_page_diversity():
+    duplicate_page = SOURCES[0].model_copy(update={"chunk_id": uuid4()})
+    another_page = SOURCES[0].model_copy(update={"chunk_id": uuid4(), "page_start": 15})
+    merged = rag_module._rrf_merge_many(
+        [[SOURCES[0]], [duplicate_page, another_page]],
+        limit=2,
+        dedupe_pages=True,
+    )
+    assert [chunk.page_start for chunk in merged] == [12, 15]
+
+
+def test_decomposition_merge_drops_near_duplicate_pages():
+    toolchain = SOURCES[0].model_copy(
+        update={
+            "chunk_id": uuid4(),
+            "page_start": 29,
+            "content": "Source program passes through compiler assembler linker into machine code.",
+        }
+    )
+    repeated = SOURCES[0].model_copy(
+        update={
+            "chunk_id": uuid4(),
+            "page_start": 30,
+            "content": "Source program passes through compiler assembler linker into target machine code.",
+        }
+    )
+    distinct = SOURCES[0].model_copy(
+        update={
+            "chunk_id": uuid4(),
+            "page_start": 13,
+            "content": "A position map tracks each token location for diagnostic messages.",
+        }
+    )
+
+    merged = rag_module._rrf_merge_many(
+        [[toolchain, repeated, distinct]],
+        limit=2,
+        dedupe_similar=True,
+    )
+
+    assert [chunk.page_start for chunk in merged] == [29, 13]
+
+
 def test_anchor_terms_keep_content_and_drop_question_framing():
     assert rag_module._anchor_terms(
         "A source comment disappears before parsing, whereas count becomes an identifier token."
     ) == ["comment", "disappears", "parsing", "count", "identifier", "token"]
+
+
+@pytest.mark.parametrize(
+    ("question", "expected"),
+    [
+        ("What is a compiler?", False),
+        (
+            "How does the example progress from source identifiers to a tree with type conversion?",
+            True,
+        ),
+        (
+            "How does the optimized literal differ from the original source literal, and why?",
+            True,
+        ),
+    ],
+)
+def test_selective_decomposition_router_is_conservative(question, expected):
+    assert rag_module._should_decompose(question) is expected
+
+
+def test_complex_question_decomposes_once_and_skips_rewrite(client, monkeypatch):
+    monkeypatch.setattr(settings, "LLM_FAKE_MODE", False)
+    monkeypatch.setattr(settings, "RETRIEVAL_DECOMPOSITION_ENABLED", True)
+    monkeypatch.setattr(settings, "QUERY_REWRITE_ENABLED", True)
+    monkeypatch.setattr(rag_module, "embed_query", lambda _query: [0.0] * 1024)
+    sub_questions = [
+        "How are source identifiers mapped?",
+        "How is multiplication grouped in the syntax tree?",
+        "Where is type conversion inserted?",
+    ]
+    decompose = AsyncMock(return_value=sub_questions)
+    rewrite = AsyncMock()
+    confidence = AsyncMock()
+    monkeypatch.setattr(rag_module, "decompose_question", decompose)
+    monkeypatch.setattr(rag_module, "rewrite_query", rewrite)
+    monkeypatch.setattr(rag_module, "_retrieval_confidence", confidence)
+    evidence = [
+        SOURCES[0].model_copy(update={"chunk_id": uuid4(), "page_start": page})
+        for page in (13, 16, 17)
+    ]
+    retrieve = AsyncMock(side_effect=[list(SOURCES), [evidence[0]], [evidence[1]], [evidence[2]]])
+    monkeypatch.setattr(rag_module, "_retrieve", retrieve)
+    candidate = LlmAnswer(
+        answer="The conversion is inserted in the multiplication branch [1].",
+        grounded=True,
+        citations=[rag_module.LlmCitation(marker=1, quote=evidence[2].content)],
+    )
+    generate = AsyncMock(return_value=candidate)
+    monkeypatch.setattr(rag_module, "generate_answer", generate)
+
+    body = client.post(
+        "/rag/query",
+        json={
+            "question": (
+                "How does the example progress from source identifiers to a tree "
+                "with type conversion?"
+            )
+        },
+    ).json()
+
+    decompose.assert_awaited_once()
+    rewrite.assert_not_awaited()
+    confidence.assert_not_awaited()
+    assert retrieve.await_count == 4
+    assert all(call.args[0].top_k == 5 for call in retrieve.await_args_list[1:])
+    assert generate.await_count == 1
+    assert body["grounded"] is True
+    trace = _assistant_turn(client).scope_snapshot["question_decomposition"]
+    assert trace["attempted"] is True
+    assert trace["accepted"] is True
+    assert trace["sub_questions"] == sub_questions
 
 
 def test_low_confidence_rewrites_before_one_generation_and_keeps_scope(client, monkeypatch):

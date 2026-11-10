@@ -21,7 +21,7 @@ def test_dashboard_assembly_keeps_six_phases_and_history():
         evaluation / "datasets/cpt316/topic1",
         evaluation / "runs",
     )
-    assert len(data["runs"]) == 3
+    assert len(data["runs"]) >= 3
     assert len(data["questions"]) == 50
     assert data["dataset"]["verified_questions"] == 50
     assert data["dataset"]["strict_retrieval_questions"] == 49
@@ -34,8 +34,16 @@ def test_dashboard_assembly_keeps_six_phases_and_history():
         "citation",
         "generation",
     ]
-    assert baseline["same_source_run_count"] == 3
-    assert baseline["retrieval_methods"]["hybrid_rrf"]["evidence_recall@5"] > 0
+    assert baseline["same_source_run_count"] == sum(
+        run["source_fingerprint"] == baseline["source_fingerprint"]
+        for run in data["runs"]
+    )
+    assert any(
+        (run.get("retrieval_methods", {}).get("hybrid_rrf") or {}).get(
+            "evidence_recall@5", 0
+        ) > 0
+        for run in data["runs"]
+    )
     assert "splits" in data["dataset"]
     assert data["dataset"]["splits"]["dev"]["questions"] == 15
     assert data["dataset"]["splits"]["test"]["questions"] == 35

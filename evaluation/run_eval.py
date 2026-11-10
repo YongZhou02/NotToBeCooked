@@ -491,13 +491,14 @@ def summary(rows: list[dict], checks: dict, out: Path) -> None:
 
 
 async def main(args: argparse.Namespace) -> None:
-    if args.query_rewrite and (
+    if (args.query_rewrite or args.question_decomposition) and (
         not args.generate or args.generation_method != "hybrid_rrf"
     ):
         raise ValueError(
-            "--query-rewrite requires --generate --generation-method hybrid_rrf"
+            "retrieval enhancements require --generate --generation-method hybrid_rrf"
         )
     settings.QUERY_REWRITE_ENABLED = args.query_rewrite
+    settings.RETRIEVAL_DECOMPOSITION_ENABLED = args.question_decomposition
     folder = args.dataset.resolve()
     manifest, questions, answers, evidence = load_dataset(folder)
     if args.split != "all":
@@ -567,6 +568,7 @@ async def main(args: argparse.Namespace) -> None:
                 ROOT / "apps/api/app/services/prompt.py",
                 ROOT / "apps/api/app/services/llm.py",
                 ROOT / "apps/api/app/services/query_rewrite.py",
+                ROOT / "apps/api/app/services/question_decomposition.py",
                 ROOT / "apps/api/app/routers/rag.py",
             ]
         },
@@ -578,6 +580,7 @@ async def main(args: argparse.Namespace) -> None:
         "generation_model": settings.llm_model_name if args.generate else None,
         "generation_method": args.generation_method,
         "query_rewrite_enabled": args.query_rewrite,
+        "question_decomposition_enabled": args.question_decomposition,
         "question_split": args.split,
         "question_ids": args.question_id or None,
         "repeats": args.repeats,
@@ -815,15 +818,18 @@ async def main(args: argparse.Namespace) -> None:
                             row["scope_snapshots"] = [
                                 m.scope_snapshot for m in messages
                             ]
-                            rewrite_snapshots = [
-                                snapshot.get("query_rewrite", {})
+                            retrieval_enhancement_snapshots = [
+                                snapshot.get("question_decomposition")
+                                or snapshot.get("query_rewrite", {})
                                 for snapshot in row["scope_snapshots"]
                                 if snapshot
                             ]
                             merged_ids = next(
                                 (
                                     snapshot.get("merged_chunk_ids", [])
-                                    for snapshot in reversed(rewrite_snapshots)
+                                    for snapshot in reversed(
+                                        retrieval_enhancement_snapshots
+                                    )
                                     if snapshot.get("merged_chunk_ids")
                                 ),
                                 [],
@@ -935,6 +941,14 @@ if __name__ == "__main__":
         help=(
             "Retry low-confidence retrieval using a rewritten query and keyword anchors "
             "(hybrid generation only)"
+        ),
+    )
+    parser.add_argument(
+        "--question-decomposition",
+        action="store_true",
+        help=(
+            "Selectively decompose complex questions into at most three retrieval "
+            "queries (hybrid generation only)"
         ),
     )
     parser.add_argument(

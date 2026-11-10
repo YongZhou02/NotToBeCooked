@@ -81,7 +81,10 @@ class Settings(BaseSettings):
     LLM_FAKE_MODE: bool = Field(default=True)
     # Opt-in: one rewrite/retrieval/generation pass after a source-free refusal.
     QUERY_REWRITE_ENABLED: bool = False
+    RETRIEVAL_DECOMPOSITION_ENABLED: bool = False
+    ANSWER_DECOMPOSITION_ENABLED: bool = False
     QUERY_REWRITE_TIMEOUT_SECONDS: float = Field(default=15.0, gt=0)
+    RETRIEVAL_DECOMPOSITION_MAX_QUESTIONS: int = Field(default=3, ge=2, le=4)
     # Calibrated on Topic 2 development-query similarities. This is a routing
     # signal, not a probability that the answer is correct.
     QUERY_REWRITE_CONFIDENCE_THRESHOLD: float = Field(default=0.50, ge=0, le=1)

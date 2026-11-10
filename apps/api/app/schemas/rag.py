@@ -158,6 +158,7 @@ class ScopeSnapshot(SQLModel):
     model_config = {"extra": "forbid"}
 
     query_rewrite: dict[str, Any] | None = None
+    question_decomposition: dict[str, Any] | None = None
 
     scope_course_id: UUID | None = Field(
         default=None,
