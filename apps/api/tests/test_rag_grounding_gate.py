@@ -273,6 +273,7 @@ def test_low_confidence_rewrites_before_one_generation_and_keeps_scope(client, m
     assert retry[2] == original[2] == USER_ID
     assert retry_call.kwargs["search_config"].keyword_weight == 2.0
     assert retry_call.kwargs["search_config"].vector_weight == 1.0
+    assert generate.await_args is not None
     assert generate.await_args.kwargs["question"] == "What is a partial index?"
     assert [source.page_start for source in generate.await_args.kwargs["sources"]] == [99, 12, 5]
     assert body["grounded"] is True

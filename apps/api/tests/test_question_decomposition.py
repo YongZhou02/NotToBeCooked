@@ -38,6 +38,7 @@ async def test_decomposition_is_bounded_deduplicated_and_never_answers(monkeypat
     )
 
     assert result == ["First fact?", "Second fact?", "Fourth?"]
+    assert post.await_args is not None
     payload = post.await_args.kwargs["json"]
     assert len(payload["messages"]) == 2
     assert "Do not answer" in payload["messages"][0]["content"]
