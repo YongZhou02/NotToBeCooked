@@ -89,6 +89,12 @@ async def test_database_url() -> AsyncGenerator[str, None]:
     engine = make_engine(url)
     async with engine.begin() as conn:
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+        # The table was renamed to answer_feedback on 24 Nov 2026. A test
+        # database built before that still holds answerfeedback, which no model
+        # declares, so drop_all leaves it standing, and its foreign keys then
+        # block dropping message and conversation: 50 errors, none of them
+        # naming the real cause.
+        await conn.execute(text("DROP TABLE IF EXISTS answerfeedback CASCADE;"))
     await engine.dispose()
 
     yield url

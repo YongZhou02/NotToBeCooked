@@ -46,7 +46,11 @@ class Settings(BaseSettings):
     BATCH_SIZE: int = 32
     EMBEDDINGS_DIM: int = 1024
     MODEL_TYPE: str = "jinaai/jina-embeddings-v5-text-small"
-    CHUNKER_VERSION: str = "chunker-1"
+    # Copied onto every INGESTION_RUN; bump it whenever chunk output changes.
+    # chunker-2 (24 Nov 2026) covers two changes that kept "chunker-1": one page
+    # per chunk with the heading in the text (10 Oct), and code items kept apart
+    # plus chart chunks (7 Nov).
+    CHUNKER_VERSION: str = "chunker-2"
     # Local vision enrichment for supported charts; disable for text-only benchmarks.
     CHART_EXTRACTION_ENABLED: bool = True
 

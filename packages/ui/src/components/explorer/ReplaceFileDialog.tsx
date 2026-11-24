@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { LoaderCircle } from "lucide-react"
+import { isApiClientError } from "@workspace/contracts"
 import { Button } from "../button"
 import {
   Dialog,
@@ -34,8 +35,10 @@ export function ReplaceFileDialog({
       await onReplace(file)
       onOpenChange(false)
     } catch (cause) {
+      // ApiClient rejects with plain { code, message } objects, never an Error,
+      // so an `instanceof Error` check dropped the API's 413 and 415 wording.
       setError(
-        cause instanceof Error
+        isApiClientError(cause)
           ? cause.message
           : "Couldn’t replace the file. Please try again."
       )

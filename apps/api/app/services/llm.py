@@ -96,7 +96,13 @@ class GroqAnswer(BaseModel):
         parts: list[str] = []
         for claim in self.claims:
             text = claim.text.strip()
-            if re.search(r"(?:\[|【|［)\s*\d+\s*(?:\]|】|］)", text):
+            # A handwritten marker stands after a space, a full stop or nothing.
+            # `arr[0]`, `dp[i][2]` and `f(x)[1]` are indexing: the bracket follows
+            # an identifier or a closing bracket. Rejecting those turned every
+            # answer about code into GENERATION_FAILED, because only the missing-
+            # marker error is retried. ASCII only, so Chinese prose followed by
+            # 【1】 with no space is still caught.
+            if re.search(r"(?<![A-Za-z0-9_\]\)])(?:\[|【|［)\s*\d+\s*(?:\]|】|］)", text):
                 raise ValueError("Groq claim text must not contain handwritten markers")
             markers = list(dict.fromkeys(claim.markers))
             if self.grounded and not markers:

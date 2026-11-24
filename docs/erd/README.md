@@ -45,7 +45,8 @@ npx mmdc -i docs/erd/erd.mmd -o docs/erd/erd.png -c cfg.json -p pp.json -b white
 { "args": ["--no-sandbox", "--disable-setuid-sandbox"] }
 ```
 
-Current output is 2352 × 2058, ~305 KB, from `@mermaid-js/mermaid-cli` 11.17.0.
+Current output is 2352 × 1524, ~250 KB, from `@mermaid-js/mermaid-cli` 11.17.0
+(24 Nov, ten entities, after ANSWER_FEEDBACK was added).
 If a render comes out several megabytes, `-s 3` has been raised — three is enough
 to read every annotation at 100%.
 

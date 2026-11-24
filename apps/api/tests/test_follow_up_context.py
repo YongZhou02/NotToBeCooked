@@ -80,6 +80,15 @@ def test_history_block_strips_old_markers_and_is_empty_on_a_first_question():
     assert "never cite it" in block
 
 
+def test_history_keeps_code_indexing_while_stripping_markers():
+    """Found in review 24 Nov 2026: the old pattern sent `arr[0]` to the model
+    as `arr` and `dp[i][2]` as `dp[i]`. Same rule as grounding._MARKER."""
+    block = render_history(
+        [("min of arr", "After the loop arr[0] holds it [1]. dp[i][2] too [2].")]
+    )
+    assert "Assistant: After the loop arr[0] holds it. dp[i][2] too." in block
+
+
 def test_interleave_alternates_without_repeats_and_respects_the_limit():
     a, b, c, d = (_chunk(x) for x in "abcd")
     assert rag_module._interleave([a, b], [c, a, d], limit=5) == [a, c, b, d]

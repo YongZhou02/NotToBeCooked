@@ -711,6 +711,13 @@ async def query(
             UUID(str(user_id)),
         )
     else:
+        if settings.LLM_FAKE_MODE:
+            # Rewrite and decomposition are real provider calls with no fake of
+            # their own, so the conditions below skip both. Recorded so a fake-
+            # mode trace says why an enabled feature attempted nothing.
+            for trace in (rewrite_trace, decomposition_trace):
+                if trace["enabled"]:
+                    trace["skip_reason"] = "llm_fake_mode"
         decomposition_candidate = (
             settings.RETRIEVAL_DECOMPOSITION_ENABLED
             and not settings.LLM_FAKE_MODE
@@ -758,24 +765,29 @@ async def query(
                 decomposition_trace["sub_questions"] = sub_questions
                 rankings = [chunks]
                 subquery_sources: list[dict[str, Any]] = []
-                for sub_question in sub_questions:
-                    sub_request = rag_request.model_copy(
-                        update={"question": sub_question, "top_k": min(5, rag_request.top_k)}
-                    )
-                    sub_chunks = await _retrieve(
-                        sub_request,
-                        session,
-                        UUID(str(user_id)),
-                        search_config=SearchConfig(final_limit=min(5, rag_request.top_k)),
-                    )
-                    rankings.append(sub_chunks)
-                    subquery_sources.append(
-                        {
-                            "question": sub_question,
-                            "chunk_ids": [str(c.chunk_id) for c in sub_chunks],
-                            "pages": [c.page_start for c in sub_chunks],
-                        }
-                    )
+                # A SAVEPOINT, because the `except` below cannot undo a database
+                # error on its own: PostgreSQL aborts the whole transaction, and
+                # the commit at the end of this route -- which also carries the
+                # user turn -- would then fail with both turns lost.
+                async with session.begin_nested():
+                    for sub_question in sub_questions:
+                        sub_request = rag_request.model_copy(
+                            update={"question": sub_question, "top_k": min(5, rag_request.top_k)}
+                        )
+                        sub_chunks = await _retrieve(
+                            sub_request,
+                            session,
+                            UUID(str(user_id)),
+                            search_config=SearchConfig(final_limit=min(5, rag_request.top_k)),
+                        )
+                        rankings.append(sub_chunks)
+                        subquery_sources.append(
+                            {
+                                "question": sub_question,
+                                "chunk_ids": [str(c.chunk_id) for c in sub_chunks],
+                                "pages": [c.page_start for c in sub_chunks],
+                            }
+                        )
                 merged = _rrf_merge_many(
                     rankings,
                     rag_request.top_k,
@@ -800,7 +812,11 @@ async def query(
                 })
                 decomposition_trace["subquery_sources"] = subquery_sources
                 decomposition_trace["merged_chunk_ids"] = [str(c.chunk_id) for c in merged]
-                decomposition_trace["accepted"] = merged != chunks
+                # Ids, not the chunks: the merge copies every chunk with its fused
+                # score, so comparing the lists was True whenever either was non-empty.
+                decomposition_trace["accepted"] = [c.chunk_id for c in merged] != [
+                    c.chunk_id for c in chunks
+                ]
                 chunks = merged
             except Exception as exc:
                 decomposition_trace["error_type"] = type(exc).__name__
@@ -828,34 +844,38 @@ async def query(
                 else:
                     rewritten_request = rag_request.model_copy(update={"question": rewritten})
                     rewritten_vector = await asyncio.to_thread(embed_query, rewritten)
-                    retry_chunks = await _retrieve(
-                        rewritten_request,
-                        session,
-                        UUID(str(user_id)),
-                        query_vector=rewritten_vector,
-                        search_config=SearchConfig(
-                            keyword_weight=2.0,
-                            vector_weight=1.0,
-                            final_limit=rag_request.top_k,
-                        ),
-                    )
-                    anchor_chunks = await _keyword_anchor_retrieve(
-                        rag_request, session, UUID(str(user_id))
-                    )
+                    # A SAVEPOINT for the same reason as decomposition's above.
+                    async with session.begin_nested():
+                        retry_chunks = await _retrieve(
+                            rewritten_request,
+                            session,
+                            UUID(str(user_id)),
+                            query_vector=rewritten_vector,
+                            search_config=SearchConfig(
+                                keyword_weight=2.0,
+                                vector_weight=1.0,
+                                final_limit=rag_request.top_k,
+                            ),
+                        )
+                        anchor_chunks = await _keyword_anchor_retrieve(
+                            rag_request, session, UUID(str(user_id))
+                        )
+                        rewrite_trace["rewritten_confidence"] = await _retrieval_confidence(
+                            rewritten_request,
+                            rewritten_vector,
+                            session,
+                            UUID(str(user_id)),
+                        )
                     expanded_chunks = _interleave(anchor_chunks, retry_chunks, rag_request.top_k)
-                    rewrite_trace["rewritten_confidence"] = await _retrieval_confidence(
-                        rewritten_request,
-                        rewritten_vector,
-                        session,
-                        UUID(str(user_id)),
-                    )
                     rewrite_trace["retry_source_pages"] = [c.page_start for c in retry_chunks]
                     rewrite_trace["retry_chunk_ids"] = [str(c.chunk_id) for c in retry_chunks]
                     rewrite_trace["anchor_terms"] = _anchor_terms(clean_rag_query)
                     rewrite_trace["anchor_source_pages"] = [c.page_start for c in anchor_chunks]
                     merged = _rrf_merge(chunks, expanded_chunks, rag_request.top_k)
                     rewrite_trace["merged_chunk_ids"] = [str(c.chunk_id) for c in merged]
-                    rewrite_trace["accepted"] = merged != chunks
+                    rewrite_trace["accepted"] = [c.chunk_id for c in merged] != [
+                        c.chunk_id for c in chunks
+                    ]
                     chunks = merged
             except Exception as exc:
                 rewrite_trace["error_type"] = type(exc).__name__

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
-import { api, type CourseCreate } from "@workspace/contracts"
+import { api, isApiClientError, type CourseCreate } from "@workspace/contracts"
 import { useAuth } from "../context/auth-context"
 import {
   useWorkspace,
@@ -247,10 +247,14 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
     try {
       await ingestFileMutation.mutateAsync(fileId)
       showToast("File replaced. Indexing started; ask again when Ready.")
-    } catch {
+    } catch (cause) {
       // Bytes were already replaced. Retry indexing, rather than uploading again.
+      // A 409 means a run was already queued for this file; it reads the same
+      // storage key when it starts, so it indexes the new bytes anyway.
       showToast(
-        "File replaced, but indexing could not start. Use Start indexing in its menu."
+        isApiClientError(cause)
+          ? `File replaced, but indexing could not start: ${cause.message}`
+          : "File replaced, but indexing could not start. Use Start indexing in its menu."
       )
     }
   }
@@ -287,8 +291,19 @@ export function DashboardPage({ platform = "web" }: DashboardPageProps = {}) {
   }
 
   const handleRetryIndexing = async (fileId: string) => {
-    await ingestFileMutation.mutateAsync(fileId)
-    showToast("Indexing restarted in the background")
+    try {
+      await ingestFileMutation.mutateAsync(fileId)
+      showToast("Indexing restarted in the background")
+    } catch (cause) {
+      // Caught here, not left to the caller: "Start indexing" in the file menu
+      // calls this with `void`, so a rejection showed the user nothing. A 409
+      // (already queued or indexing) carries the API's own wording.
+      showToast(
+        isApiClientError(cause)
+          ? cause.message
+          : "Indexing could not start. Please try again."
+      )
+    }
   }
 
   const handleDeleteFile = async (fileId: string) => {

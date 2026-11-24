@@ -252,7 +252,10 @@ def build_context(
 # question is unlikely to point back to.
 HISTORY_TURNS = 2
 
-_MARKER = re.compile(r"\s?\[\d+\]")
+# The same rule as grounding._MARKER: a bracket glued to an identifier or to a
+# closing bracket is indexing, not a marker. Stripping every `[digits]` sent an
+# answer about arrays back to the model with `arr[0]` cut down to `arr`.
+_MARKER = re.compile(r"\s?(?<![A-Za-z0-9_\])])\[\d+\]")
 
 
 def render_history(turns: list[tuple[str, str | None]]) -> str:

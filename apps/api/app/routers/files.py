@@ -35,7 +35,7 @@ from app.schemas.file import (
 )
 from app.schemas.folder import Folder
 from app.schemas.ingestion_run import IngestionRun, IngestionRunStatus
-from app.services.processing import NoExtractableContentError, run_ingestion
+from app.services.processing import NoExtractableContentError, ingestion_slot, run_ingestion
 from app.services.storage import (
     UploadTooLargeError,
     build_storage_key,
@@ -154,15 +154,40 @@ async def ingest_file(
     # that does not exist, and both leave below as 404. That is deliberate: a 403
     # here would confirm the id is real, which is exactly what a stranger probing
     # ids is trying to learn.
+    #
+    # FOR UPDATE OF file holds the FILE row until the commit below. A double click
+    # sends two requests at once; without the lock both read "no open run" before
+    # either has inserted one, and both get through the check that follows.
     statement = (
         select(FileRow)
         .join(Folder, col(Folder.id) == col(FileRow.folder_id))
         .join(Course, col(Course.id) == col(Folder.course_id))
         .where(FileRow.id == file_id, Course.user_id == user_id)
+        .with_for_update(of=FileRow)
     )
     file_row = (await session.exec(statement)).first()
     if file_row is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "File not found")
+
+    # One open run per file. A file waiting for ingestion_slot still reads
+    # `uploaded` (or `failed`), so "Start indexing" and Retry stay on offer, and
+    # a second click used to queue a second run that parsed the same bytes again.
+    # A run left open by a restart cannot block this for ever:
+    # recover_interrupted_ingestion fails every one of them at startup.
+    open_run = (
+        await session.exec(
+            select(IngestionRun.id).where(
+                IngestionRun.file_id == file_id,
+                col(IngestionRun.status).in_(
+                    [IngestionRunStatus.QUEUED, IngestionRunStatus.PROCESSING]
+                ),
+            )
+        )
+    ).first()
+    if open_run is not None:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "This file is already queued or being indexed."
+        )
 
     # The run is recorded before any work starts, so a crash mid-ingest leaves a
     # row saying what was attempted rather than nothing at all. The three settings
@@ -238,7 +263,10 @@ async def _ingest_in_background(
     INGESTION_RUN carries the detail, FILE.status carries the summary the file
     list renders.
     """
-    async with async_session_maker() as session:
+    # The slot first, before any row is marked: a file waiting for it keeps its
+    # status and its run stays QUEUED (see ingestion_slot). The session opens
+    # after the wait, so no pooled connection sits idle through another parse.
+    async with ingestion_slot, async_session_maker() as session:
         run = await session.get(IngestionRun, ingestion_run_id)
         file_row = await session.get(FileRow, file_id)
         if run is None or file_row is None:

@@ -2,6 +2,8 @@ import importlib.util
 import json
 from pathlib import Path
 
+import pytest
+
 SCRIPT = Path(__file__).resolve().parents[1] / "dashboard/build_dashboard_data.py"
 spec = importlib.util.spec_from_file_location("dashboard_builder", SCRIPT)
 assert spec and spec.loader
@@ -17,9 +19,19 @@ def test_partial_similarity_is_exact_or_conservative():
 
 def test_dashboard_assembly_keeps_six_phases_and_history():
     evaluation = SCRIPT.parents[1]
+    runs = evaluation / "runs"
+    # evaluation/runs/ is gitignored, so a clean checkout has no history to check.
+    # Counted the way assemble() finds runs: a directory holding config.json.
+    run_count = 0
+    if runs.is_dir():
+        run_count = sum((path / "config.json").exists() for path in runs.iterdir())
+    if run_count < 3:
+        pytest.skip(
+            f"needs at least 3 local runs in evaluation/runs/ (gitignored), found {run_count}"
+        )
     data = builder.assemble(
         evaluation / "datasets/cpt316/topic1",
-        evaluation / "runs",
+        runs,
     )
     assert len(data["runs"]) >= 3
     assert len(data["questions"]) == 50

@@ -45,6 +45,20 @@ def test_extract_markers_ignores_markdown_links():
     assert extract_markers(answer) == {1, 2}
 
 
+def test_extract_markers_ignores_code_indexing():
+    answer = "After the loop arr[0] holds the minimum [1]. dp[i][2] and f(x)[3] are costs [2]."
+    assert extract_markers(answer) == {1, 2}
+
+
+def test_an_answer_about_array_indexing_passes():
+    report = check_grounding(
+        answer="After the loop arr[0] holds light energy [1].",
+        citations=[cite(1, C1, "Photosynthesis converts light energy")],
+        selected=SELECTED,
+    )
+    assert report.ok, report.problems
+
+
 def test_a_consistent_answer_passes():
     report = check_grounding(
         answer="Plants turn light into chemical energy [1]. Carbon is fixed later [2].",

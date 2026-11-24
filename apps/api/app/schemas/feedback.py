@@ -23,6 +23,10 @@ class FeedbackReason(Enum):
 
 
 class AnswerFeedback(SQLModel, table=True):
+    # Named explicitly: SQLModel's default lowercases the class name, which gave
+    # `answerfeedback` against every other table's snake_case. Renamed 24 Nov 2026.
+    # The suppressions are IngestionRun's; see the note there.
+    __tablename__ = "answer_feedback"  # pyrefly: ignore[bad-override]  # pyright: ignore[reportAssignmentType]
     __table_args__ = (
         UniqueConstraint(
             "message_id",

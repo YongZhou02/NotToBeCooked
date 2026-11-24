@@ -115,6 +115,40 @@ def test_grounded_groq_claim_without_a_marker_is_rejected():
         answer.render({})
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "The first element is arr[0].",
+        "The table cell dp[i][2] stores the best cost.",
+        "T[3] holds the fourth token.",
+        "Call f(x)[1] to read the second field.",
+    ],
+)
+def test_groq_claim_with_code_indexing_renders(text):
+    answer = llm.GroqAnswer.model_validate(
+        {"claims": [{"text": text, "markers": [1]}], "grounded": True, "citations": []}
+    ).render({})
+
+    assert answer.answer == f"{text} [1]"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "The lexicon is a word list [1]",
+        "[2] at the start",
+        "a list 【3】",
+        "词汇表是单词列表【3】",
+    ],
+)
+def test_groq_claim_with_handwritten_marker_is_rejected(text):
+    answer = llm.GroqAnswer.model_validate(
+        {"claims": [{"text": text, "markers": [1]}], "grounded": True, "citations": []}
+    )
+    with pytest.raises(ValueError, match="handwritten markers"):
+        answer.render({})
+
+
 def test_evidence_catalog_quotes_are_exact_source_substrings():
     source = RetrievedChunk(
         chunk_id=uuid4(),

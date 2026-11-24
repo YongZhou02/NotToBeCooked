@@ -6,6 +6,7 @@ conversation lookup are mocked; everything from `_retrieve` onwards is the real
 code path.
 """
 
+from contextlib import nullcontext
 from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
@@ -75,6 +76,10 @@ def client(monkeypatch):
 
     session = AsyncMock()
     session.add = Mock(side_effect=added.append)
+    # Rewrite and decomposition retrieve inside a SAVEPOINT. AsyncMock would hand
+    # back a coroutine, which `async with` rejects; what the SAVEPOINT does
+    # against a real database is tested in test_rag_auxiliary_savepoint.py.
+    session.begin_nested = Mock(side_effect=nullcontext)
 
     test_app = FastAPI()
     test_app.include_router(rag_module.rag_router, prefix="/rag")
@@ -296,6 +301,96 @@ def test_high_confidence_does_not_rewrite(client, monkeypatch):
     body = client.post("/rag/query", json={"question": "What is a partial index?"}).json()
     rewrite.assert_not_awaited()
     assert body["grounded"] is False
+
+
+@pytest.mark.parametrize(
+    "question",
+    [
+        "What is a partial index?",
+        "How does the example progress from source identifiers to a tree with type conversion?",
+    ],
+)
+def test_fake_mode_never_calls_rewrite_or_decomposition(client, monkeypatch, question):
+    """Both are real provider calls, so a fake-mode run must not spend quota on them.
+
+    The mocks record rather than only raise: the route catches every exception
+    from these calls, so a raise alone would be swallowed and the test would pass.
+    """
+    monkeypatch.setattr(settings, "QUERY_REWRITE_ENABLED", True)
+    monkeypatch.setattr(settings, "RETRIEVAL_DECOMPOSITION_ENABLED", True)
+    monkeypatch.setattr(rag_module, "_retrieval_confidence", AsyncMock(return_value={"score": 0.0}))
+    rewrite = AsyncMock(side_effect=AssertionError("rewrite_query called in fake mode"))
+    decompose = AsyncMock(side_effect=AssertionError("decompose_question called in fake mode"))
+    monkeypatch.setattr(rag_module, "rewrite_query", rewrite)
+    monkeypatch.setattr(rag_module, "decompose_question", decompose)
+
+    response = client.post("/rag/query", json={"question": question})
+
+    rewrite.assert_not_awaited()
+    decompose.assert_not_awaited()
+    assert response.status_code == 200
+    assert response.json()["grounded"] is True
+    snapshot = _assistant_turn(client).scope_snapshot
+    for key in ("query_rewrite", "question_decomposition"):
+        assert snapshot[key]["attempted"] is False
+        assert snapshot[key]["skip_reason"] == "llm_fake_mode"
+
+
+def test_a_rewrite_that_finds_nothing_new_is_not_accepted(client, monkeypatch):
+    """`accepted` says the merge changed the sources, not that a merge ran."""
+    monkeypatch.setattr(settings, "LLM_FAKE_MODE", False)
+    monkeypatch.setattr(settings, "QUERY_REWRITE_ENABLED", True)
+    monkeypatch.setattr(rag_module, "embed_query", lambda _query: [0.0] * 1024)
+    monkeypatch.setattr(rag_module, "_retrieval_confidence", AsyncMock(return_value={"score": 0.4}))
+    monkeypatch.setattr(
+        rag_module, "rewrite_query", AsyncMock(return_value="partial index WHERE clause")
+    )
+    # The retry finds exactly what the first search found, and no anchor hits.
+    monkeypatch.setattr(rag_module, "_keyword_anchor_retrieve", AsyncMock(return_value=[]))
+    monkeypatch.setattr(
+        rag_module,
+        "generate_answer",
+        AsyncMock(return_value=LlmAnswer(answer=REFUSAL, grounded=False, citations=[])),
+    )
+
+    client.post("/rag/query", json={"question": "What is a partial index?"})
+
+    trace = _assistant_turn(client).scope_snapshot["query_rewrite"]
+    assert "error_type" not in trace
+    assert trace["merged_chunk_ids"] == trace["first_chunk_ids"]
+    assert trace["accepted"] is False
+
+
+def test_a_decomposition_that_finds_nothing_new_is_not_accepted(client, monkeypatch):
+    monkeypatch.setattr(settings, "LLM_FAKE_MODE", False)
+    monkeypatch.setattr(settings, "RETRIEVAL_DECOMPOSITION_ENABLED", True)
+    monkeypatch.setattr(rag_module, "embed_query", lambda _query: [0.0] * 1024)
+    monkeypatch.setattr(
+        rag_module,
+        "decompose_question",
+        AsyncMock(return_value=["How are identifiers mapped?", "Where is conversion inserted?"]),
+    )
+    monkeypatch.setattr(
+        rag_module,
+        "generate_answer",
+        AsyncMock(return_value=LlmAnswer(answer=REFUSAL, grounded=False, citations=[])),
+    )
+
+    # Every sub-question retrieves SOURCES again, the fixture's only answer.
+    client.post(
+        "/rag/query",
+        json={
+            "question": (
+                "How does the example progress from source identifiers to a tree "
+                "with type conversion?"
+            )
+        },
+    )
+
+    trace = _assistant_turn(client).scope_snapshot["question_decomposition"]
+    assert "error_type" not in trace
+    assert trace["merged_chunk_ids"] == trace["first_chunk_ids"]
+    assert trace["accepted"] is False
 
 
 def test_a_verifiable_answer_is_sent_and_marked_grounded(client):

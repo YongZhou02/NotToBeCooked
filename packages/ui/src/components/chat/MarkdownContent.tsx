@@ -1,6 +1,7 @@
 import React from "react"
 import type { CitationItem } from "./ChatMessage"
 import { FileText, Folder } from "lucide-react"
+import { splitInlineTokens } from "../../lib/inlineTokens"
 
 export interface MarkdownContentProps {
   content: string
@@ -14,16 +15,9 @@ function parseInline(
   citations: CitationItem[] = [],
   onCiteClick?: (cite: CitationItem) => void
 ): React.ReactNode[] {
-  // Tokenizer pattern covering:
-  // 1. Code: `code`
-  // 2. Bold/Italic: ***text***, **text**, *text*
-  // 3. Mentions: @[Filename] or @word
-  // 4. Citation markers: [1], [2], etc.
-  // 5. Markdown Links: [label](url)
-  const regex =
-    /(`[^`]+`|\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|\*[^*]+\*|__[^_]+__|_[^_]+_|@\[[^\]]+\]|@[a-zA-Z0-9_\-.]+|\[\d+\]|\[[^\]]+\]\([^)]+\))/g
-
-  const tokens = text.split(regex)
+  // The pattern and what it covers live in lib/inlineTokens.ts, where a test
+  // can reach them.
+  const tokens = splitInlineTokens(text)
 
   return tokens.map((token, idx) => {
     if (!token) return null

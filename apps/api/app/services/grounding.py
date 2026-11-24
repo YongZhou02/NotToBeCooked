@@ -44,7 +44,13 @@ from app.schemas.rag import Citation, RetrievedChunk
 
 # Markers are written `[1]`, `[2]`. Bare digits in brackets only -- a markdown
 # link `[see here](url)` has a non-digit inside the brackets and does not match.
-_MARKER = re.compile(r"\[(\d+)\]")
+# A marker stands after a space, a full stop or nothing. `arr[0]`, `dp[i][2]` and
+# `f(x)[1]` are indexing: the bracket follows an identifier or a closing bracket.
+# Counting those as markers made every answer about arrays UNVERIFIED, because
+# `[0]` names a source that does not exist. Same rule as GroqAnswer.render.
+# Measured 24 November on the VM: 23 stored answers carry 120 markers, and none
+# is glued to a word or to a closing bracket, so no real marker is lost.
+_MARKER = re.compile(r"(?<![A-Za-z0-9_\]\)])\[(\d+)\]")
 
 
 @dataclass

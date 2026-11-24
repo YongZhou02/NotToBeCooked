@@ -16,7 +16,14 @@ from app.services.embeddings import embed_text
 from app.services.ingestion import count_pages, create_chunk, extract_text, ingest_document
 
 logger = logging.getLogger(__name__)
-_ingestion_slot = asyncio.Semaphore(1)
+
+# One ingest at a time: parse and embed are heavy CPU/model work, and a task
+# waiting here uses no worker thread. Taken by the caller, _ingest_in_background
+# in routers/files.py, before anything is marked PROCESSING. Found 24 Nov 2026:
+# taken inside process_file, a file waiting behind another already read as
+# indexing, its "Replace file…" item was disabled, and the run's started_at
+# counted the queue as indexing time. Not re-entrant, so nothing below takes it.
+ingestion_slot = asyncio.Semaphore(1)
 
 INTERRUPTED_MESSAGE = "Indexing was interrupted by a server restart. Please retry."
 
@@ -59,19 +66,10 @@ async def process_file(
     file_path: str,
     session: AsyncSession,
 ) -> int | None:
-    # Bound heavy CPU/model work across uploads; waiting tasks use no worker thread.
-    async with _ingestion_slot:
-        return await _process_file(file_id, course_id, ingestion_run_id, file_path, session)
+    """Returns the page count, which only the parsed document knows.
 
-
-async def _process_file(
-    file_id: UUID,
-    course_id: UUID,
-    ingestion_run_id: UUID,
-    file_path: str,
-    session: AsyncSession,
-) -> int | None:
-    """Returns the page count, which only the parsed document knows."""
+    The caller holds `ingestion_slot`.
+    """
     started = perf_counter()
     logger.info("ingestion %s: parsing started", ingestion_run_id)
     chunk_creates, page_count = await asyncio.to_thread(_parse_and_chunk, file_path, file_id)
@@ -126,7 +124,11 @@ async def run_ingestion(
     file_path: str,
     session: AsyncSession,
 ) -> int | None:
-    """Returns the page count from process_file, for the FILE row."""
+    """Returns the page count from process_file, for the FILE row.
+
+    Call it holding `ingestion_slot`: PROCESSING and started_at below are only
+    true once the work can actually start.
+    """
     ingestion_run = await session.get(
         IngestionRun, ingestion_run_id
     )  # 去 database 的 IngestionRun 里面，根据 ingestion_run_id 找到那一笔 record/object。

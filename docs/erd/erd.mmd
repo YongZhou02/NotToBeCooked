@@ -2,7 +2,7 @@
 %% Source of record. Ratified 27 Jul 2026, amended 4 Aug (CR-23), 15 Aug 2026
 %% (CR-24, CR-25, CR-26, CR-27) and 25 Aug 2026 (CR-31, CR-32).
 %% ---
-%% 9 entities. Declaration order below is deliberate: it controls how dagre ranks
+%% 10 entities. Declaration order below is deliberate: it controls how dagre ranks
 %% the nodes, and reordering will reintroduce edge crossings.
 %% ---
 %% Changes on 15 Aug 2026:
@@ -105,11 +105,21 @@
 %%       @-mentions are first item at the next meeting
 %%   R10 deferred again. Turn order stays implied by created_at in v1
 %% ---
+%% 24 Nov 2026. ANSWER_FEEDBACK drawn. The table shipped on 7 Nov (a4f8c2d91b7e,
+%%   thumbs up or down on an answer) and this diagram never gained it, so
+%%   CODE_VS_ERD.md listed it as code only. The code also named it answerfeedback,
+%%   SQLModel's default; 58cd633ee63b renames it answer_feedback like every other
+%%   table. The entity is declared last, under MESSAGE, the entity it hangs off.
+%%   Its USER edge is declared second, straight after "owns": declared last it
+%%   crossed two COURSE edges; there it runs down the left margin and the render
+%%   (mermaid-cli 11.17.0) still has no crossings
+%% ---
 %% A bare "%%" line breaks mermaid's ER parser. Every comment line needs content.
 
 erDiagram
 
     USER ||--o{ COURSE : "owns"
+    USER ||--o{ ANSWER_FEEDBACK : "gives"
     COURSE ||--o{ FOLDER : "organises"
     COURSE ||--o{ MILESTONE : "planned as"
     COURSE ||--o{ CONVERSATION : "is home course of"
@@ -121,6 +131,7 @@ erDiagram
     COURSE ||--o{ CHUNK : "scopes"
     CONVERSATION ||--o{ MESSAGE : "contains"
     COURSE ||--o{ MESSAGE : "scopes retrieval for"
+    MESSAGE ||--o{ ANSWER_FEEDBACK : "is rated by"
 
     USER {
         uuid id PK
@@ -230,4 +241,15 @@ erDiagram
         jsonb mentioned_file_ids "the @-scope, may cross courses, beats scope_course_id"
         jsonb scope_snapshot "what retrieval was allowed to see, frozen at write time"
         timestamptz created_at
+    }
+
+    ANSWER_FEEDBACK {
+        uuid id PK
+        uuid message_id FK "the assistant turn rated, ON DELETE CASCADE. UNIQUE with user_id: one rating per user per answer, changed in place"
+        uuid user_id FK "who rated it, ON DELETE CASCADE"
+        enum rating "positive, negative"
+        enum reason "nullable — answer_incorrect, retrieval_missed, citation_unsupported, answer_incomplete, document_missing_answer"
+        string comment "nullable, at most 1000 characters"
+        timestamptz created_at
+        timestamptz updated_at
     }
